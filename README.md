@@ -76,6 +76,34 @@ Open [http://localhost:4200](http://localhost:4200) to view it in your browser.
 
 Runs the backend server.
 
+![Screenshot (519)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/c0515118-a754-433a-ab79-661696320de3)
+
+![Screenshot (520)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/726b81ee-be09-4ede-aed1-0f160985f5fe)
+
+![Screenshot (521)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/08b62563-a339-4a34-a494-afd99e3908c3)
+
+![Screenshot (522)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/b3c20a09-f9ac-41a7-9e7c-2f1d746b8aa6)
+
+![Screenshot (523)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/6c25a029-837b-45c2-8bf2-69bcd8de6653)
+
+![Screenshot (524)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/c524ced2-a9a4-40f7-9b97-27eee891d676)
+
+![Screenshot (525)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/5bc95383-2710-412b-bba5-40185571899b)
+
+![Screenshot (526)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/a3242970-5f08-4ba4-9f29-0ba8d6ce9574)
+
+![Screenshot (527)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/d7051ea7-3a82-4602-aadc-845889c1835e)
+
+![Screenshot (528)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/620de364-2030-4b00-87ac-b5b2dd869872)
+
+![Screenshot (529)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/913cbc4c-6f8c-4173-91d5-ca454797fa1b)
+
+![Screenshot (530)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/5446feab-59c4-4f92-a350-59cedcafc36c)
+
+![Screenshot (531)](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/af4163a0-151c-4e9c-a892-3cbe64237d08)
+
+
+
 ## Contributing
 
 Contributions are welcome! Please fork this repository and submit pull requests for any enhancements or bug fixes.
