@@ -79,39 +79,51 @@ Runs the backend server.
 ## Screenshots
 
 ![Home Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/c0515118-a754-433a-ab79-661696320de3)
+
 *Home page for ordering food.*
 
 ![Customer Login Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/726b81ee-be09-4ede-aed1-0f160985f5fe)
+
 *Login page for customers.*
 
 ![Admin Login Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/08b62563-a339-4a34-a494-afd99e3908c3)
+
 *Login page for Admin.*
 
 ![Customer Register Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/b3c20a09-f9ac-41a7-9e7c-2f1d746b8aa6)
+
 *Register page for customers.*
 
 ![Cart Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/6c25a029-837b-45c2-8bf2-69bcd8de6653)
+
 *Cart page where customers can pay for the food.*
 
 ![About Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/c524ced2-a9a4-40f7-9b97-27eee891d676)
+
 *About page.*
 
 ![Recipe Menu Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/5bc95383-2710-412b-bba5-40185571899b)
+
 *Recipe menu of the diet page.*
 
 ![North Food Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/a3242970-5f08-4ba4-9f29-0ba8d6ce9574)
+
 *North food page.*
 
 ![South Food Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/d7051ea7-3a82-4602-aadc-845889c1835e)
+
 *South food page.*
 
 ![Chinese Food Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/620de364-2030-4b00-87ac-b5b2dd869872)
+
 *Chinese food page.*
 
 ![Western Food Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/913cbc4c-6f8c-4173-91d5-ca454797fa1b)
+
 *Western food page.*
 
 ![Home Page](https://github.com/SUNDAR-NS/Food-delivery-system/assets/155610373/5446feab-59c4-4f92-a350-59cedcafc36c)
+
 *Home page for selecting North, South, Western, and Chinese food pages.*
 
 ## Contributing
