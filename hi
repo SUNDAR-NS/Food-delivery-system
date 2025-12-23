@@ -1,118 +1,16 @@
-onNextSummary: function () {
+// ===== Validation STEP-2 : Primary Key selection =====
+var bAnyPKSelected = false;
+var oTable = this.byId("columnsTable");
+var aItems = oTable.getItems();
 
-      var oModel = this.getView().getModel("columnsModel");
+aItems.forEach(function (oItem) {
+  var oCheckBox = oItem.getCells()[0]; // PK checkbox is first cell
+  if (oCheckBox.getVisible() && oCheckBox.getSelected()) {
+    bAnyPKSelected = true;
+  }
+});
 
-      let aData = oModel.getProperty("/columns");
-
-      console.log(aData)
-      // Validation
-      for (let row of aData) {
-        if (!row.COLUMN_NAME || !row.DATATYPE || !row.CONSTRAINTS) {
-
-          sap.m.MessageToast.show("Please fill all required inputs.");
-          return;
-        }
-      }
-      //write code for validation step-2
-      // Freeze table (make inputs readonly + disable add/delete)
-      this._freezeTable();
-
-      // Move to next step
-      this.byId("_IDGenButtons").setVisible(false);
-      this.byId("templateWizard").nextStep();
-    },
-
-    _freezeTable: function () {
-      let aItems = this.byId("columnsTable").getItems();
-
-      var aColumns = this.getView().getModel("columnsModel").getData();
-      console.log(aColumns)
-      aItems.forEach(item => {
-        item.getCells()[0].setEditable(false); // colName Input
-        item.getCells()[1].setEnabled(false);  // dataType Select
-        item.getCells()[2].setEnabled(false);  // constraint Select
-        item.getCells()[3].setEnabled(false);  // delete btn
-        item.getCells()[4].setEnabled(false);  // delete btn
-        item.getCells()[5].setEnabled(false);  // delete btn
-      });
-      this.byId("columnsTable").setMode("None");
-      this.byId("columnsTable").rerender();
-
-      // Disable Add Row
-      this.byId("_IDGenButton5").setEnabled(false);
-      this.byId("_IDGenButton54").setEnabled(false);
-      this.byId("_IDGenButton59").setEnabled(false);
-
-      // //Disable Primary Key and checkbox (shivani)
-      // this.byId("_IDGenCheckbox1").setEnabled(false);
-      // this.byId("_IDGenButton60").setEnabled(false);
-
-      var oWizard = this.byId("step3");
-
-      const oSummaryTable = new sap.m.Table({
-        inset: false,
-        columns: [
-          new sap.m.Column({ header: new sap.m.Label({ text: "Column Name" }) }),
-          new sap.m.Column({ header: new sap.m.Label({ text: "Data Type" }) }),
-          new sap.m.Column({ header: new sap.m.Label({ text: "Constraint" }) })
-        ],
-        items: aColumns.columns.map(col => {
-          // Merge numeric fields for NVARCHAR and DECIMAL
-          let displayType = col.DATATYPE;
-
-          if (col.DATATYPE === "NVARCHAR") {
-            if (col.LENGTH_PRECISION == undefined) {
-              col.LENGTH_PRECISION = 1
-            }
-            if (col.LENGTH_PRECISION >= 10000) {
-              col.LENGTH_PRECISION = 10000
-            }
-            displayType += col.LENGTH_PRECISION ? `(${col.LENGTH_PRECISION})` : "";
-          } else if (col.DATATYPE === "DECIMAL") {
-            if (col.LENGTH_PRECISION == undefined) {
-              col.LENGTH_PRECISION = 1
-            }
-            if (col.SCALE == undefined) {
-              col.SCALE = 0
-            }
-            if (col.LENGTH_PRECISION >= 1000) {
-              col.LENGTH_PRECISION = 1000
-            }
-            if (col.SCALE >= 38) {
-              col.SCALE = 38
-            }
-
-            displayType += col.LENGTH_PRECISION
-              ? `(${col.LENGTH_PRECISION}${col.SCALE !== undefined ? "," + col.SCALE : ""})`
-              : "";
-          }
-
-          return new sap.m.ColumnListItem({
-            cells: [
-              new sap.m.Text({ text: col.COLUMN_NAME }),
-              new sap.m.Text({ text: displayType }),
-              new sap.m.Text({ text: col.CONSTRAINTS })
-            ]
-          });
-        })
-      });
-
-      const oGlobalSubmitButton = new sap.m.Button({
-        text: "Submit",
-        type: "Ghost",
-        press: this.openTempateDashboard.bind(this, oSummaryTable),
-        layoutData: new sap.m.FlexItemData({ styleClass: "sapUiSmallMarginTop" })
-      });
-
-      const oSummaryLayout = new sap.m.VBox({
-        items: [
-          oSummaryTable,
-          oGlobalSubmitButton // place it below the table
-        ],
-        width: "100%"
-      });
-
-      const oStep3 = this.byId("step3");
-      oStep3.removeAllContent();
-      oStep3.addContent(oSummaryLayout);
-    },
+if (!bAnyPKSelected) {
+  sap.m.MessageToast.show("Please select at least one Primary Key column.");
+  return;
+}
