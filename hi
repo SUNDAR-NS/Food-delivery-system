@@ -1,21 +1,19 @@
-<SegmentedButton
-        id="_IDGenButton60"
-        selectionChange=".onPrimaryKeyToggle">
-        <items>
-            <SegmentedButtonItem key="ON" text="Primary Key"/>
-            <SegmentedButtonItem key="OFF" text="Off"/>
-        </items>
-    </SegmentedButton>
-
 onPrimaryKeyToggle: function (oEvent) {
     var sKey = oEvent.getParameter("key"); // ON / OFF
     var bShow = sKey === "ON";
 
     var table = this.byId("columnsTable");
+    var aItems = table.getItems();
 
-    table.getItems().forEach(function (row) {
-        var cb = row.getCells()[0];
+    if (!aItems.length) {
+        console.error("No rows in table");
+        return;
+    }
+
+    aItems.forEach(function (row) {
+        var cb = row.getCells()[0]; // FIRST CELL = checkbox
         cb.setVisible(bShow);
+
         if (!bShow) {
             cb.setSelected(false);
         }
