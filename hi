@@ -166,3 +166,31 @@ _freezeTable: function () {
       this.byId("_IDGenCheckbox1").setEnabled(false);
       this.byId("_IDGenButton60").setEnabled(false);
 
+
+
+onPrimaryKeyToggle: function (oEvent) {
+    var isPressed = oEvent.getSource().getPressed();
+    var table = this.byId("columnsTable");
+
+    table.getItems().forEach(function (row) {
+        var cb = row.getCells()[0]; // FIRST CELL = checkbox
+        cb.setVisible(isPressed);
+        if (!isPressed) {
+            cb.setSelected(false);
+        }
+    });
+}
+
+onCheckboxSelect: function (oEvent) {
+    var selectedCB = oEvent.getSource();
+    var table = this.byId("columnsTable");
+
+    if (selectedCB.getSelected()) {
+        table.getItems().forEach(function (row) {
+            var cb = row.getCells()[0];
+            if (cb !== selectedCB) {
+                cb.setSelected(false); // REMOVE this line if multiple PK allowed
+            }
+        });
+    }
+}
