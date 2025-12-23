@@ -1,127 +1,19 @@
-<VBox id="_IDGenVBox9" class="sapUiSmallMargin">
-        
-        <!-- Header + Add Button on Right -->
-        <HBox id="_IDGenHBox5" justifyContent="End" class="sapUiTinyMarginBottom">
+onPrimaryKeyToggle: function (oEvent) {
+    var bState = oEvent.getParameter("state"); // true = ON
+    var table = this.byId("columnsTable");
 
-        <Text id="_IDGenTextPK" text ="Primary Key" class="sapUiTinyMarginEnd"/>
-        <SegmentedButton
-        id="_IDGenButton60"
-        selectionChange=".onPrimaryKeyToggle">
-        <items>
-            <SegmentedButtonItem id="_IDGenSegmentOn" key="ON" text="ON"/>
-            <SegmentedButtonItem id="_IDGenSegmentOff" key="OFF" text="OFF"/>
-        </items>
-      </SegmentedButton>
+    var aItems = table.getItems();
+    if (!aItems.length) {
+        console.log("No rows available");
+        return;
+    }
 
-             <Button id="_IDGenButton59" 
-                text="Template" 
-                icon="sap-icon://excel-attachment" 
-                type="Ghost" 
-                press=".downloadTemplate"/>       
+    aItems.forEach(function (row) {
+        var cb = row.getCells()[0]; // checkbox column
+        cb.setVisible(bState);
 
-            <Button id="_IDGenButton54" 
-                text="Import" 
-                icon="sap-icon://upload" 
-                type="Ghost" 
-                press=".onOpenFileDialog"/>
-
-            <Button id="_IDGenButton5" 
-                text="Add Column" 
-                icon="sap-icon://add" 
-                type="Ghost" 
-                press=".onAddColumn"/>
-        </HBox>
-<Table
-    id="columnsTable"
-    inset="false"
-    items="{columnsModel>/columns}"
-    class="sapUiSizeCompact">
-
-    <columns>
-        <Column id = "_IDGenColumn11" hAlign="Center" width="3rem">
-           <Text id="_IDGenText9" text=""/>
-        </Column>
-        <Column id="_IDGenColumn"><Text id="_IDGenText2" text="Column Name"/></Column>
-        <Column id="_IDGenColumn6"><Text id="_IDGenText4" text="Data Type"/></Column>
-        <Column id="_IDGenColumn7"><Text id="_IDGenText5" text="Length / Precision"/></Column>
-        <Column id="_IDGenColumn8"><Text id="_IDGenText6" text="Scale"/></Column>
-        <Column id="_IDGenColumn9"><Text id="_IDGenText7" text="Constraints"/></Column>
-        <!-- Delete column -->
-        <Column id="_IDGenColumn10" hAlign="Center" width="3rem">
-            <Text id="_IDGenText8" text=""/>
-        </Column>
-    </columns>
-
-    <items>
-    <ColumnListItem id="_IDGenColumnListItem1">
-            <cells>
-                <!-- checkbox for  primary key // shivani -->
-                <CheckBox id="_IDGenCheckbox1"
-                    tooltip="Select key"
-                    required= "true"
-                    class = "pkCheckbox"
-                    select=".onCheckboxSelect"
-                    visible= "false"/>
-                <!-- Column Name -->
-                <Input id="_IDGenInput"
-                    value="{columnsModel>COLUMN_NAME}"
-                    type = "Text"
-                    placeholder="Enter column name"
-                    required="true"
-                    maxLength = "30"
-                    liveChange = "onColumnNameChange"
-                    width="100%" />
-
-                <!-- Data Type -->
-                <Select id="_IDGenSelect"
-                    selectedKey="{columnsModel>DATATYPE}"
-                    width="100%"
-                    change=".onDataTypeChange">
-                    <items>
-                        <core:Item id="_IDGenItem2" key="NVARCHAR" text="NVARCHAR"/>
-                        <core:Item id="_IDGenItem3" key="BOOLEAN" text="BOOLEAN"/>
-                        <core:Item id="_IDGenItem4" key="DECIMAL" text="DECIMAL"/>
-                        <core:Item id="_IDGenItem5" key="DATE" text="DATE"/>
-                        <core:Item id="_IDGenItem8" key="TIME" text="TIME"/>
-                    </items>
-                </Select>
-
-                <!-- Length / Precision -->
-                <StepInput id="_IDGenStepInput"
-                    value="{columnsModel>LENGTH_PRECISION}"
-                    min="1"
-                    max="1000"
-                    enabled="{= ${columnsModel>DATATYPE} === 'NVARCHAR' || ${columnsModel>DATATYPE} === 'DECIMAL'}"
-                    placeholder="Length / Precision"
-                    width="100%" />
-
-                <!-- Scale -->
-                <StepInput id="_IDGenStepInput1"
-                    value="{columnsModel>SCALE}"
-                    min="0"
-                    max="38"
-                    enabled="{= ${columnsModel>DATATYPE} === 'DECIMAL'}"
-                    placeholder="Scale"
-                    width="100%" />
-
-                <!-- Constraints -->
-                <Select id="_IDGenSelect1"
-                    selectedKey="{columnsModel>CONSTRAINTS}"
-                    width="100%">
-                    <items>
-                        <core:Item id="_IDGenItem6" key="NULL" text="NULL"/>
-                        <core:Item id="_IDGenItem7" key="NOT NULL" text="NOT NULL"/>
-                    </items>
-                </Select>
-
-                <!-- Delete Button -->
-                <Button id="_IDGenButton4"
-                    icon="sap-icon://delete"
-                    type="Transparent"
-                    tooltip="Delete Row"
-                    press=".onDeleteRow"/>
-            </cells>
-        </ColumnListItem>
-    </items>
-</Table>
-</VBox>
+        if (!bState) {
+            cb.setSelected(false);
+        }
+    });
+}
