@@ -1,6 +1,33 @@
-templateuploader.view.xml
+<VBox id="_IDGenVBox9" class="sapUiSmallMargin">
+        
+        <!-- Header + Add Button on Right -->
+        <HBox id="_IDGenHBox5" justifyContent="End" class="sapUiTinyMarginBottom">
 
-<columns>
+             <Button id="_IDGenButton59" 
+                text="Template" 
+                icon="sap-icon://excel-attachment" 
+                type="Ghost" 
+                press=".downloadTemplate"/>       
+
+            <Button id="_IDGenButton54" 
+                text="Import" 
+                icon="sap-icon://upload" 
+                type="Ghost" 
+                press=".onOpenFileDialog"/>
+
+            <Button id="_IDGenButton5" 
+                text="Add Column" 
+                icon="sap-icon://add" 
+                type="Ghost" 
+                press=".onAddColumn"/>
+        </HBox>
+<Table
+    id="columnsTable"
+    inset="false"
+    items="{columnsModel>/columns}"
+    class="sapUiSizeCompact">
+
+    <columns>
         <Column id = "_IDGenColumn11" hAlign="Center" width="3rem">
            <Text id="_IDGenText9" text=""/>
         </Column>
@@ -15,16 +42,16 @@ templateuploader.view.xml
         </Column>
     </columns>
 
-<items>
-     <!-- checkbox for  primary key // shivani -->
+    <items>
+    <ColumnListItem id="_IDGenColumnListItem1">
+            <cells>
+                <!-- checkbox for  primary key // shivani -->
                 <CheckBox id="_IDGenCheckbox1"
                     tooltip="Select key"
                     required= "true"
                     class = "pkCheckbox"
                     select=".onCheckboxSelect"
                     visible= "false"/>
-    <ColumnListItem id="_IDGenColumnListItem1">
-            <cells>
                 <!-- Column Name -->
                 <Input id="_IDGenInput"
                     value="{columnsModel>COLUMN_NAME}"
@@ -86,111 +113,5 @@ templateuploader.view.xml
             </cells>
         </ColumnListItem>
     </items>
-
-
-templateuploader.controller.js
-
-  //shivani 
-
-    onPrimaryKeyToggle: function (oEvent) {
-      var isPressed = oEvent.getSource().getPressed();
-      var table = this.byId("columnsTable"); 
-
-      table.getItems().forEach(function (row) {
-        var cb = row.getCells().find(c => c.isA ("sap.m.CheckBox"));
-
-        if (cb) {
-          cb.setVisible(isPressed);
-
-          if (!isPressed) {
-            cb.setSelected(false); 
-          }
-        }
-    });
-  },
-
-    //checkbox primary key function - shivani 
-    onCheckboxSelect: function(oEvent) {
-      var selectedCB = oEvent.getSource();
-      var isSelected = selectedCB.getSelected();
-      var table = this.byId("columnsTable");
-
-      if (isSelected) {
-        //get the row containing this checkbox
-        table.getItems().forEach(function (row) {
-          var cb = row.getCells().find(c => c.isA("sap.m.CheckBox"));
-          if(cb && cb !== selectedCB) {
-            cb.setSelected(false);
-          }
-
-        });
-      } else {
-        var anySelected = false;
-
-        table.getItemss().forEach(function (row) {
-          var cb = row.getCells().find(c => c.isA("sap.m.CheckBox"));
-          if(cb && cb.getSelected()) {
-            anySelected = true;
-          }
-        });
-
-        if (!anySelected) {
-          selectedCB.CB.setSelected(true);
-        }
-      }
-    },
-
-onNextStepPress: async function () {
-_freezeTable: function () {
-      let aItems = this.byId("columnsTable").getItems();
-
-      var aColumns = this.getView().getModel("columnsModel").getData();
-      console.log(aColumns)
-      aItems.forEach(item => {
-        item.getCells()[0].setEditable(false); // colName Input
-        item.getCells()[1].setEnabled(false);  // dataType Select
-        item.getCells()[2].setEnabled(false);  // constraint Select
-        item.getCells()[3].setEnabled(false);  // delete btn
-        item.getCells()[4].setEnabled(false);  // delete btn
-        item.getCells()[5].setEnabled(false);  // delete btn
-      });
-      this.byId("columnsTable").setMode("None");
-      this.byId("columnsTable").rerender();
-
-      // Disable Add Row
-      this.byId("_IDGenButton5").setEnabled(false);
-      this.byId("_IDGenButton54").setEnabled(false);
-      this.byId("_IDGenButton59").setEnabled(false);
-
-      //Disable Primary Key and checkbox (shivani)
-      this.byId("_IDGenCheckbox1").setEnabled(false);
-      this.byId("_IDGenButton60").setEnabled(false);
-
-
-
-onPrimaryKeyToggle: function (oEvent) {
-    var isPressed = oEvent.getSource().getPressed();
-    var table = this.byId("columnsTable");
-
-    table.getItems().forEach(function (row) {
-        var cb = row.getCells()[0]; // FIRST CELL = checkbox
-        cb.setVisible(isPressed);
-        if (!isPressed) {
-            cb.setSelected(false);
-        }
-    });
-}
-
-onCheckboxSelect: function (oEvent) {
-    var selectedCB = oEvent.getSource();
-    var table = this.byId("columnsTable");
-
-    if (selectedCB.getSelected()) {
-        table.getItems().forEach(function (row) {
-            var cb = row.getCells()[0];
-            if (cb !== selectedCB) {
-                cb.setSelected(false); // REMOVE this line if multiple PK allowed
-            }
-        });
-    }
-}
+</Table>
+</VBox>
