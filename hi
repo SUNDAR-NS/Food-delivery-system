@@ -1,33 +1,13 @@
-/* Container spacing (optional if needed) */
-#_IDGenHBoxPK {
-    gap: 0.5rem;           /* space between text & switch */
-}
+onCheckboxSelect: function(oEvent) {
+    // We don’t need to deselect other checkboxes
+    // Multiple selection is allowed
+    // Optional: highlight row visually
+    var selectedCB = oEvent.getSource();
+    var row = selectedCB.getParent();
 
-/* "Primary Key" text style */
-#_IDGenTextPK {
-    font-size: 0.75rem;    /* small text */
-    font-weight: 600;     /* semi-bold */
-    color: #5f6368;       /* subtle gray */
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-}
-
-/* Switch size tuning */
-#_IDGenSwitchPK {
-    transform: scale(0.9); /* slightly smaller switch */
-}
-
-/* Switch ON state color */
-#_IDGenSwitchPK.sapMSwtOn {
-    background-color: #0a6ed1; /* SAP blue */
-}
-
-/* Switch OFF track color */
-#_IDGenSwitchPK.sapMSwtOff {
-    background-color: #e0e0e0;
-}
-
-/* Focus / hover polish */
-#_IDGenSwitchPK:hover {
-    filter: brightness(1.05);
-}
+    if (selectedCB.getSelected()) {
+        row.addStyleClass("pkSelectedRow"); // optional visual highlight
+    } else {
+        row.removeStyleClass("pkSelectedRow");
+    }
+},
