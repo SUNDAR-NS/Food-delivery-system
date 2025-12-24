@@ -1,16 +1,59 @@
-onPrimaryKeyToggle: function (oEvent) {
-  // Store toggle state globally in controller
-  this._bPKToggleOn = oEvent.getParameter("state");
-
-  var aItems = this.byId("columnsTable").getItems();
-
-  aItems.forEach(function (oItem) {
-    var oCheckBox = oItem.getCells()[0]; // PK checkbox
-    if (oCheckBox) {
-      oCheckBox.setVisible(this._bPKToggleOn);
-      if (!this._bPKToggleOn) {
-        oCheckBox.setSelected(false); // clear selection when toggle OFF
-      }
-    }
-  }.bind(this));
+entity TemplateStorage : cuid,managed {
+  MODULE_NAME     : String(100);
+  SUB_MODULE_NAME : String(100);
+  LOAD_TEMPLATE   : String(100);
+  STATUS          : String(50);
+  JSON_TEMPLATE       : LargeString;
+  EXPIRY_DATE     : Date;
+  ACTION_BY       : String(100);
 }
+
+
+
+    openTempateDashboard: async function (oTable) {
+
+      var aItems = oTable.getItems();
+      var aData = [];
+
+      aItems.forEach(function (oItem) {
+        var aCells = oItem.getCells();
+
+        // Example: assume table columns are (ColumnName, DataType, Constraints)
+        console.log(aCells[1].getText)
+        var rowData = {
+          COLUMN_NAME: aCells[0].getText ? aCells[0].getText() : aCells[0].getValue(), // Text or Input
+          DATA_TYPE: aCells[1].getText ? aCells[1].getText() : aCells[1].getValue(),
+          CONSTRAINTS: aCells[2].getText ? aCells[2].getText() : aCells[2].getValue()
+        };
+
+        aData.push(rowData);
+      });
+
+      console.log("Extracted JSON:", aData);
+
+      //save this to a template dashboard.
+
+      var aFieldIds = ["moduleComboBox1", "submoduleInput", "templateNameInput", "datePickerId"];
+
+      const module = this.byId("moduleComboBox1").getSelectedKey();
+      const submodule = this.byId("submoduleInput").getValue();
+      const templateName = this.byId("templateNameInput").getValue();
+      var oExpiryDate = this.byId("datePickerId").getValue();
+
+      const payload = {
+        MODULE_NAME: module,
+        SUB_MODULE_NAME: submodule,
+        LOAD_TEMPLATE: templateName,
+        STATUS: "pending",
+        EXPIRY_DATE: oExpiryDate,
+        JSON_TEMPLATE: JSON.stringify(aData)
+      };
+
+      const listBinding = this.oModel.bindList("/TemplateStorage");
+      const context = await listBinding.create(payload);
+      await context.created();
+
+      //refresh browser screen
+      location.reload();
+
+    },
