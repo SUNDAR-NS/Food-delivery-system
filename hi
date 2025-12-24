@@ -9,6 +9,8 @@ entity TemplateStorage : cuid,managed {
 }
 
 
+The above is my db there is where all stored 
+
 
     openTempateDashboard: async function (oTable) {
 
@@ -57,3 +59,5 @@ entity TemplateStorage : cuid,managed {
       location.reload();
 
     },
+
+This my code here i want to add primary key column in it. help me and give me a code
