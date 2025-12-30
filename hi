@@ -1,243 +1,54 @@
-<VBox id="_IDGenVBox9" class="sapUiSmallMargin">
-        
-        <!-- Header + Add Button on Right -->
-        <HBox id="_IDGenHBox5" justifyContent="End" class="sapUiTinyMarginBottom">
+/* ---------- Primary Key Toggle Section ---------- */
 
-        <HBox id="_IDGenHBoxPK" alignItems="Center" class="sapUiTinyMarginEnd">
-
-            <Text id="_IDGenTextPK" text ="Key" class="pkLabel sapUiTinyMarginEnd"/>
-
-            <Switch id="_IDGenSwitchPK" state="false" change=".onPrimaryKeyToggle"/> 
-            
-        </HBox>
-
-             <Button id="_IDGenButton59" 
-                text="Template" 
-                icon="sap-icon://excel-attachment" 
-                type="Ghost" 
-                press=".downloadTemplate"/>       
-
-            <Button id="_IDGenButton54" 
-                text="Import" 
-                icon="sap-icon://upload" 
-                type="Ghost" 
-                press=".onOpenFileDialog"/>
-
-            <Button id="_IDGenButton5" 
-                text="Add Column" 
-                icon="sap-icon://add" 
-                type="Ghost" 
-                press=".onAddColumn"/>
-        </HBox>
-<Table
-    id="columnsTable"
-    inset="false"
-    items="{columnsModel>/columns}"
-    class="sapUiSizeCompact">
-
-    <columns>
-        <Column id = "_IDGenColumn11" hAlign="Center" width="3rem">
-           <Text id="_IDGenText9" text=""/>
-        </Column>
-        <Column id="_IDGenColumn"><Text id="_IDGenText2" text="Column Name"/></Column>
-        <Column id="_IDGenColumn6"><Text id="_IDGenText4" text="Data Type"/></Column>
-        <Column id="_IDGenColumn7"><Text id="_IDGenText5" text="Length / Precision"/></Column>
-        <Column id="_IDGenColumn8"><Text id="_IDGenText6" text="Scale"/></Column>
-        <Column id="_IDGenColumn9"><Text id="_IDGenText7" text="Constraints"/></Column>
-        <!-- Delete column -->
-        <Column id="_IDGenColumn10" hAlign="Center" width="3rem">
-            <Text id="_IDGenText8" text=""/>
-        </Column>
-    </columns>
-
-    <items>
-    <ColumnListItem id="_IDGenColumnListItem1">
-            <cells>
-                <!-- checkbox for  primary key // shivani -->
-                <CheckBox id="_IDGenCheckbox1"
-                    select=".onCheckboxSelect"
-                    visible= "false"
-                    class="pkCheckbox"/>
-                <!-- Column Name -->
-                <Input id="_IDGenInput"
-                    value="{columnsModel>COLUMN_NAME}"
-                    type = "Text"
-                    placeholder="Enter column name"
-                    required="true"
-                    maxLength = "30"
-                    liveChange = "onColumnNameChange"
-                    width="100%" />
-
-                <!-- Data Type -->
-                <Select id="_IDGenSelect"
-                    selectedKey="{columnsModel>DATATYPE}"
-                    width="100%"
-                    change=".onDataTypeChange">
-                    <items>
-                        <core:Item id="_IDGenItem2" key="NVARCHAR" text="NVARCHAR"/>
-                        <core:Item id="_IDGenItem3" key="BOOLEAN" text="BOOLEAN"/>
-                        <core:Item id="_IDGenItem4" key="DECIMAL" text="DECIMAL"/>
-                        <core:Item id="_IDGenItem5" key="DATE" text="DATE"/>
-                        <core:Item id="_IDGenItem8" key="TIME" text="TIME"/>
-                    </items>
-                </Select>
-
-                <!-- Length / Precision -->
-                <StepInput id="_IDGenStepInput"
-                    value="{columnsModel>LENGTH_PRECISION}"
-                    min="1"
-                    max="1000"
-                    enabled="{= ${columnsModel>DATATYPE} === 'NVARCHAR' || ${columnsModel>DATATYPE} === 'DECIMAL'}"
-                    placeholder="Length / Precision"
-                    width="100%" />
-
-                <!-- Scale -->
-                <StepInput id="_IDGenStepInput1"
-                    value="{columnsModel>SCALE}"
-                    min="0"
-                    max="38"
-                    enabled="{= ${columnsModel>DATATYPE} === 'DECIMAL'}"
-                    placeholder="Scale"
-                    width="100%" />
-
-                <!-- Constraints -->
-                <Select id="_IDGenSelect1"
-                    selectedKey="{columnsModel>CONSTRAINTS}"
-                    width="100%">
-                    <items>
-                        <core:Item id="_IDGenItem6" key="NULL" text="NULL"/>
-                        <core:Item id="_IDGenItem7" key="NOT NULL" text="NOT NULL"/>
-                    </items>
-                </Select>
-
-                <!-- Delete Button -->
-                <Button id="_IDGenButton4"
-                    icon="sap-icon://delete"
-                    type="Transparent"
-                    tooltip="Delete Row"
-                    press=".onDeleteRow"/>
-            </cells>
-        </ColumnListItem>
-    </items>
-</Table>
-</VBox>
-
-
-/* Enter your custom styles here */
-
-/* Custom style for the file upload section */
-.file-upload-container .file-upload-box {
-  border: 2px dashed #ccc; /* Dotted border for drag and drop */
-  border-radius: 6px;
-  padding: 20px;
-  text-align: center;
-  background-color: #f9f9f9; /* Light background for visibility */
+#_IDGenHBoxPK {
+  padding-right: 0.5rem;
 }
 
-.pkLabel{
+.pkLabel {
   font-size: 0.75rem;
-  font-weight: bold;
-  color: #0f0f0f;
-  text-transform: uppercase;
-  margin-right: 0.3rem;
+  color: #6a6d70;        /* SAP neutral text */
+  font-weight: 500;
+  margin-right: 0.4rem;
 }
 
-#_IDGenSwitchPK{
-  transform: scale(0.9);
+/* Keep switch natural – SAP default look */
+#_IDGenSwitchPK {
+  transform: scale(0.9);   /* slight compact feel */
 }
 
-/* Optional: Add hover effect to make it visually responsive during drag */
-.file-upload-container .file-upload-box:hover {
-  border-color: #007acc; /* Change border color on hover */
-  background-color: #e6f7ff; /* Slight background change on hover */
+/* ---------- PK Checkbox inside Table ---------- */
+
+.pkCheckbox {
+  margin-left: 0.25rem;
 }
 
-
-.scaledSwitch {
-  transform: scale(1.2);
-  transform-origin: center;
+/* Align checkbox perfectly center like Fiori tables */
+.sapMListTblCell .pkCheckbox {
+  display: flex;
+  justify-content: center;
 }
 
-.pkLabel{
-  font-weight: bold;
-  margin-bottom: 4px;
+/* When PK mode is ON (optional visual hint) */
+.pkModeOn .sapMListTblHeaderCell {
+  background-color: #f7f7f7;
 }
 
-.card-container {
-  background-color: #fff; /* White background */
-  border: 1px solid #ccc; /* Light border */
-  border-radius: 8px; /* Rounded corners */
-  padding: 16px; /* Padding inside the card */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for 3D effect */
-  transition: box-shadow 0.3s ease-in-out; /* Smooth shadow transition on hover */
+/* ---------- Table polish ---------- */
+
+.sapUiSizeCompact .sapMListTblCell {
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
 }
 
-.card-container:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Darker shadow on hover */
-}
-
-.customTableWithStickyHeader {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 9 !important;
-  background-color: #f9f9f9;
-  box-shadow: 0 2px 2px -2px gray;
-}
-
-.dialogGrid {
-  border: 1px solid #ccc;
-  padding: 10px;
-}
-
-.gridItem {
-  border: 1px solid #ccc;
-  padding: 8px;
-  margin: 2px;
-  box-sizing: border-box;
+/* Avoid odd spacing for first column */
+.sapMListTblCell:first-child {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
 }
 
 
+var oTable = this.byId("columnsTable");
+var bState = oEvent.getParameter("state");
 
-/*  ------------------------------------------------------------- */
+oTable.toggleStyleClass("pkModeOn", bState);
 
-.sideNavigationToggleButton {
-    border-radius: 8px;
-    background: rgba(0, 122, 255, 0.1);
-  }
-  
-  .sideNavigationToggleButton .sapMBtnIcon {
-    color: #007aff !important;
-  }
-  
-  .gradientTitle {
-    text-align: center;
-    width: 100%;
-    color: #0070f2;
-    font-weight: bold;
-    display: block;
-
-  }
-  
-  
-  .iconbtns {
-    background-color: #007aff !important;
-  
-  } 
-  
-  .sapMFlexItemAlignAuto {
-    margin-left: 10px;
-  
-  }
-  
-  
-  .logo {
-    height: 40px !important;
-  }
-  
-  .navListIcon .sapTntNLIIcon,
-  .navListIcon .sapMText {
-    color: #007aff !important;
-  }
-
-
-This my UI and css code , u already gave me a css for this code but its odd from other UI , so make it even with the website. Note: I gave you my full css code just for your reference.
