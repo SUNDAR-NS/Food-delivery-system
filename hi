@@ -1,54 +1,16 @@
-/* ---------- Primary Key Toggle Section ---------- */
+onPrimaryKeyToggle: function (oEvent) {
 
-#_IDGenHBoxPK {
-  padding-right: 0.5rem;
-}
+      this._bPKToggleOn = oEvent.getParameter("state");
 
-.pkLabel {
-  font-size: 0.75rem;
-  color: #6a6d70;        /* SAP neutral text */
-  font-weight: 500;
-  margin-right: 0.4rem;
-}
+      var aItems = this.byId("columnsTable").getItems();
 
-/* Keep switch natural – SAP default look */
-#_IDGenSwitchPK {
-  transform: scale(0.9);   /* slight compact feel */
-}
-
-/* ---------- PK Checkbox inside Table ---------- */
-
-.pkCheckbox {
-  margin-left: 0.25rem;
-}
-
-/* Align checkbox perfectly center like Fiori tables */
-.sapMListTblCell .pkCheckbox {
-  display: flex;
-  justify-content: center;
-}
-
-/* When PK mode is ON (optional visual hint) */
-.pkModeOn .sapMListTblHeaderCell {
-  background-color: #f7f7f7;
-}
-
-/* ---------- Table polish ---------- */
-
-.sapUiSizeCompact .sapMListTblCell {
-  padding-top: 0.3rem;
-  padding-bottom: 0.3rem;
-}
-
-/* Avoid odd spacing for first column */
-.sapMListTblCell:first-child {
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-}
-
-
-var oTable = this.byId("columnsTable");
-var bState = oEvent.getParameter("state");
-
-oTable.toggleStyleClass("pkModeOn", bState);
-
+      aItems.forEach(function (oItem) {
+        var oCheckBox = oItem.getCells()[0]; // PK checkbox
+        if (oCheckBox) {
+          oCheckBox.setVisible(this._bPKToggleOn);
+          if (!this._bPKToggleOn) {
+            oCheckBox.setSelected(false); // clear selection when toggle OFF
+          }
+        }
+      }.bind(this));
+    },
