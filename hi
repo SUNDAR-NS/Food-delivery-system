@@ -1,38 +1,26 @@
 onPrimaryKeyToggle: function (oEvent) {
 
-      const isOn = oEvent.getParameter("pressed");
+  // Correct property for ToggleButton
+  var bState = oEvent.getParameter("pressed");
 
-      this._bPKToggleOn = oEvent.getParameter("state");
+  this._bPKToggleOn = bState;
 
-      var oTable = this.byId("columnsTable");
-      var bState = oEvent.getParameter("state");
+  var oTable = this.byId("columnsTable");
+  var aItems = oTable.getItems();
 
-      oTable.toggleStyleClass("pkModeOn",bState);
+  // Toggle UI class
+  oTable.toggleStyleClass("pkModeOn", bState);
 
-      var aItems = this.byId("columnsTable").getItems();
+  aItems.forEach(function (oItem) {
+    var oCheckBox = oItem.getCells()[0];
 
-      aItems.forEach(function (oItem) {
-        var oCheckBox = oItem.getCells()[0]; // PK checkbox
-        if (oCheckBox) {
-          oCheckBox.setVisible(this._bPKToggleOn);
-          if (!this._bPKToggleOn) {
-            oCheckBox.setSelected(false); // clear selection when toggle OFF
-          }
-        }
-      }.bind(this));
-    },
+    if (oCheckBox) {
+      oCheckBox.setVisible(bState);
 
-    //checkbox primary key function - shivani 
-    onCheckboxSelect: function (oEvent) {
-      // We don’t need to deselect other checkboxes
-      // Multiple selection is allowed
-      // Optional: highlight row visually
-      var selectedCB = oEvent.getSource();
-      var row = selectedCB.getParent();
-
-      if (selectedCB.getSelected()) {
-        row.addStyleClass("pkSelectedRow"); // optional visual highlight
-      } else {
-        row.removeStyleClass("pkSelectedRow");
+      // Reset selection when turned OFF
+      if (!bState) {
+        oCheckBox.setSelected(false);
       }
-    },
+    }
+  });
+}
