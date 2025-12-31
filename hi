@@ -1,4 +1,4 @@
-/* Base toggle style */
+/* Base toggle */
 .pkSwitch {
   width: 46px;
   height: 24px;
@@ -6,19 +6,18 @@
   background-color: #d1d5db;
   position: relative;
   padding: 0;
-  border: none;
-  transition: background-color 0.3s ease;
+  overflow: hidden;
 }
 
-/* Hide default button look */
+/* Remove SAP button visuals */
 .pkSwitch .sapMBtnInner {
   background: transparent !important;
   border: none !important;
-  box-shadow: none !important;
+  padding: 0 !important;
 }
 
-/* Toggle knob */
-.pkSwitch::after {
+/* The sliding circle */
+.pkSwitch::before {
   content: "";
   position: absolute;
   width: 20px;
@@ -28,14 +27,14 @@
   top: 2px;
   left: 2px;
   transition: transform 0.25s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 2;
 }
 
-/* ✅ ACTIVE (Pressed) STATE */
+/* ACTIVE STATE */
 .pkSwitch.sapMToggleBtnPressed {
   background-color: #0a6ed1;
 }
 
-.pkSwitch.sapMToggleBtnPressed::after {
+.pkSwitch.sapMToggleBtnPressed::before {
   transform: translateX(22px);
 }
