@@ -1,60 +1,55 @@
-/* ===== CUSTOM TOGGLE BUTTON ===== */
-
-.pkToggle {
-  width: 48px;
-  height: 26px;
+/* --- Toggle Base --- */
+.pkSwitch {
+  width: 46px;
+  height: 24px;
   border-radius: 20px;
-  background-color: #cfd8dc;
+  background-color: #d1d5db;
+  position: relative;
   padding: 0;
   border: none;
-  position: relative;
   transition: background-color 0.3s ease;
 }
 
-/* remove default button styles */
-.pkToggle .sapMBtnInner {
-  background: none !important;
+/* Hide default button styling */
+.pkSwitch .sapMBtnInner {
+  background: transparent !important;
   border: none !important;
-  padding: 0 !important;
+  box-shadow: none !important;
 }
 
-/* toggle knob */
-.pkToggle::after {
+/* Circle knob */
+.pkSwitch::after {
   content: "";
   position: absolute;
-  width: 22px;
-  height: 22px;
-  background: white;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
   border-radius: 50%;
   top: 2px;
   left: 2px;
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 /* ON state */
-.pkToggle.sapMToggleBtnPressed {
+.pkSwitch.sapMToggleBtnPressed {
   background-color: #0a6ed1;
 }
 
-.pkToggle.sapMToggleBtnPressed::after {
+.pkSwitch.sapMToggleBtnPressed::after {
   transform: translateX(22px);
 }
 
 
 onPrimaryKeyToggle: function (oEvent) {
   const isOn = oEvent.getParameter("pressed");
+  this._bPKToggleOn = isOn;
 
-  const oTable = this.byId("columnsTable");
-  const rows = oTable.getItems();
-
-  rows.forEach(row => {
-    const cb = row.getCells()[0];
+  var aItems = this.byId("columnsTable").getItems();
+  aItems.forEach(item => {
+    var cb = item.getCells()[0];
     cb.setVisible(isOn);
-
-    if (!isOn) {
-      cb.setSelected(false);
-    }
+    if (!isOn) cb.setSelected(false);
   });
 }
 
