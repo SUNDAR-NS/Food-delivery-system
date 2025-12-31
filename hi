@@ -1,26 +1,60 @@
+/* ===== CUSTOM TOGGLE BUTTON ===== */
+
+.pkToggle {
+  width: 48px;
+  height: 26px;
+  border-radius: 20px;
+  background-color: #cfd8dc;
+  padding: 0;
+  border: none;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+/* remove default button styles */
+.pkToggle .sapMBtnInner {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* toggle knob */
+.pkToggle::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* ON state */
+.pkToggle.sapMToggleBtnPressed {
+  background-color: #0a6ed1;
+}
+
+.pkToggle.sapMToggleBtnPressed::after {
+  transform: translateX(22px);
+}
+
+
 onPrimaryKeyToggle: function (oEvent) {
+  const isOn = oEvent.getParameter("pressed");
 
-  // Correct property for ToggleButton
-  var bState = oEvent.getParameter("pressed");
+  const oTable = this.byId("columnsTable");
+  const rows = oTable.getItems();
 
-  this._bPKToggleOn = bState;
+  rows.forEach(row => {
+    const cb = row.getCells()[0];
+    cb.setVisible(isOn);
 
-  var oTable = this.byId("columnsTable");
-  var aItems = oTable.getItems();
-
-  // Toggle UI class
-  oTable.toggleStyleClass("pkModeOn", bState);
-
-  aItems.forEach(function (oItem) {
-    var oCheckBox = oItem.getCells()[0];
-
-    if (oCheckBox) {
-      oCheckBox.setVisible(bState);
-
-      // Reset selection when turned OFF
-      if (!bState) {
-        oCheckBox.setSelected(false);
-      }
+    if (!isOn) {
+      cb.setSelected(false);
     }
   });
 }
+
