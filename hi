@@ -1,215 +1,333 @@
-onNextSummary: function () {
+srv.on("ValidateTemplate", async (req) => {
 
-      var oModel = this.getView().getModel("columnsModel");
+    const { MODULE_NAME, SUB_MODULE_NAME, LOAD_TEMPLATE, FILE_CONTENT } = req.data;
 
-      let aData = oModel.getProperty("/columns");
+    //parse the excel and covert to JSON store it
 
-      console.log(aData)
-      // Validation
-      for (let row of aData) {
-        if (!row.COLUMN_NAME || !row.DATATYPE || !row.CONSTRAINTS) {
+    const buffer = Buffer.from(FILE_CONTENT, 'base64'); // If CONTENT is Base64 encoded
 
-          sap.m.MessageToast.show("Please fill all required inputs.");
-          return;
+    const workbook = xlsx.read(buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    // Extract headers from the first row
+    const headers = [];
+    const range = xlsx.utils.decode_range(sheet["!ref"]);
+    const firstRow = range.s.r; // starting row index
+
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = { c: col, r: firstRow };
+      const cellRef = xlsx.utils.encode_cell(cellAddress);
+      const cell = sheet[cellRef];
+      let header = cell ? cell.v : undefined;
+      headers.push(header);
+    }
+    const tx = cds.transaction(req);
+    const headerData = await tx.run(
+
+      SELECT.from('com.scb.fileupload.master.LoadMap')
+        .columns("COLUMN_NAME", "COLUMN_DATATYPE", "CONSTRAINTS")
+        .where({
+          MODULE_NAME: MODULE_NAME,
+          SUB_MODULE_NAME: SUB_MODULE_NAME,
+          LOAD_TEMPLATE: LOAD_TEMPLATE
+        })
+        .orderBy('LOAD_COLUMN_SEQ')
+    );
+
+
+    const expectedHeaders = headerData.map(item => item.COLUMN_NAME);
+
+
+    // Compare headers
+    const isValidHeader =
+      headers.length === expectedHeaders.length &&
+      headers.every((h, i) => h === expectedHeaders[i]);
+
+    if (!isValidHeader) {
+      const result = {
+        message: "Invalid headers",
+        flag: isValidHeader
+      }
+      return result;
+    } else {
+
+      //check for datatype and constraints in each cell
+
+      const headers = await tx.run(
+
+        SELECT.from('com.scb.fileupload.master.LoadMap')
+          .columns('COLUMN_NAME', 'COLUMN_DATATYPE', "CONSTRAINTS")
+          .where({
+            MODULE_NAME: MODULE_NAME,
+            SUB_MODULE_NAME: SUB_MODULE_NAME,
+            LOAD_TEMPLATE: LOAD_TEMPLATE
+          })
+          .orderBy('LOAD_COLUMN_SEQ')
+      );
+      const expectedColumns = headers.reduce((acc, item) => {
+        const colName = item["COLUMN_NAME"].toUpperCase(); // optional: replace spaces with _
+        const dataType = item["COLUMN_DATATYPE"].toUpperCase();   // make uppercase
+        const constraint = item["CONSTRAINTS"]?.toUpperCase();    // added constraint
+        acc[colName] = { dataType, constraint };
+        return acc;
+      }, {});
+
+      // Convert sheet to JSON
+
+      const jsonData = xlsx.utils.sheet_to_json(sheet, { defval: null });  //for to chck blank
+
+      let errors = [];
+      const MAX_ERRORS = 200;
+
+      jsonData.forEach((row, rowIndex) => {
+        if (errors.length >= MAX_ERRORS) {
+          return; // stop collecting further errors
         }
+
+        Object.keys(expectedColumns).forEach((col) => {
+          if (errors.length >= MAX_ERRORS) {
+            return; // stop inside column loop too
+          }
+
+          const { dataType, constraint } = expectedColumns[col]; //added constraint
+          const value = row[col];
+
+
+          if (constraint === "NOT NULL" && (value === null || value === "")) {
+            errors.push(
+              `Row ${rowIndex + 2}, Column "${col}" is NOT NULL but value is empty`
+            );
+          }
+
+          if (!checkHanaType(value, dataType)) {
+            if (dataType === 'DATE') {
+              errors.push(
+                `Row ${rowIndex + 2}, Column "${col}" expected ${dataType} (yyyy-MM-dd) but got "${value} "`
+              );
+            }
+            else {
+              errors.push(
+                `Row ${rowIndex + 2}, Column "${col}" expected ${dataType} but got "${value}"`
+              );
+            }
+          }
+        });
+      });
+
+
+      var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
+      if (message1 === "All datatypes and constraints are valid") {
+        const result = {
+          message: "Proceed",
+          flag: true
+        }
+        return result;
+
+      } else {
+        const result = {
+          message: message1,
+          flag: false
+        }
+        return result;
       }
 
-      // ===== Validation STEP-2 : Primary Key selection =====
 
-      if (this._bPKToggleOn) {
-        var bAnyPKSelected = false;
-        var oTable = this.byId("columnsTable");
-        var aItems = oTable.getItems();
+    }
 
-        aItems.forEach(function (oItem) {
-          var oCheckBox = oItem.getCells()[0]; // PK checkbox is first cell
-          if (oCheckBox.getVisible() && oCheckBox.getSelected()) {
-            bAnyPKSelected = true;
+
+  });
+
+
+onUploadPress: async function () {
+      const module = this.byId("moduleComboBox").getSelectedKey();
+      const subModule = this.byId("subModuleComboBox").getSelectedKey();
+      const template = this.byId("loadTemplateComboBox").getSelectedKey();
+      const oFileUploader = this.byId("fileUploader");
+      console.log(oFileUploader);
+      const file = oFileUploader.getDomRef("fu").files?.[0];
+
+      if (!module || !subModule || !template || !file) {
+        sap.m.MessageBox.error("Please select all dropdowns and choose a file.");
+        return;
+      }
+
+      const maxSize = 20 * 1024 * 1024;
+      if (file.size > maxSize) {
+        sap.m.MessageBox.alert("File size exceeds 20 MB. Please upload a smaller file`.");
+        return; // stop further execution
+      }
+      sap.ui.core.BusyIndicator.show(0);
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Content = reader.result.split(",")[1];
+
+        const payload = {
+          MODULE_NAME: module,
+          SUB_MODULE_NAME: subModule,
+          LOAD_TEMPLATE: template,
+          FILE_NAME: file.name,
+          STATUS: "uploaded",
+          FILE_MIME_TYPE: file.type,
+          FILE_SIZE: file.size,
+          FILE_CONTENT: base64Content
+        };
+
+        //Do validation here...
+        var displayflag = false;
+        const oFunction = this.oModel.bindContext("/ValidateTemplate(...)");
+        oFunction.setParameter("FILE_CONTENT", base64Content);
+        oFunction.setParameter("MODULE_NAME", module);
+        oFunction.setParameter("SUB_MODULE_NAME", subModule);
+        oFunction.setParameter("LOAD_TEMPLATE", template);
+        oFunction.execute().then(() => {
+          const oCtx = oFunction.getBoundContext();
+          const data = oCtx.getObject();
+          sap.ui.core.BusyIndicator.hide();
+          if (data.flag === false) {
+            if (data.message === "Invalid headers") {
+              sap.m.MessageBox.error("Invalid headers");
+              return;
+            }
+            else {
+              sap.m.MessageBox.error(data.message);
+              return;
+            }
+          } else {
+            this._showPreviewDialog(payload);
           }
         });
 
-        if (!bAnyPKSelected) {
-          sap.m.MessageToast.show("Please select at least one Primary Key column.");
-          return;
-        }
-      }
 
-      //write code for validation step-2
-      // Freeze table (make inputs readonly + disable add/delete)
-      this._freezeTable();
+      };
 
-      // Move to next step
-      this.byId("_IDGenButtons").setVisible(false);
-      this.byId("templateWizard").nextStep();
+      reader.readAsDataURL(file);
     },
+    _showPreviewDialog: function (payload) {
 
-    _freezeTable: function () {
-
-      // 🔹 Existing code (unchanged)
-      let aItems = this.byId("columnsTable").getItems();
-      var aColumns = this.getView().getModel("columnsModel").getData();
-      console.log(aColumns);
-
-      aItems.forEach(item => {
-        item.getCells()[0].setEditable(false); // colName Input
-        item.getCells()[1].setEnabled(false);  // dataType Select
-        item.getCells()[2].setEnabled(false);  // constraint Select
-        item.getCells()[3].setEnabled(false);  // delete btn
-        item.getCells()[4].setEnabled(false);  // delete btn
-        item.getCells()[5].setEnabled(false);  // delete btn
+      const oExpiryDate = new sap.m.DatePicker({
+        placeholder: "Select Expiry Date",
+        change: function () {
+          oUploadBtn.setEnabled(!!oExpiryDate.getValue() && !!oLoadTypeSelect.getSelectedKey());
+        }
       });
 
-      this.byId("columnsTable").setMode("None");
-      this.byId("columnsTable").rerender();
 
-      // Disable Add Row
-      this.byId("_IDGenButton5").setEnabled(false);
-      this.byId("_IDGenButton54").setEnabled(false);
-      this.byId("_IDGenButton59").setEnabled(false);
 
-      var oWizard = this.byId("step3");
-
-      // 🔹 NEW: keep reference to table items (for PK checkbox state)
-      var aTableItems = this.byId("columnsTable").getItems();
-
-      const oSummaryTable = new sap.m.Table({
-        inset: false,
-        columns: [
-          new sap.m.Column({ header: new sap.m.Label({ text: "Column Name" }) }),
-          new sap.m.Column({ header: new sap.m.Label({ text: "Data Type" }) }),
-          new sap.m.Column({ header: new sap.m.Label({ text: "Constraint" }) }),
-          new sap.m.Column({ header: new sap.m.Label({ text: "Primary Key" }) }) // 🔹 NEW
+      const oLoadTypeSelect = new sap.m.Select({
+        items: [
+          new sap.ui.core.Item({ key: "TRUNCATE", text: "Truncate" }),
+          new sap.ui.core.Item({ key: "APPEND", text: "Append" })
         ],
+        change: function () {
+          oUploadBtn.setEnabled(!!oExpiryDate.getDateValue() && !!oLoadTypeSelect.getSelectedKey());
+        }
+      });
 
-        // 🔹 KEEP YOUR EXISTING MAP (UNCHANGED)
-        items: aColumns.columns.map((col, index) => {
+      const oForm = new sap.ui.layout.form.SimpleForm({
+        editable: false,
+        layout: "ResponsiveGridLayout",
+        content: [
+          new sap.m.Label({ text: "Module" }),
+          new sap.m.Text({ text: payload.MODULE_NAME }),
 
-          // 🔹 NEW: read checkbox state safely (PK is optional)
-          var bIsPrimaryKey = false;
-          var oRowItem = aTableItems[index];
-          if (oRowItem) {
-            var oCheckBox = oRowItem.getCells()[0]; // PK checkbox
-            if (oCheckBox && oCheckBox.getVisible()) {
-              bIsPrimaryKey = oCheckBox.getSelected();
+          new sap.m.Label({ text: "Submodule" }),
+          new sap.m.Text({ text: payload.SUB_MODULE_NAME }),
+
+          new sap.m.Label({ text: "Template" }),
+          new sap.m.Text({ text: payload.LOAD_TEMPLATE }),
+
+          new sap.m.Label({ text: "File Name" }),
+          new sap.m.Text({ text: payload.FILE_NAME }),
+
+          new sap.m.Label({ text: "Expiry Date" }),
+          oExpiryDate,
+
+          new sap.m.Label({ text: "Load Type" }),
+          oLoadTypeSelect
+        ]
+      });
+
+      const oUploadBtn = new sap.m.Button({
+        text: "Upload",
+        enabled: false,
+        press: async () => {
+          oDialog.setBusy(true);
+          const date = oExpiryDate.getDateValue();
+          const yyyy = date.getFullYear();
+          const mm = String(date.getMonth() + 1).padStart(2, '0'); // months are 0-indexed
+          const dd = String(date.getDate()).padStart(2, '0');
+
+          payload.EXPIRY_DATE = `${yyyy}-${mm}-${dd}`;
+          console.log(payload.EXPIRY_DATE);
+
+          payload.LOAD_TYPE = oLoadTypeSelect.getSelectedKey(); // ⬅️ new field added
+
+          try {
+            const listBinding = this.oModel.bindList("/ReportFileStorage");
+            const context = await listBinding.create(payload);
+            await context.created();
+            const oObject = context.getObject();
+            const id = oObject.ID;
+
+            sap.m.MessageToast.show("Upload successful!");
+
+            //audit trail record..
+
+            const oEntry = {
+              REPORT_ID: id,  // <-- FK to ReportFileStorage
+              MODULE_NAME: payload.MODULE_NAME,
+              SUB_MODULE_NAME: payload.SUB_MODULE_NAME,
+              LOAD_TEMPLATE: payload.LOAD_TEMPLATE
+            };
+
+            // Create the audit trail
+            const listBinding1 = this.oModel.bindList("/AuditTrailReport");
+            const context1 = await listBinding1.create(oEntry);
+            await context1.created();
+
+
+            const oTable = this.byId("fileTable");
+            const oBindings = oTable.getBinding("rows");
+            if (oBindings) {
+              oBindings.refresh();
             }
+          } catch (error) {
+            console.error("Upload error:", error);
+
+            let message = "Upload failed.";
+            if (error && error.message) {
+              message = error.message;
+            } else if (error && error.responseText) {
+              try {
+                const odataError = JSON.parse(error.responseText);
+                message = odataError.error?.message?.value || message;
+              } catch (e) {
+                // fallback to default message
+              }
+            }
+            sap.m.MessageToast.show(message);
+          } finally {
+            oDialog.setBusy(false);
+            oDialog.close();
           }
+        }
+      });
 
-          // 🔹 YOUR EXISTING LOGIC (UNCHANGED)
-          let displayType = col.DATATYPE;
-
-          if (col.DATATYPE === "NVARCHAR") {
-            if (col.LENGTH_PRECISION == undefined) {
-              col.LENGTH_PRECISION = 1;
-            }
-            if (col.LENGTH_PRECISION >= 10000) {
-              col.LENGTH_PRECISION = 10000;
-            }
-            displayType += col.LENGTH_PRECISION ? `(${col.LENGTH_PRECISION})` : "";
-          }
-          else if (col.DATATYPE === "DECIMAL") {
-            if (col.LENGTH_PRECISION == undefined) {
-              col.LENGTH_PRECISION = 1;
-            }
-            if (col.SCALE == undefined) {
-              col.SCALE = 0;
-            }
-            if (col.LENGTH_PRECISION >= 1000) {
-              col.LENGTH_PRECISION = 1000;
-            }
-            if (col.SCALE >= 38) {
-              col.SCALE = 38;
-            }
-
-            displayType += col.LENGTH_PRECISION
-              ? `(${col.LENGTH_PRECISION}${col.SCALE !== undefined ? "," + col.SCALE : ""})`
-              : "";
-          }
-
-          // 🔹 ADD PK INFO TO SUMMARY ROW
-          return new sap.m.ColumnListItem({
-            cells: [
-              new sap.m.Text({ text: col.COLUMN_NAME }),
-              new sap.m.Text({ text: displayType }),
-              new sap.m.Text({ text: col.CONSTRAINTS }),
-              new sap.m.Text({ text: bIsPrimaryKey ? "Yes" : "No" })
-            ]
-          });
+      const oDialog = new sap.m.Dialog({
+        title: "Confirm Upload",
+        content: [oForm],
+        beginButton: oUploadBtn,
+        endButton: new sap.m.Button({
+          text: "Cancel",
+          press: () => oDialog.close()
         })
       });
 
-      const oGlobalSubmitButton = new sap.m.Button({
-        text: "Submit",
-        type: "Ghost",
-        press: this.openTempateDashboard.bind(this, oSummaryTable),
-        layoutData: new sap.m.FlexItemData({ styleClass: "sapUiSmallMarginTop" })
-      });
-
-      const oSummaryLayout = new sap.m.VBox({
-        items: [
-          oSummaryTable,
-          oGlobalSubmitButton
-        ],
-        width: "100%"
-      });
-
-      const oStep3 = this.byId("step3");
-      oStep3.removeAllContent();
-      oStep3.addContent(oSummaryLayout);
+      oDialog.open();
     },
 
 
-    openTempateDashboard: async function (oTable) {
 
-      var aItems = oTable.getItems();
-      var aData = [];
-
-      aItems.forEach(function (oItem) {
-        var aCells = oItem.getCells();
-
-        // Example: assume table columns are (ColumnName, DataType, Constraints)
-        // console.log(aCells[1].getText)
-        var bIsPrimaryKey = false;
-        if (aCells[3] && aCells[3].getText) {
-          bIsPrimaryKey = aCells[3].getText() === "Yes";
-        }
-        var rowData = {
-          COLUMN_NAME: aCells[0].getText ? aCells[0].getText() : aCells[0].getValue(), // Text or Input
-          DATA_TYPE: aCells[1].getText ? aCells[1].getText() : aCells[1].getValue(),
-          CONSTRAINTS: aCells[2].getText ? aCells[2].getText() : aCells[2].getValue(),
-          IS_PRIMARY_KEY: bIsPrimaryKey
-        };
-
-        aData.push(rowData);
-      });
-
-      console.log("Extracted JSON:", aData);
-
-      //save this to a template dashboard.
-
-      var aFieldIds = ["moduleComboBox1", "submoduleInput", "templateNameInput", "datePickerId"];
-
-      const module = this.byId("moduleComboBox1").getSelectedKey();
-      const submodule = this.byId("submoduleInput").getValue();
-      const templateName = this.byId("templateNameInput").getValue();
-      var oExpiryDate = this.byId("datePickerId").getValue();
-
-      const payload = {
-        MODULE_NAME: module,
-        SUB_MODULE_NAME: submodule,
-        LOAD_TEMPLATE: templateName,
-        STATUS: "pending",
-        EXPIRY_DATE: oExpiryDate,
-        JSON_TEMPLATE: JSON.stringify(aData)
-      };
-
-      const listBinding = this.oModel.bindList("/TemplateStorage");
-      const context = await listBinding.create(payload);
-      await context.created();
-
-      //refresh browser screen
-      location.reload();
-
-    },
-
-
-In the primary key ui dont want to show yes or no just want to show icon symbols related to yes or no , but when it wants to store in hana like yes or no only 
+when uploading the data , i
