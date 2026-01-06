@@ -212,3 +212,6 @@ onNextSummary: function () {
       location.reload();
 
     },
+
+
+Dont change any logic my tl asked me to change the primary key name to unique , and check this code also if it has any error and and give me the full code.
