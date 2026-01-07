@@ -1,46 +1,10 @@
-const timestampKeys = Object.entries(excepetedMap)
-  .filter(([k, v]) => v === "TIMESTAMP")
-  .map(([k]) => k);
-
-if (timestampKeys.length) {
-  jsonData.forEach(row => {
-    timestampKeys.forEach(col => {
-      const tsChange = convertTimestamp(row[col]);
-      if (tsChange) row[col] = tsChange;
-    });
-  });
-}
-
-
-function convertTimestamp(value) {
-  if (!value) return "";
-
-  // ✅ Excel timestamp number (date + time)
-  if (typeof value === "number") {
-    // Excel epoch = 1899-12-30
-    const excelEpoch = new Date(Date.UTC(1899, 11, 30));
-    const date = new Date(excelEpoch.getTime() + value * 86400000);
-
-    if (isNaN(date.getTime())) return "";
-
-    return date.toISOString().replace("T", " ").substring(0, 19);
-  }
-
-  const str = String(value).trim();
-
-  // yyyy-MM-dd HH:mm:ss
-  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(str))
-    return str;
-
-  // yyyy-MM-dd HH:mm:ss.SSS
-  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+$/.test(str))
-    return str.split(".")[0];
-
-  // ISO format
-  const parsed = new Date(str);
-  if (!isNaN(parsed.getTime())) {
-    return parsed.toISOString().replace("T", " ").substring(0, 19);
-  }
-
-  return "";
+// dd/MM/yyyy HH:mm:ss
+const dmyTime = str.match(
+  /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})$/
+);
+if (dmyTime) {
+  const [, dd, mm, yyyy, hh, mi, ss] = dmyTime;
+  const d = new Date(`${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}`);
+  if (!isNaN(d.getTime()))
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
 }
