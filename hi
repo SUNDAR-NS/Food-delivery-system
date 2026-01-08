@@ -1,12 +1,301 @@
-[{
-	"resource": "/home/user/projects/T1GDTL_PHY/T1GDTL_PHY-db/src/GENERIC_DATA_VALIDATOR.hdbprocedure",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "(dberror) [264]: invalid datatype: \"VALUE\" LOB type in GROUP BY clause: line 20 col 26 (at pos 404)",
-	"source": "SQLScript Language Server (LSP)",
-	"startLineNumber": 19,
-	"startColumn": 27,
-	"endLineNumber": 19,
-	"endColumn": 27,
-	"origin": "extHost1"
-}]
+srv.on("ValidateTemplate", async (req) => {
+
+    const { MODULE_NAME, SUB_MODULE_NAME, LOAD_TEMPLATE, FILE_CONTENT } = req.data;
+
+    //parse the excel and covert to JSON store it
+
+    const buffer = Buffer.from(FILE_CONTENT, 'base64'); // If CONTENT is Base64 encoded
+
+    const workbook = xlsx.read(buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    // Extract headers from the first row
+    const headers = [];
+    const range = xlsx.utils.decode_range(sheet["!ref"]);
+    const firstRow = range.s.r; // starting row index
+
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = { c: col, r: firstRow };
+      const cellRef = xlsx.utils.encode_cell(cellAddress);
+      const cell = sheet[cellRef];
+      let header = cell ? cell.v : undefined;
+      headers.push(header);
+    }
+    const tx = cds.transaction(req);
+    const headerData = await tx.run(
+
+      SELECT.from('com.scb.fileupload.master.LoadMap')
+        .columns("COLUMN_NAME", "COLUMN_DATATYPE", "CONSTRAINTS")
+        .where({
+          MODULE_NAME: MODULE_NAME,
+          SUB_MODULE_NAME: SUB_MODULE_NAME,
+          LOAD_TEMPLATE: LOAD_TEMPLATE
+        })
+        .orderBy('LOAD_COLUMN_SEQ')
+    );
+
+
+    const expectedHeaders = headerData.map(item => item.COLUMN_NAME);
+
+
+    // Compare headers
+    const isValidHeader =
+      headers.length === expectedHeaders.length &&
+      headers.every((h, i) => h === expectedHeaders[i]);
+
+    if (!isValidHeader) {
+      const result = {
+        message: "Invalid headers",
+        flag: isValidHeader
+      }
+      return result;
+    } else {
+
+      //check for datatype and constraints in each cell
+
+      const headers = await tx.run(
+
+        SELECT.from('com.scb.fileupload.master.LoadMap')
+          .columns('COLUMN_NAME', 'COLUMN_DATATYPE', "CONSTRAINTS")
+          .where({
+            MODULE_NAME: MODULE_NAME,
+            SUB_MODULE_NAME: SUB_MODULE_NAME,
+            LOAD_TEMPLATE: LOAD_TEMPLATE
+          })
+          .orderBy('LOAD_COLUMN_SEQ')
+      );
+      const expectedColumns = headers.reduce((acc, item) => {
+        const colName = item["COLUMN_NAME"].toUpperCase(); // optional: replace spaces with _
+        const dataType = item["COLUMN_DATATYPE"].toUpperCase();   // make uppercase
+        const constraint = item["CONSTRAINTS"]?.toUpperCase();    // added constraint
+        acc[colName] = { dataType, constraint };
+        return acc;
+      }, {});
+
+      // Convert sheet to JSON
+
+      const jsonData = xlsx.utils.sheet_to_json(sheet, { defval: null });  //for to chck blank
+
+      let errors = [];
+      const MAX_ERRORS = 200;
+
+      jsonData.forEach((row, rowIndex) => {
+        if (errors.length >= MAX_ERRORS) {
+          return; // stop collecting further errors
+        }
+
+        Object.keys(expectedColumns).forEach((col) => {
+          if (errors.length >= MAX_ERRORS) {
+            return; // stop inside column loop too
+          }
+
+          const { dataType, constraint } = expectedColumns[col]; //added constraint
+          const value = row[col];
+
+
+          if (constraint === "NOT NULL" && (value === null || value === "")) {
+            errors.push(
+              `Row ${rowIndex + 2}, Column "${col}" is NOT NULL but value is empty`
+            );
+          }
+
+          if (!checkHanaType(value, dataType)) {
+            if (dataType === 'DATE') {
+              errors.push(
+                `Row ${rowIndex + 2}, Column "${col}" expected ${dataType} (yyyy-MM-dd) but got "${value} "`
+              );
+            }
+            else {
+              errors.push(
+                `Row ${rowIndex + 2}, Column "${col}" expected ${dataType} but got "${value}"`
+              );
+            }
+          }
+        });
+      });
+
+
+      var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
+      if (message1 === "All datatypes and constraints are valid") {
+        const result = {
+          message: "Proceed",
+          flag: true
+        }
+        return result;
+
+      } else {
+        const result = {
+          message: message1,
+          flag: false
+        }
+        return result;
+      }
+
+
+    }
+
+
+  });
+
+srv.on('CREATE', "ReportFileStorage", async (req) => {
+  try {
+    const result = await cds.tx(req)
+      .create("com.scb.fileupload.master.ReportFileStorage")
+      .entries(req.data);
+
+    const uuid = result?.ID || req.data.ID;
+    const db = cds.transaction(req);
+
+    const file = await db.run(
+      SELECT
+        .from('com.scb.fileupload.master.ReportFileStorage')
+        .columns('FILE_CONTENT', 'FILE_NAME', 'FILE_MIME_TYPE')
+        .where({ ID: uuid })
+    );
+
+    if (!file || file.length === 0) {
+      req.error(404, 'File not found');
+    }
+
+    const { FILE_CONTENT, FILE_NAME } = file[0];
+
+    const streamToBuffer = async (readableStream) => {
+      const chunks = [];
+      for await (const chunk of readableStream) {
+        chunks.push(chunk);
+      }
+      return Buffer.concat(chunks);
+    };
+
+    const buffer = await streamToBuffer(FILE_CONTENT);
+
+    const workbook = xlsx.read(buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    //Sundar -> code
+    const jsonData = xlsx.utils.sheet_to_json(sheet, { raw: true, defval: "" });
+
+    const reportFileStorageList = await db.run(
+      SELECT
+        .from('com.scb.fileupload.master.ReportFileStorage')
+        .columns('MODULE_NAME', 'SUB_MODULE_NAME', 'LOAD_TEMPLATE')
+        .where({ ID: uuid })
+    );
+
+    var reportFileStorageItem = reportFileStorageList[0];
+
+    const uniqueColumns = await db.run(
+      SELECT
+        .from('com.scb.fileupload.master.LoadMap')
+        .columns('COLUMN_NAME')
+        .where({
+          MODULE_NAME: reportFileStorageItem.MODULE_NAME,
+          SUB_MODULE_NAME: reportFileStorageItem.SUB_MODULE_NAME,
+          LOAD_TEMPLATE: reportFileStorageItem.LOAD_TEMPLATE,
+          IS_UNIQUE: true
+        })
+    );
+
+    const batchId = uuid;
+
+    for (const col of uniqueColumns) {
+      const colName = col.COLUMN_NAME;
+
+      const rowsToInsert = jsonData
+        .filter(r => r[colName] !== null && r[colName] !== "")
+        .map(r => ({
+          BATCH_ID: batchId,
+          COLUMN_NAME: colName,
+          VALUE: String(r[colName])
+        }));
+
+      if (rowsToInsert.length > 0) {
+        await db.run(
+          INSERT.into('com.scb.fileupload.master.UploadStaging')
+            .entries(rowsToInsert)
+        );
+      }
+    }
+
+    await db.run(
+      `CALL "GENERIC_DATA_VALIDATOR"(?)`,
+      [batchId]
+    );
+
+    await db.run(
+      DELETE.from('com.scb.fileupload.master.UploadStaging')
+        .where({ BATCH_ID: batchId })
+    );
+
+    const loadTableList = await db.run(
+      SELECT
+        .from('com.scb.fileupload.master.LoadMap')
+        .columns('COLUMN_NAME', 'COLUMN_DATATYPE')
+        .where({
+          MODULE_NAME: reportFileStorageItem.MODULE_NAME,
+          SUB_MODULE_NAME: reportFileStorageItem.SUB_MODULE_NAME,
+          LOAD_TEMPLATE: reportFileStorageItem.LOAD_TEMPLATE
+        })
+        .orderBy('LOAD_COLUMN_SEQ')
+    );
+
+    const excepetedMap = loadTableList.reduce((acc, item) => {
+      const colName = item["COLUMN_NAME"];
+      const dataType = item["COLUMN_DATATYPE"];
+      acc[colName] = dataType;
+      return acc;
+    }, {});
+
+    const dateKeys = Object.entries(excepetedMap)
+      .filter(([k, v]) => v === "DATE")
+      .map(([k]) => k);
+
+    if (dateKeys.length) {
+      jsonData.forEach(row => {
+        dateKeys.forEach(col => {
+          const dateChange = Datechange(row[col]);
+          if (dateChange) row[col] = dateChange;
+        });
+      });
+    }
+
+    const timeKeys = Object.entries(excepetedMap)
+      .filter(([k, v]) => v === "TIME")
+      .map(([k]) => k);
+
+    if (timeKeys.length) {
+      jsonData.forEach(row => {
+        timeKeys.forEach(col => {
+          const timeChange = convertTime(row[col]);
+          if (timeChange) row[col] = timeChange;
+        });
+      });
+    }
+
+    const timestampKeys = Object.entries(excepetedMap)
+      .filter(([k, v]) => v === "TIMESTAMP")
+      .map(([k]) => k);
+
+    if (timestampKeys.length) {
+      jsonData.forEach(row => {
+        timestampKeys.forEach(col => {
+          const tsChange = convertTimestamp(row[col]);
+          if (tsChange) row[col] = tsChange;
+        });
+      });
+    }
+
+    const strJson = JSON.stringify(jsonData);
+
+    await UPDATE('com.scb.fileupload.master.ReportFileStorage')
+      .set({ JSON_DATA: strJson })
+      .where({ ID: uuid });
+
+    return { ID: uuid };
+
+  } catch (err) {
+    console.error('Error during file upload:', err);
+    req.error(500, 'Failed to store file record.');
+  }
