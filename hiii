@@ -128,7 +128,6 @@ openTempateDashboard: async function (oTable) {
   aItems.forEach(function (oItem) {
     var aCells = oItem.getCells();
 
-    // ✅ FIX: read ICON instead of text
     var bIsUnique = false;
     if (aCells[3] && aCells[3].getSrc) {
       bIsUnique = aCells[3].getSrc() === "sap-icon://accept";
@@ -157,4 +156,6 @@ openTempateDashboard: async function (oTable) {
 
   location.reload();
 }
+
+
 
