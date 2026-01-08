@@ -1,5 +1,5 @@
 [odata] - POST /service/ReportFileStorage 
-Error during file upload: Error: invalid column name: IS_UNIQUE: line 1 col 156 (at pos 155)
+Error during file upload: Error: invalid name of function or procedure: no procedure with name GENERIC_DATA_VALIDATOR found: line 1 col 6 (at pos 5)
     at Socket.<anonymous> (/home/user/projects/SCBFileHub_recent/node_modules/@sap/hana-client/lib/index.js:53:13)
     at Socket.emit (node:events:524:28)
     at addChunk (node:internal/streams/readable:561:12)
@@ -7,10 +7,10 @@ Error during file upload: Error: invalid column name: IS_UNIQUE: line 1 col 156 
     at Readable.push (node:internal/streams/readable:392:5)
     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
     at Pipe.callbackTrampoline (node:internal/async_hooks:130:17) {
-  code: 260,
+  code: 328,
   sqlState: 'HY000',
-  query: 'SELECT COLUMN_NAME AS "COLUMN_NAME" FROM com_scb_fileupload_master_LoadMap ALIAS_1 WHERE MODULE_NAME = ? AND SUB_MODULE_NAME = ? AND LOAD_TEMPLATE = ? AND IS_UNIQUE = ?',
-  values: [ 'TREASURY', 'MAPPING_MASTER', 'MFU_SOTP', true ]
+  query: 'CALL "GENERIC_DATA_VALIDATOR"(?)',
+  values: [ 'b7507119-86ee-4fa6-b6dd-24be2d3bca9c' ]
 }
 [cds] - Error: Failed to store file record.
     at ApplicationService.<anonymous> (/home/user/projects/SCBFileHub_recent/srv/service.js:445:9)
