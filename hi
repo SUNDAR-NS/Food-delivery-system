@@ -1,30 +1,82 @@
-[odata] - POST /service/ValidateTemplate 
-[odata] - POST /service/ValidateTemplate 
-[odata] - POST /service/ReportFileStorage 
-Error during file upload: Error: invalid column name: IS_UNIQUE: line 1 col 156 (at pos 155)
-    at Socket.<anonymous> (/home/user/projects/SCBFileHub_recent/node_modules/@sap/hana-client/lib/index.js:53:13)
-    at Socket.emit (node:events:524:28)
-    at addChunk (node:internal/streams/readable:561:12)
-    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
-    at Readable.push (node:internal/streams/readable:392:5)
-    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
-    at Pipe.callbackTrampoline (node:internal/async_hooks:130:17) {
-  code: 260,
-  sqlState: 'HY000',
-  query: 'SELECT COLUMN_NAME AS "COLUMN_NAME" FROM com_scb_fileupload_master_LoadMap ALIAS_1 WHERE MODULE_NAME = ? AND SUB_MODULE_NAME = ? AND LOAD_TEMPLATE = ? AND IS_UNIQUE = ?',
-  values: [ 'TREASURY', 'MAPPING_MASTER', 'MFU_SOTP', true ]
-}
-[cds] - Error: Failed to store file record.
-    at ApplicationService.<anonymous> (/home/user/projects/SCBFileHub_recent/srv/service.js:445:9)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async next (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:64:17)
-    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:62:10)
-    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/libx/_runtime/common/Service.js:81:16) {
-  code: 500,
-  numericSeverity: 4
-}
-[error] - 500 > {
-  code: '500',
-  message: 'Failed to store file record.',
-  '@Common.numericSeverity': 4
-}
+srv.on('UpdateStatusTemplate', async (req) => {
+
+    const { id, action } = req.data;
+
+    const db = await cds.connect.to('db');
+
+    if (action === "approved") {
+
+      const rows = await db.run(
+        `SELECT MODULE_NAME,SUB_MODULE_NAME,LOAD_TEMPLATE,EXPIRY_DATE,JSON_TEMPLATE FROM com_scb_fileupload_master_TemplateStorage WHERE ID = ?`,
+        [id]
+      );
+      if (!rows.length) {
+        console.log('No row found for ID:', ID);
+        return { data: [] };
+      }
+
+      const inputJson = JSON.parse(rows[0].JSON_TEMPLATE);
+
+      var modulename = rows[0].MODULE_NAME;
+      var submodulename = rows[0].SUB_MODULE_NAME;
+      var templatename = rows[0].LOAD_TEMPLATE;
+
+      var expirydate = rows[0].EXPIRY_DATE;
+
+      //get container name from ModuleContainerMap table
+
+      const containerName = await db.run(
+        SELECT
+          .from('com.scb.fileupload.master.ModuleContainerMap')
+          .columns('CONTAINER_NAME')
+          .where({ MODULE_NAME: modulename })
+      );
+
+      const { CONTAINER_NAME } = containerName[0];
+
+      const loadTableMock = [
+        {
+          ID: cds.utils.uuid(),
+          MODULE_NAME: modulename,
+          SUB_MODULE_NAME: submodulename,
+          LOAD_TEMPLATE: templatename,
+          NUMBER_OF_COLUMNS: 0,
+          EXPIRY_DATE: expirydate,
+          DESTINATION_CONTAINER: CONTAINER_NAME,
+          STG_TABLE: templatename
+        }
+      ];
+
+      const loadMapMock = inputJson.map((col, index) => ({
+        ID: cds.utils.uuid(),
+        MODULE_NAME: modulename,
+        SUB_MODULE_NAME: submodulename,
+        LOAD_TEMPLATE: templatename,
+        LOAD_COLUMN_SEQ: index + 1,
+        COLUMN_NAME: col.COLUMN_NAME,
+        COLUMN_DATATYPE: col.DATA_TYPE.startsWith("DECIMAL") ? "DECIMAL" : col.DATA_TYPE,
+        CONSTRAINTS: col.CONSTRAINTS ? col.CONSTRAINTS.trim().toUpperCase() : null,
+        IS_UNIQUE: 
+      }));
+
+      await db.run(INSERT.into('com.scb.fileupload.master.LoadTable').entries(loadTableMock));
+      await db.run(INSERT.into('com.scb.fileupload.master.LoadMap').entries(loadMapMock));
+
+    }
+
+    const updateUser = await UPDATE('com.scb.fileupload.master.TemplateStorage')
+      .set({
+        STATUS: action
+      })
+      .where({ ID: id });
+
+    const result = await UPDATE('com.scb.fileupload.master.TemplateStorage')
+      .set({ ACTION_BY: req.user.id })
+      .where({ ID: id });
+
+    //
+    return action;
+
+
+
+  });
