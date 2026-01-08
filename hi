@@ -1,28 +1,12 @@
-[odata] - POST /service/ReportFileStorage 
-Error during file upload: Error: invalid name of function or procedure: no procedure with name GENERIC_DATA_VALIDATOR found: line 1 col 6 (at pos 5)
-    at Socket.<anonymous> (/home/user/projects/SCBFileHub_recent/node_modules/@sap/hana-client/lib/index.js:53:13)
-    at Socket.emit (node:events:524:28)
-    at addChunk (node:internal/streams/readable:561:12)
-    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
-    at Readable.push (node:internal/streams/readable:392:5)
-    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
-    at Pipe.callbackTrampoline (node:internal/async_hooks:130:17) {
-  code: 328,
-  sqlState: 'HY000',
-  query: 'CALL "GENERIC_DATA_VALIDATOR"(?)',
-  values: [ 'b7507119-86ee-4fa6-b6dd-24be2d3bca9c' ]
-}
-[cds] - Error: Failed to store file record.
-    at ApplicationService.<anonymous> (/home/user/projects/SCBFileHub_recent/srv/service.js:445:9)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async next (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:64:17)
-    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:62:10)
-    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/libx/_runtime/common/Service.js:81:16) {
-  code: 500,
-  numericSeverity: 4
-}
-[error] - 500 > {
-  code: '500',
-  message: 'Failed to store file record.',
-  '@Common.numericSeverity': 4
-}
+[{
+	"resource": "/home/user/projects/T1GDTL_PHY/T1GDTL_PHY-db/src/GENERIC_DATA_VALIDATOR.hdbprocedure",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "(dberror) [264]: invalid datatype: \"VALUE\" LOB type in GROUP BY clause: line 20 col 26 (at pos 404)",
+	"source": "SQLScript Language Server (LSP)",
+	"startLineNumber": 19,
+	"startColumn": 27,
+	"endLineNumber": 19,
+	"endColumn": 27,
+	"origin": "extHost1"
+}]
