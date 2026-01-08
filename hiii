@@ -8,7 +8,8 @@ srv.on('CREATE', "ReportFileStorage", async (req) => {
     const db = cds.transaction(req);
 
     const file = await db.run(
-      SELECT.from('com.scb.fileupload.master.ReportFileStorage')
+      SELECT
+        .from('com.scb.fileupload.master.ReportFileStorage')
         .columns('FILE_CONTENT', 'FILE_NAME', 'FILE_MIME_TYPE')
         .where({ ID: uuid })
     );
@@ -17,7 +18,7 @@ srv.on('CREATE', "ReportFileStorage", async (req) => {
       req.error(404, 'File not found');
     }
 
-    const { FILE_CONTENT } = file[0];
+    const { FILE_CONTENT, FILE_NAME } = file[0];
 
     const streamToBuffer = async (readableStream) => {
       const chunks = [];
@@ -33,26 +34,25 @@ srv.on('CREATE', "ReportFileStorage", async (req) => {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
 
-    // ✅ Excel → JSON
+    //Sundar -> code
     const jsonData = xlsx.utils.sheet_to_json(sheet, { raw: true, defval: "" });
 
-    // =========================
-    // 🔹 GET MODULE DETAILS
-    // =========================
+    /* =====================================================
+       UNIQUE DATA VALIDATION (ONLY ADDITION)
+    ====================================================== */
+
     const reportFileStorageList = await db.run(
-      SELECT.from('com.scb.fileupload.master.ReportFileStorage')
+      SELECT
+        .from('com.scb.fileupload.master.ReportFileStorage')
         .columns('MODULE_NAME', 'SUB_MODULE_NAME', 'LOAD_TEMPLATE')
         .where({ ID: uuid })
     );
 
-    const reportFileStorageItem = reportFileStorageList[0];
-
-    // =========================
-    // 🔹 UNIQUE COLUMN CHECK
-    // =========================
+    var reportFileStorageItem = reportFileStorageList[0];
 
     const uniqueColumns = await db.run(
-      SELECT.from('com.scb.fileupload.master.LoadMap')
+      SELECT
+        .from('com.scb.fileupload.master.LoadMap')
         .columns('COLUMN_NAME')
         .where({
           MODULE_NAME: reportFileStorageItem.MODULE_NAME,
@@ -62,9 +62,8 @@ srv.on('CREATE', "ReportFileStorage", async (req) => {
         })
     );
 
-    const batchId = uuid; // use upload UUID as batch id
+    const batchId = uuid;
 
-    // insert UNIQUE values into staging table
     for (const col of uniqueColumns) {
       const colName = col.COLUMN_NAME;
 
@@ -84,24 +83,23 @@ srv.on('CREATE', "ReportFileStorage", async (req) => {
       }
     }
 
-    // 🔥 CALL HANA PROCEDURE (STOPS UPLOAD IF DUPLICATE)
     await db.run(
       `CALL "CHECK_UNIQUE_DATA"(?)`,
       [batchId]
     );
 
-    // cleanup staging if success
     await db.run(
       DELETE.from('com.scb.fileupload.master.UploadStaging')
         .where({ BATCH_ID: batchId })
     );
 
-    // =========================
-    // 🔹 EXISTING DATATYPE LOGIC (UNCHANGED)
-    // =========================
+    /* =====================================================
+       END UNIQUE DATA VALIDATION
+    ====================================================== */
 
     const loadTableList = await db.run(
-      SELECT.from('com.scb.fileupload.master.LoadMap')
+      SELECT
+        .from('com.scb.fileupload.master.LoadMap')
         .columns('COLUMN_NAME', 'COLUMN_DATATYPE')
         .where({
           MODULE_NAME: reportFileStorageItem.MODULE_NAME,
@@ -112,45 +110,47 @@ srv.on('CREATE', "ReportFileStorage", async (req) => {
     );
 
     const excepetedMap = loadTableList.reduce((acc, item) => {
-      acc[item.COLUMN_NAME] = item.COLUMN_DATATYPE;
+      const colName = item["COLUMN_NAME"];
+      const dataType = item["COLUMN_DATATYPE"];
+      acc[colName] = dataType;
       return acc;
     }, {});
 
     const dateKeys = Object.entries(excepetedMap)
-      .filter(([_, v]) => v === "DATE")
+      .filter(([k, v]) => v === "DATE")
       .map(([k]) => k);
 
     if (dateKeys.length) {
       jsonData.forEach(row => {
         dateKeys.forEach(col => {
-          const v = Datechange(row[col]);
-          if (v) row[col] = v;
+          const dateChange = Datechange(row[col]);
+          if (dateChange) row[col] = dateChange;
         });
       });
     }
 
     const timeKeys = Object.entries(excepetedMap)
-      .filter(([_, v]) => v === "TIME")
+      .filter(([k, v]) => v === "TIME")
       .map(([k]) => k);
 
     if (timeKeys.length) {
       jsonData.forEach(row => {
         timeKeys.forEach(col => {
-          const v = convertTime(row[col]);
-          if (v) row[col] = v;
+          const timeChange = convertTime(row[col]);
+          if (timeChange) row[col] = timeChange;
         });
       });
     }
 
     const timestampKeys = Object.entries(excepetedMap)
-      .filter(([_, v]) => v === "TIMESTAMP")
+      .filter(([k, v]) => v === "TIMESTAMP")
       .map(([k]) => k);
 
     if (timestampKeys.length) {
       jsonData.forEach(row => {
         timestampKeys.forEach(col => {
-          const v = convertTimestamp(row[col]);
-          if (v) row[col] = v;
+          const tsChange = convertTimestamp(row[col]);
+          if (tsChange) row[col] = tsChange;
         });
       });
     }
@@ -165,5 +165,5 @@ srv.on('CREATE', "ReportFileStorage", async (req) => {
 
   } catch (err) {
     console.error('Error during file upload:', err);
-    req.error(500, err.message || 'Failed to store file record.');
+    req.error(500, 'Failed to store file record.');
   }
