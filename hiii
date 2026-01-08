@@ -1,45 +1,134 @@
-PROCEDURE "CHECK_UNIQUE_DATA"
-(
-  IN  I_BATCH_ID NVARCHAR(36)
-)
-LANGUAGE SQLSCRIPT
-SQL SECURITY INVOKER
-AS
-BEGIN
+srv.on('CREATE', "ReportFileStorage", async (req) => {
+    try {
+      const result = await cds.tx(req).create("com.scb.fileupload.master.ReportFileStorage").entries(req.data);
 
-  DECLARE duplicate_count INTEGER;
-  DECLARE error_message NVARCHAR(5000);
+      const uuid = result?.ID || req.data.ID;
+      const db = cds.transaction(req);
+      const file = await db.run(
+        SELECT
+          .from('com.scb.fileupload.master.ReportFileStorage')
+          .columns('FILE_CONTENT', 'FILE_NAME', 'FILE_MIME_TYPE')
+          .where({ ID: uuid })
+      );
+      
+      if (!file || file.length === 0) {
+        req.error(404, 'File not found');
+      }
 
-  -- Count duplicate values for UNIQUE columns in this batch
-  SELECT COUNT(*) 
-    INTO duplicate_count
-  FROM (
-    SELECT COLUMN_NAME, VALUE
-    FROM COM_SCB_UPLOAD_STAGING
-    WHERE BATCH_ID = :I_BATCH_ID
-    GROUP BY COLUMN_NAME, VALUE
-    HAVING COUNT(*) > 1
-  );
+      const { FILE_CONTENT, FILE_NAME } = file[0];
+      const streamToBuffer = async (readableStream) => {
+        const chunks = [];
+        for await (const chunk of readableStream) {
+          chunks.push(chunk);
+        }
+        return Buffer.concat(chunks);
+      };
 
-  -- If duplicates exist, build error message and stop
-  IF :duplicate_count > 0 THEN
+      const buffer = await streamToBuffer(FILE_CONTENT); // FILE_CONTENT is Readable
 
-    SELECT STRING_AGG(
-      'Duplicate value "' || VALUE || '" found for UNIQUE column "' || COLUMN_NAME || '"',
-      CHAR(10)
-    )
-    INTO error_message
-    FROM (
-      SELECT COLUMN_NAME, VALUE
-      FROM COM_SCB_UPLOAD_STAGING
-      WHERE BATCH_ID = :I_BATCH_ID
-      GROUP BY COLUMN_NAME, VALUE
-      HAVING COUNT(*) > 1
-    );
+      const base64Content = buffer.toString('base64');
 
-    SIGNAL SQL_ERROR_CODE 10001
-      SET MESSAGE_TEXT = :error_message;
+      const workbook = xlsx.read(buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
 
-  END IF;
+      //const jsonData = xlsx.utils.sheet_to_json(sheet); // All rows as JSON
 
-END;
+      //Sundar -> code
+      const jsonData = xlsx.utils.sheet_to_json(sheet, { raw: true, defval: "" });
+
+      //get module, submodule, loadtemplate
+
+      const reportFileStorageList = await db.run(
+        SELECT
+          .from('com.scb.fileupload.master.ReportFileStorage')
+          .columns('MODULE_NAME', 'SUB_MODULE_NAME', 'LOAD_TEMPLATE')
+          .where({ ID: uuid })
+      );
+
+      var reportFileStorageItem = reportFileStorageList[0];
+
+      const loadTableList = await db.run(
+        SELECT
+          .from('com.scb.fileupload.master.LoadMap')
+          .columns('COLUMN_NAME', 'COLUMN_DATATYPE')
+          .where({
+            MODULE_NAME: reportFileStorageItem.MODULE_NAME,
+            SUB_MODULE_NAME: reportFileStorageItem.SUB_MODULE_NAME,
+            LOAD_TEMPLATE: reportFileStorageItem.LOAD_TEMPLATE
+          })
+          .orderBy('LOAD_COLUMN_SEQ')
+      );
+
+      const excepetedMap = loadTableList.reduce((acc, item) => {
+        const colName = item["COLUMN_NAME"];
+        const dataType = item["COLUMN_DATATYPE"];
+        acc[colName] = dataType;
+        return acc;
+      }, {});
+
+      const dateKeys = Object.entries(excepetedMap)
+        .filter(([k, v]) => v === "DATE")
+        .map(([k]) => k);
+
+      // Convert only known date columns
+
+      if (dateKeys.length) {
+
+        jsonData.forEach(row => {
+
+          dateKeys.forEach(col => {
+
+            const dateChange = Datechange(row[col]);
+            if (dateChange) row[col] = dateChange;
+
+          });
+        });
+      }
+
+      const timeKeys = Object.entries(excepetedMap)
+        .filter(([k, v]) => v === "TIME")
+        .map(([k]) => k);
+
+      if (timeKeys.length) {
+        jsonData.forEach(row => {
+          timeKeys.forEach(col => {
+            const timeChange = convertTime(row[col]);
+            if (timeChange) row[col] = timeChange;
+          });
+        });
+      }
+
+      const timestampKeys = Object.entries(excepetedMap)
+        .filter(([k, v]) => v === "TIMESTAMP")
+        .map(([k]) => k);
+
+      if (timestampKeys.length) {
+        jsonData.forEach(row => {
+          timestampKeys.forEach(col => {
+            const tsChange = convertTimestamp(row[col]);
+            if (tsChange) row[col] = tsChange;
+          });
+        });
+      }
+
+
+      const strJson = JSON.stringify(jsonData);
+
+      //write update statement here
+
+      try {
+        await UPDATE('com.scb.fileupload.master.ReportFileStorage')
+          .set({ JSON_DATA: strJson })
+          .where({ ID: uuid });
+
+        return { ID: uuid };
+      } catch (error) {
+        req.error(500, `Update failed: ${error.message}`);
+      }
+
+      return { ID: uuid };
+    } catch (err) {
+      console.error('Error during file upload:', err);
+      req.error(500, 'Failed to store file record.');
+    }
