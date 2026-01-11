@@ -1,101 +1,346 @@
-PROCEDURE "GENERIC_DATA_VALIDATOR"
-(
-    IN  P_ID            NVARCHAR(36),
-    IN  P_MODULE        NVARCHAR(100),
-    IN  P_SUB_MODULE    NVARCHAR(100),
-    IN  P_LOAD_TEMPLATE NVARCHAR(100),
-    OUT O_STATUS        NVARCHAR(1),      -- 'S' or 'E'
-    OUT O_MESSAGE       NCLOB
-)
-LANGUAGE SQLSCRIPT
-SQL SECURITY INVOKER
-READS SQL DATA AS
-BEGIN
+srv.on("ValidateTemplate", async (req) => {
+    const { MODULE_NAME, SUB_MODULE_NAME, LOAD_TEMPLATE, FILE_CONTENT } = req.data;
 
-    DECLARE LV_COLS        NVARCHAR(2000);
-    DECLARE LV_JSON_COLS   NVARCHAR(3000);
-    DECLARE LV_SQL         NVARCHAR(5000);
-    DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
+    //parse the excel and covert to JSON store it
 
-    /*************************************************
-     Step 1: Get UNIQUE columns from JSON_TEMPLATE
-    *************************************************/
-    SELECT STRING_AGG(COLUMN_NAME, ',')
-      INTO LV_COLS
-      FROM JSON_TABLE(
-           ( SELECT JSON_TEMPLATE
-               FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
-              WHERE MODULE_NAME     = :P_MODULE
-                AND SUB_MODULE_NAME = :P_SUB_MODULE
-                AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
-           ),
-           '$[*]'
-           COLUMNS (
-             COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
-             IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
-           )
-      )
-     WHERE IS_UNIQUE = 'true';
+    const buffer = Buffer.from(FILE_CONTENT, 'base64'); // If CONTENT is Base64 encoded
 
-    -- If no unique columns defined → validation passes
-    IF :LV_COLS IS NULL THEN
-        O_STATUS  := 'S';
-        O_MESSAGE := 'No unique columns defined in template';
-        RETURN;
-    END IF;
+    const workbook = xlsx.read(buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
 
-    /*************************************************
-     Step 2: Build JSON_TABLE column mapping
-    *************************************************/
-    SELECT STRING_AGG(
-           COLUMN_NAME || ' NVARCHAR(500) PATH ''$.' || COLUMN_NAME || '''',
-           ','
-    )
-    INTO LV_JSON_COLS
-    FROM JSON_TABLE(
-         ( SELECT JSON_TEMPLATE
-             FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
-            WHERE MODULE_NAME     = :P_MODULE
-              AND SUB_MODULE_NAME = :P_SUB_MODULE
-              AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
-         ),
-         '$[*]'
-         COLUMNS (
-           COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
-           IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
-         )
-    )
-    WHERE IS_UNIQUE = 'true';
+    // Extract headers from the first row
+    const headers = [];
+    const range = xlsx.utils.decode_range(sheet["!ref"]);
+    const firstRow = range.s.r; // starting row index
 
-    /*************************************************
-     Step 3: Dynamic duplicate DATA check
-    *************************************************/
-    LV_SQL :=
-    'SELECT COUNT(*) FROM (
-        SELECT ' || LV_COLS || ', COUNT(*) CNT
-          FROM COM_SCB_FILEUPLOAD_MASTER_DUMMY 
-          CROSS JOIN JSON_TABLE(
-              COM_SCB_FILEUPLOAD_MASTER_DUMMY.JSON_DATA,
-              ''$[*]''
-              COLUMNS ( ' || LV_JSON_COLS || ' )
-          ) JT
-         WHERE COM_SCB_FILEUPLOAD_MASTER_DUMMY.ID = ''' || :P_ID || '''
-         GROUP BY ' || LV_COLS || '
-         HAVING COUNT(*) > 1
-     )';
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = { c: col, r: firstRow };
+      const cellRef = xlsx.utils.encode_cell(cellAddress);
+      const cell = sheet[cellRef];
+      let header = cell ? cell.v : undefined;
+      headers.push(header);
+    }
+    const tx = cds.transaction(req);
+    const headerData = await tx.run(
 
-    EXECUTE IMMEDIATE :LV_SQL INTO LV_DUP_CNT;
+      SELECT.from('com.scb.fileupload.master.LoadMap')
+        .columns("COLUMN_NAME", "COLUMN_DATATYPE", "CONSTRAINTS")
+        .where({
+          MODULE_NAME: MODULE_NAME,
+          SUB_MODULE_NAME: SUB_MODULE_NAME,
+          LOAD_TEMPLATE: LOAD_TEMPLATE
+        })
+        .orderBy('LOAD_COLUMN_SEQ')
+    );
 
-    /*************************************************
-     Step 4: Result
-    *************************************************/
-    IF :LV_DUP_CNT > 0 THEN
-        O_STATUS  := 'E';
-        O_MESSAGE := 'Duplicate data found for unique column combination';
-        RETURN;
-    END IF;
 
-    O_STATUS  := 'S';
-    O_MESSAGE := 'Validation successful';
+    const expectedHeaders = headerData.map(item => item.COLUMN_NAME);
 
-END;
+
+    // Compare headers
+    const isValidHeader =
+      headers.length === expectedHeaders.length &&
+      headers.every((h, i) => h === expectedHeaders[i]);
+
+    if (!isValidHeader) {
+      const result = {
+        message: "Invalid headers",
+        flag: isValidHeader
+      }
+      return result;
+    } else {
+
+      //check for datatype and constraints in each cell
+
+      const headers = await tx.run(
+
+        SELECT.from('com.scb.fileupload.master.LoadMap')
+          .columns('COLUMN_NAME', 'COLUMN_DATATYPE', "CONSTRAINTS")
+          .where({
+            MODULE_NAME: MODULE_NAME,
+            SUB_MODULE_NAME: SUB_MODULE_NAME,
+            LOAD_TEMPLATE: LOAD_TEMPLATE
+          })
+          .orderBy('LOAD_COLUMN_SEQ')
+      );
+      const expectedColumns = headers.reduce((acc, item) => {
+        const colName = item["COLUMN_NAME"].toUpperCase(); // optional: replace spaces with _
+        const dataType = item["COLUMN_DATATYPE"].toUpperCase();   // make uppercase
+        const constraint = item["CONSTRAINTS"]?.toUpperCase();    // added constraint
+        acc[colName] = { dataType, constraint };
+        return acc;
+      }, {});
+
+      // Convert sheet to JSON
+
+      const jsonData = xlsx.utils.sheet_to_json(sheet, { defval: null });  //for to chck blank
+
+      let errors = [];
+      const MAX_ERRORS = 200;
+
+      jsonData.forEach((row, rowIndex) => {
+        if (errors.length >= MAX_ERRORS) {
+          return; // stop collecting further errors
+        }
+
+        Object.keys(expectedColumns).forEach((col) => {
+          if (errors.length >= MAX_ERRORS) {
+            return; // stop inside column loop too
+          }
+
+          const { dataType, constraint } = expectedColumns[col]; //added constraint
+          const value = row[col];
+
+
+          if (constraint === "NOT NULL" && (value === null || value === "")) {
+            errors.push(
+              `Row ${rowIndex + 2}, Column "${col}" is NOT NULL but value is empty`
+            );
+          }
+
+          if (!checkHanaType(value, dataType)) {
+            if (dataType === 'DATE') {
+              errors.push(
+                `Row ${rowIndex + 2}, Column "${col}" expected ${dataType} (yyyy-MM-dd) but got "${value} "`
+              );
+            }
+            else {
+              errors.push(
+                `Row ${rowIndex + 2}, Column "${col}" expected ${dataType} but got "${value}"`
+              );
+            }
+          }
+        });
+      });
+
+
+      var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
+      if (message1 === "All datatypes and constraints are valid") {
+        const result = {
+          message: "Proceed",
+          flag: true
+        }
+        return result;
+
+      } else {
+        const result = {
+          message: message1,
+          flag: false
+        }
+        return result;
+      }
+
+
+    }
+
+
+  });
+
+srv.on('CREATE', "ReportFileStorage", async (req) => {
+    try {
+      const result = await cds.tx(req).create("com.scb.fileupload.master.ReportFileStorage").entries(req.data);
+
+      const uuid = result?.ID || req.data.ID;
+      const db = cds.transaction(req);
+      const file = await db.run(
+        SELECT
+          .from('com.scb.fileupload.master.ReportFileStorage')
+          .columns('FILE_CONTENT', 'FILE_NAME', 'FILE_MIME_TYPE')
+          .where({ ID: uuid })
+      );
+
+      if (!file || file.length === 0) {
+        req.error(404, 'File not found');
+      }
+
+      const { FILE_CONTENT, FILE_NAME } = file[0];
+      const streamToBuffer = async (readableStream) => {
+        const chunks = [];
+        for await (const chunk of readableStream) {
+          chunks.push(chunk);
+        }
+        return Buffer.concat(chunks);
+      };
+
+      const buffer = await streamToBuffer(FILE_CONTENT); // FILE_CONTENT is Readable
+
+      const base64Content = buffer.toString('base64');
+
+      const workbook = xlsx.read(buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+
+      //const jsonData = xlsx.utils.sheet_to_json(sheet); // All rows as JSON
+
+      //Sundar -> code
+      const jsonData = xlsx.utils.sheet_to_json(sheet, { raw: true, defval: "" });
+
+      //get module, submodule, loadtemplate
+
+      const reportFileStorageList = await db.run(
+        SELECT
+          .from('com.scb.fileupload.master.ReportFileStorage')
+          .columns('MODULE_NAME', 'SUB_MODULE_NAME', 'LOAD_TEMPLATE')
+          .where({ ID: uuid })
+      );
+
+      var reportFileStorageItem = reportFileStorageList[0];
+
+      const loadTableList = await db.run(
+        SELECT
+          .from('com.scb.fileupload.master.LoadMap')
+          .columns('COLUMN_NAME', 'COLUMN_DATATYPE')
+          .where({
+            MODULE_NAME: reportFileStorageItem.MODULE_NAME,
+            SUB_MODULE_NAME: reportFileStorageItem.SUB_MODULE_NAME,
+            LOAD_TEMPLATE: reportFileStorageItem.LOAD_TEMPLATE
+          })
+          .orderBy('LOAD_COLUMN_SEQ')
+      );
+
+      const excepetedMap = loadTableList.reduce((acc, item) => {
+        const colName = item["COLUMN_NAME"];
+        const dataType = item["COLUMN_DATATYPE"];
+        acc[colName] = dataType;
+        return acc;
+      }, {});
+
+      const dateKeys = Object.entries(excepetedMap)
+        .filter(([k, v]) => v === "DATE")
+        .map(([k]) => k);
+
+      // Convert only known date columns
+
+      if (dateKeys.length) {
+
+        jsonData.forEach(row => {
+
+          dateKeys.forEach(col => {
+
+            const dateChange = Datechange(row[col]);
+            if (dateChange) row[col] = dateChange;
+
+          });
+        });
+      }
+
+      const timeKeys = Object.entries(excepetedMap)
+        .filter(([k, v]) => v === "TIME")
+        .map(([k]) => k);
+
+      if (timeKeys.length) {
+        jsonData.forEach(row => {
+          timeKeys.forEach(col => {
+            const timeChange = convertTime(row[col]);
+            if (timeChange) row[col] = timeChange;
+          });
+        });
+      }
+
+
+      const strJson = JSON.stringify(jsonData);
+
+      //write update statement here
+
+      try {
+        await UPDATE('com.scb.fileupload.master.ReportFileStorage')
+          .set({ JSON_DATA: strJson })
+          .where({ ID: uuid });
+
+        return { ID: uuid };
+      } catch (error) {
+        req.error(500, `Update failed: ${error.message}`);
+      }
+
+      return { ID: uuid };
+    } catch (err) {
+      console.error('Error during file upload:', err);
+      req.error(500, 'Failed to store file record.');
+    }
+
+
+    function convertTime(value) {
+      if (!value) return "";
+
+      // Excel time serial (0 to 1)
+      if (typeof value === "number" && value >= 0 && value < 1) {
+        const totalSeconds = Math.round(value * 86400);
+        const hh = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+        const mm = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+        const ss = String(totalSeconds % 60).padStart(2, "0");
+        return `${hh}:${mm}:${ss}`;
+      }
+
+      const str = String(value).trim();
+
+      // HH:mm
+      if (/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(str)) {
+        return str + ":00";
+      }
+
+      // HH:mm:ss
+      if (/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(str)) {
+        return str;
+      }
+
+      // HH:mm:ss.SSS
+      if (/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d\.\d+$/.test(str)) {
+        return str.split(".")[0];
+      }
+
+      // h:mm AM/PM
+      const ampmMatch = str.match(/^(\d{1,2}):(\d{2})\s?(AM|PM)$/i);
+      if (ampmMatch) {
+        let [_, h, m, ampm] = ampmMatch;
+        h = Number(h);
+        if (ampm.toUpperCase() === "PM" && h !== 12) h += 12;
+        if (ampm.toUpperCase() === "AM" && h === 12) h = 0;
+        return `${String(h).padStart(2, "0")}:${m}:00`;
+      }
+
+      // Try parsing time via Date
+      const tryParse = new Date("1970-01-01T" + str);
+      if (!isNaN(tryParse.getTime())) {
+        return tryParse.toISOString().split("T")[1].substring(0, 8);
+      }
+
+      return "";
+    }
+
+    function Datechange(value) {
+      if (!value) return "";
+
+      if (typeof value === "number") {
+
+        const excelDate = new Date((value - 25569) * 86400 * 1000);
+
+        if (isNaN(excelDate.getTime())) return "";
+
+        return excelDate.toISOString().split("T")[0];
+      }
+
+      const parsed = new Date(value);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toISOString().split("T")[0];
+      }
+
+      value = String(value).trim();
+
+      const match = value.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/);
+      if (match) {
+        const [, dd, mm, yyyy] = match;
+
+        if (+yyyy < 1 || +yyyy > 9999) return null;
+
+        const iso = `${yyyy}-${mm}-${dd}`;
+        const d = new Date(iso);
+        if (!isNaN(d.getTime())) return iso;
+        return "";
+
+      }
+      return "";
+    }
+
+
+  });
