@@ -1,10 +1,58 @@
-const procResult = await tx.run(
-  SELECT.from('GENERIC_DATA_VALIDATOR')
-    .columns('O_STATUS', 'O_MESSAGE')
-    .where({
-      P_ID: dummyId,
-      P_MODULE: MODULE_NAME,
-      P_SUB_MODULE: SUB_MODULE_NAME,
-      P_LOAD_TEMPLATE: LOAD_TEMPLATE
-    })
-);
+var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
+      if (message1 === "All datatypes and constraints are valid") {
+
+        // generate UUID for dummy table
+        const dummyId = cds.utils.uuid();
+
+        // insert JSON into Dummy table
+        await tx.run(
+          INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
+            ID: dummyId,
+            JSON_DATA: JSON.stringify(jsonData)
+          })
+        );
+
+        // call HANA procedure for duplicate validation
+        const procResult = await tx.run(
+          SELECT.from('GENERIC_DATA_VALIDATOR')
+            .columns('O_STATUS', 'O_MESSAGE')
+            .where({
+              P_ID: dummyId,
+              P_MODULE: MODULE_NAME,
+              P_SUB_MODULE: SUB_MODULE_NAME,
+              P_LOAD_TEMPLATE: LOAD_TEMPLATE
+            })
+        );
+
+        const procOut = procResult[0];
+        const status = procOut.O_STATUS;
+        const message = procOut.O_MESSAGE;
+
+        // if duplicate found
+        if (status === 'E') {
+
+          // cleanup dummy data
+          await tx.run(
+            DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
+          );
+
+          return {
+            message: message,
+            flag: false
+          };
+        }
+
+        // no duplicates → proceed
+        return {
+          message: "Proceed",
+          flag: true
+        };
+
+      } else {
+        return {
+          message: message1,
+          flag: false
+        };
+      }
+
+    }
