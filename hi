@@ -11,70 +11,42 @@ if (message1 === "All datatypes and constraints are valid") {
     })
   );
 
-  try {
-
-    const sql = `
-DO BEGIN
-  DECLARE v_status NVARCHAR(1);
-  DECLARE v_message NCLOB;
-
-  CALL "GENERIC_DATA_VALIDATOR"(
-    P_ID            => '${dummyId}',
-    P_MODULE        => '${MODULE_NAME}',
-    P_SUB_MODULE    => '${SUB_MODULE_NAME}',
-    P_LOAD_TEMPLATE => '${LOAD_TEMPLATE}',
-    O_STATUS        => v_status,
-    O_MESSAGE       => v_message
+  // ✅ CALL PROCEDURE THAT RETURNS RESULT SET
+  const procResult = await tx.run(
+    `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
+    [
+      dummyId,
+      MODULE_NAME,
+      SUB_MODULE_NAME,
+      LOAD_TEMPLATE
+    ]
   );
 
-  SELECT :v_status  AS O_STATUS,
-         :v_message AS O_MESSAGE
-  FROM DUMMY;
-END;
-`;
+  console.log("Duplicate validator RESULT:", procResult);
 
-    console.log("Duplicate validator SQL:\n", sql);
+  const status = procResult[0].O_STATUS;
+  const message = procResult[0].O_MESSAGE;
 
-    // 🔥 IMPORTANT FIX HERE
-    const procResult = await cds.db.run(sql);
+  if (status === 'E') {
 
-    console.log("RAW procResult:", JSON.stringify(procResult, null, 2));
+    await tx.run(
+      DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
+    );
 
-    if (!procResult || procResult.length === 0) {
-      throw new Error("No result returned from GENERIC_DATA_VALIDATOR");
-    }
-
-    const status = procResult[0].O_STATUS;
-    const message = procResult[0].O_MESSAGE;
-
-    console.log("Duplicate validator STATUS:", status);
-    console.log("Duplicate validator MESSAGE:", message);
-
-    if (status === 'E') {
-
-      await tx.run(
-        DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
-      );
-
-      return {
-        flag: false,
-        message: message
-      };
-    }
-
-  } catch (e) {
-    console.error("Duplicate validation FAILED:", e);
-    req.error(500, e.message);
+    return {
+      flag: false,
+      message: message
+    };
   }
 
   return {
-    message: "Proceed",
-    flag: true
+    flag: true,
+    message: "Proceed"
   };
 
 } else {
   return {
-    message: message1,
-    flag: false
+    flag: false,
+    message: message1
   };
 }
