@@ -1,59 +1,31 @@
-var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
+[odata] - POST /service/ValidateTemplate 
+Duplicate validator RESULT: {}
+[cds] - Error: Duplicate validator returned no result
+    at ApplicationService.<anonymous> (/home/user/projects/SCBFileHub_recent/srv/service.js:218:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async next (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:64:17)
+    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:62:10)
+    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/libx/_runtime/common/Service.js:81:16)
+[error] - 500 > { code: '500', message: 'Duplicate validator returned no result' }
 
-if (message1 === "All datatypes and constraints are valid") {
 
-  const dummyId = cds.utils.uuid();
-
-  await tx.run(
-    INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
-      ID: dummyId,
-      JSON_DATA: JSON.stringify(jsonData)
-    })
-  );
-
-  const procResult = await tx.run(
-  `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
-  [
-    dummyId,
-    MODULE_NAME,
-    SUB_MODULE_NAME,
-    LOAD_TEMPLATE
-  ]
-);
-
-console.log("Duplicate validator RESULT:", procResult);
-
-// ✅ HANDLE CAP RETURN SHAPE CORRECTLY
-const row = Array.isArray(procResult) ? procResult[0] : procResult;
-
-if (!row || !row.O_STATUS) {
-  throw new Error("Duplicate validator returned no result");
-}
-
-const status = row.O_STATUS;
-const message = row.O_MESSAGE;
-
-if (status === 'E') {
-
-  await tx.run(
-    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
-  );
-
-  return {
-    flag: false,
-    message: message
-  };
-}
-
-return {
-  flag: true,
-  message: "Proceed"
-};
-
-} else {
-  return {
-    flag: false,
-    message: message1
-  };
-}
-    }
+Browser console
+Log-dbg.js:497 
+ 2026-01-12 02:31:17.899900 Failed to invoke /ValidateTemplate(...) - Duplicate validator returned no result
+Error: Communication error: 500 Internal Server Error
+    at Object.createError (https://sapui5.hana.ondemand.com/1.138.0/resources/sap/ui/core/library-preload.js:2334:3891)
+    at Object.<anonymous> (https://sapui5.hana.ondemand.com/1.138.0/resources/sap/ui/core/library-preload.js:2364:20629)
+    at Object.<anonymous> (https://sapui5.hana.ondemand.com/1.138.0/resources/sap-ui-core.js:1198:9657)
+    at u (https://sapui5.hana.ondemand.com/1.138.0/resources/sap-ui-core.js:1244:25639)
+    at Object.fireWith [as rejectWith] (https://sapui5.hana.ondemand.com/1.138.0/resources/sap-ui-core.js:1244:26474)
+    at k (https://sapui5.hana.ondemand.com/1.138.0/resources/sap-ui-core.js:1244:84147)
+    at XMLHttpRequest.<anonymous> (https://sapui5.hana.ondemand.com/1.138.0/resources/sap-ui-core.js:1244:86804) sap.ui.model.odata.v4.ODataContextBinding
+index.html#/fileuploader:1 
+ Uncaught (in promise) Error: Duplicate validator returned no result
+    at Object.createError (_Helper-dbg.js:616:15)
+    at Object.<anonymous> (_Requestor-dbg.js:2153:24)
+    at Object.<anonymous> (jquery-compat-dbg.js:725:30)
+    at u (jquery-dbg.js:3500:31)
+    at Object.fireWith [as rejectWith] (jquery-dbg.js:3630:7)
+    at k (jquery-dbg.js:9913:14)
+    at XMLHttpRequest.<anonymous> (jquery-dbg.js:10172:9)
