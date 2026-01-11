@@ -1,346 +1,66 @@
-srv.on("ValidateTemplate", async (req) => {
-    const { MODULE_NAME, SUB_MODULE_NAME, LOAD_TEMPLATE, FILE_CONTENT } = req.data;
+onUploadPress: async function () {
+      const module = this.byId("moduleComboBox").getSelectedKey();
+      const subModule = this.byId("subModuleComboBox").getSelectedKey();
+      const template = this.byId("loadTemplateComboBox").getSelectedKey();
+      const oFileUploader = this.byId("fileUploader");
+      console.log(oFileUploader);
+      const file = oFileUploader.getDomRef("fu").files?.[0];
 
-    //parse the excel and covert to JSON store it
-
-    const buffer = Buffer.from(FILE_CONTENT, 'base64'); // If CONTENT is Base64 encoded
-
-    const workbook = xlsx.read(buffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-
-    // Extract headers from the first row
-    const headers = [];
-    const range = xlsx.utils.decode_range(sheet["!ref"]);
-    const firstRow = range.s.r; // starting row index
-
-    for (let col = range.s.c; col <= range.e.c; col++) {
-      const cellAddress = { c: col, r: firstRow };
-      const cellRef = xlsx.utils.encode_cell(cellAddress);
-      const cell = sheet[cellRef];
-      let header = cell ? cell.v : undefined;
-      headers.push(header);
-    }
-    const tx = cds.transaction(req);
-    const headerData = await tx.run(
-
-      SELECT.from('com.scb.fileupload.master.LoadMap')
-        .columns("COLUMN_NAME", "COLUMN_DATATYPE", "CONSTRAINTS")
-        .where({
-          MODULE_NAME: MODULE_NAME,
-          SUB_MODULE_NAME: SUB_MODULE_NAME,
-          LOAD_TEMPLATE: LOAD_TEMPLATE
-        })
-        .orderBy('LOAD_COLUMN_SEQ')
-    );
-
-
-    const expectedHeaders = headerData.map(item => item.COLUMN_NAME);
-
-
-    // Compare headers
-    const isValidHeader =
-      headers.length === expectedHeaders.length &&
-      headers.every((h, i) => h === expectedHeaders[i]);
-
-    if (!isValidHeader) {
-      const result = {
-        message: "Invalid headers",
-        flag: isValidHeader
+      if (!module || !subModule || !template || !file) {
+        sap.m.MessageBox.error("Please select all dropdowns and choose a file.");
+        return;
       }
-      return result;
-    } else {
 
-      //check for datatype and constraints in each cell
+      const maxSize = 20 * 1024 * 1024;
+      if (file.size > maxSize) {
+        sap.m.MessageBox.alert("File size exceeds 20 MB. Please upload a smaller file`.");
+        return; // stop further execution
+      }
+      sap.ui.core.BusyIndicator.show(0);
 
-      const headers = await tx.run(
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Content = reader.result.split(",")[1];
 
-        SELECT.from('com.scb.fileupload.master.LoadMap')
-          .columns('COLUMN_NAME', 'COLUMN_DATATYPE', "CONSTRAINTS")
-          .where({
-            MODULE_NAME: MODULE_NAME,
-            SUB_MODULE_NAME: SUB_MODULE_NAME,
-            LOAD_TEMPLATE: LOAD_TEMPLATE
-          })
-          .orderBy('LOAD_COLUMN_SEQ')
-      );
-      const expectedColumns = headers.reduce((acc, item) => {
-        const colName = item["COLUMN_NAME"].toUpperCase(); // optional: replace spaces with _
-        const dataType = item["COLUMN_DATATYPE"].toUpperCase();   // make uppercase
-        const constraint = item["CONSTRAINTS"]?.toUpperCase();    // added constraint
-        acc[colName] = { dataType, constraint };
-        return acc;
-      }, {});
+        const payload = {
+          MODULE_NAME: module,
+          SUB_MODULE_NAME: subModule,
+          LOAD_TEMPLATE: template,
+          FILE_NAME: file.name,
+          STATUS: "uploaded",
+          FILE_MIME_TYPE: file.type,
+          FILE_SIZE: file.size,
+          FILE_CONTENT: base64Content
+        };
 
-      // Convert sheet to JSON
-
-      const jsonData = xlsx.utils.sheet_to_json(sheet, { defval: null });  //for to chck blank
-
-      let errors = [];
-      const MAX_ERRORS = 200;
-
-      jsonData.forEach((row, rowIndex) => {
-        if (errors.length >= MAX_ERRORS) {
-          return; // stop collecting further errors
-        }
-
-        Object.keys(expectedColumns).forEach((col) => {
-          if (errors.length >= MAX_ERRORS) {
-            return; // stop inside column loop too
-          }
-
-          const { dataType, constraint } = expectedColumns[col]; //added constraint
-          const value = row[col];
-
-
-          if (constraint === "NOT NULL" && (value === null || value === "")) {
-            errors.push(
-              `Row ${rowIndex + 2}, Column "${col}" is NOT NULL but value is empty`
-            );
-          }
-
-          if (!checkHanaType(value, dataType)) {
-            if (dataType === 'DATE') {
-              errors.push(
-                `Row ${rowIndex + 2}, Column "${col}" expected ${dataType} (yyyy-MM-dd) but got "${value} "`
-              );
+        //Do validation here...
+        var displayflag = false;
+        const oFunction = this.oModel.bindContext("/ValidateTemplate(...)");
+        oFunction.setParameter("FILE_CONTENT", base64Content);
+        oFunction.setParameter("MODULE_NAME", module);
+        oFunction.setParameter("SUB_MODULE_NAME", subModule);
+        oFunction.setParameter("LOAD_TEMPLATE", template);
+        oFunction.execute().then(() => {
+          const oCtx = oFunction.getBoundContext();
+          const data = oCtx.getObject();
+          sap.ui.core.BusyIndicator.hide();
+          if (data.flag === false) {
+            if (data.message === "Invalid headers") {
+              sap.m.MessageBox.error("Invalid headers");
+              return;
             }
             else {
-              errors.push(
-                `Row ${rowIndex + 2}, Column "${col}" expected ${dataType} but got "${value}"`
-              );
+              sap.m.MessageBox.error(data.message);
+              return;
             }
+          } else {
+            this._showPreviewDialog(payload);
           }
         });
-      });
 
 
-      var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
-      if (message1 === "All datatypes and constraints are valid") {
-        const result = {
-          message: "Proceed",
-          flag: true
-        }
-        return result;
-
-      } else {
-        const result = {
-          message: message1,
-          flag: false
-        }
-        return result;
-      }
-
-
-    }
-
-
-  });
-
-srv.on('CREATE', "ReportFileStorage", async (req) => {
-    try {
-      const result = await cds.tx(req).create("com.scb.fileupload.master.ReportFileStorage").entries(req.data);
-
-      const uuid = result?.ID || req.data.ID;
-      const db = cds.transaction(req);
-      const file = await db.run(
-        SELECT
-          .from('com.scb.fileupload.master.ReportFileStorage')
-          .columns('FILE_CONTENT', 'FILE_NAME', 'FILE_MIME_TYPE')
-          .where({ ID: uuid })
-      );
-
-      if (!file || file.length === 0) {
-        req.error(404, 'File not found');
-      }
-
-      const { FILE_CONTENT, FILE_NAME } = file[0];
-      const streamToBuffer = async (readableStream) => {
-        const chunks = [];
-        for await (const chunk of readableStream) {
-          chunks.push(chunk);
-        }
-        return Buffer.concat(chunks);
       };
 
-      const buffer = await streamToBuffer(FILE_CONTENT); // FILE_CONTENT is Readable
+      reader.readAsDataURL(file);
+    },
 
-      const base64Content = buffer.toString('base64');
-
-      const workbook = xlsx.read(buffer, { type: 'buffer' });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-
-      //const jsonData = xlsx.utils.sheet_to_json(sheet); // All rows as JSON
-
-      //Sundar -> code
-      const jsonData = xlsx.utils.sheet_to_json(sheet, { raw: true, defval: "" });
-
-      //get module, submodule, loadtemplate
-
-      const reportFileStorageList = await db.run(
-        SELECT
-          .from('com.scb.fileupload.master.ReportFileStorage')
-          .columns('MODULE_NAME', 'SUB_MODULE_NAME', 'LOAD_TEMPLATE')
-          .where({ ID: uuid })
-      );
-
-      var reportFileStorageItem = reportFileStorageList[0];
-
-      const loadTableList = await db.run(
-        SELECT
-          .from('com.scb.fileupload.master.LoadMap')
-          .columns('COLUMN_NAME', 'COLUMN_DATATYPE')
-          .where({
-            MODULE_NAME: reportFileStorageItem.MODULE_NAME,
-            SUB_MODULE_NAME: reportFileStorageItem.SUB_MODULE_NAME,
-            LOAD_TEMPLATE: reportFileStorageItem.LOAD_TEMPLATE
-          })
-          .orderBy('LOAD_COLUMN_SEQ')
-      );
-
-      const excepetedMap = loadTableList.reduce((acc, item) => {
-        const colName = item["COLUMN_NAME"];
-        const dataType = item["COLUMN_DATATYPE"];
-        acc[colName] = dataType;
-        return acc;
-      }, {});
-
-      const dateKeys = Object.entries(excepetedMap)
-        .filter(([k, v]) => v === "DATE")
-        .map(([k]) => k);
-
-      // Convert only known date columns
-
-      if (dateKeys.length) {
-
-        jsonData.forEach(row => {
-
-          dateKeys.forEach(col => {
-
-            const dateChange = Datechange(row[col]);
-            if (dateChange) row[col] = dateChange;
-
-          });
-        });
-      }
-
-      const timeKeys = Object.entries(excepetedMap)
-        .filter(([k, v]) => v === "TIME")
-        .map(([k]) => k);
-
-      if (timeKeys.length) {
-        jsonData.forEach(row => {
-          timeKeys.forEach(col => {
-            const timeChange = convertTime(row[col]);
-            if (timeChange) row[col] = timeChange;
-          });
-        });
-      }
-
-
-      const strJson = JSON.stringify(jsonData);
-
-      //write update statement here
-
-      try {
-        await UPDATE('com.scb.fileupload.master.ReportFileStorage')
-          .set({ JSON_DATA: strJson })
-          .where({ ID: uuid });
-
-        return { ID: uuid };
-      } catch (error) {
-        req.error(500, `Update failed: ${error.message}`);
-      }
-
-      return { ID: uuid };
-    } catch (err) {
-      console.error('Error during file upload:', err);
-      req.error(500, 'Failed to store file record.');
-    }
-
-
-    function convertTime(value) {
-      if (!value) return "";
-
-      // Excel time serial (0 to 1)
-      if (typeof value === "number" && value >= 0 && value < 1) {
-        const totalSeconds = Math.round(value * 86400);
-        const hh = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-        const mm = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
-        const ss = String(totalSeconds % 60).padStart(2, "0");
-        return `${hh}:${mm}:${ss}`;
-      }
-
-      const str = String(value).trim();
-
-      // HH:mm
-      if (/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(str)) {
-        return str + ":00";
-      }
-
-      // HH:mm:ss
-      if (/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(str)) {
-        return str;
-      }
-
-      // HH:mm:ss.SSS
-      if (/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d\.\d+$/.test(str)) {
-        return str.split(".")[0];
-      }
-
-      // h:mm AM/PM
-      const ampmMatch = str.match(/^(\d{1,2}):(\d{2})\s?(AM|PM)$/i);
-      if (ampmMatch) {
-        let [_, h, m, ampm] = ampmMatch;
-        h = Number(h);
-        if (ampm.toUpperCase() === "PM" && h !== 12) h += 12;
-        if (ampm.toUpperCase() === "AM" && h === 12) h = 0;
-        return `${String(h).padStart(2, "0")}:${m}:00`;
-      }
-
-      // Try parsing time via Date
-      const tryParse = new Date("1970-01-01T" + str);
-      if (!isNaN(tryParse.getTime())) {
-        return tryParse.toISOString().split("T")[1].substring(0, 8);
-      }
-
-      return "";
-    }
-
-    function Datechange(value) {
-      if (!value) return "";
-
-      if (typeof value === "number") {
-
-        const excelDate = new Date((value - 25569) * 86400 * 1000);
-
-        if (isNaN(excelDate.getTime())) return "";
-
-        return excelDate.toISOString().split("T")[0];
-      }
-
-      const parsed = new Date(value);
-      if (!isNaN(parsed.getTime())) {
-        return parsed.toISOString().split("T")[0];
-      }
-
-      value = String(value).trim();
-
-      const match = value.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/);
-      if (match) {
-        const [, dd, mm, yyyy] = match;
-
-        if (+yyyy < 1 || +yyyy > 9999) return null;
-
-        const iso = `${yyyy}-${mm}-${dd}`;
-        const d = new Date(iso);
-        if (!isNaN(d.getTime())) return iso;
-        return "";
-
-      }
-      return "";
-    }
-
-
-  });
