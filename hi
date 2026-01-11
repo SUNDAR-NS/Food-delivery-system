@@ -1,96 +1,43 @@
-PROCEDURE "GENERIC_DATA_VALIDATOR"
-(
-    IN  P_ID            NVARCHAR(36),
-    IN  P_MODULE        NVARCHAR(100),
-    IN  P_SUB_MODULE    NVARCHAR(100),
-    IN  P_LOAD_TEMPLATE NVARCHAR(100)
-)
-LANGUAGE SQLSCRIPT
-SQL SECURITY INVOKER
-READS SQL DATA AS
-BEGIN
+// After datatype + constraint validation success
 
-    DECLARE LV_COLS        NVARCHAR(2000);
-    DECLARE LV_JSON_COLS   NVARCHAR(3000);
-    DECLARE LV_SQL         NVARCHAR(5000);
-    DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
+const dummyId = cds.utils.uuid();
 
-    /* Step 1: Get UNIQUE columns */
-    SELECT STRING_AGG(COLUMN_NAME, ',')
-      INTO LV_COLS
-      FROM JSON_TABLE(
-           ( SELECT JSON_TEMPLATE
-               FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
-              WHERE MODULE_NAME     = :P_MODULE
-                AND SUB_MODULE_NAME = :P_SUB_MODULE
-                AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
-           ),
-           '$[*]'
-           COLUMNS (
-             COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
-             IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
-           )
-      )
-     WHERE IS_UNIQUE = 'true';
+await tx.run(
+  INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
+    ID: dummyId,
+    JSON_DATA: JSON.stringify(jsonData)
+  })
+);
 
-    IF :LV_COLS IS NULL THEN
-        SELECT
-          'S' AS O_STATUS,
-          'No unique columns defined in template' AS O_MESSAGE
-        FROM DUMMY;
-        RETURN;
-    END IF;
+// Call procedure normally
+const procResult = await tx.run(
+  `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
+  [
+    dummyId,
+    MODULE_NAME,
+    SUB_MODULE_NAME,
+    LOAD_TEMPLATE
+  ]
+);
 
-    /* Step 2: Build JSON_TABLE mapping */
-    SELECT STRING_AGG(
-           COLUMN_NAME || ' NVARCHAR(500) PATH ''$.' || COLUMN_NAME || '''',
-           ','
-    )
-    INTO LV_JSON_COLS
-    FROM JSON_TABLE(
-         ( SELECT JSON_TEMPLATE
-             FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
-            WHERE MODULE_NAME     = :P_MODULE
-              AND SUB_MODULE_NAME = :P_SUB_MODULE
-              AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
-         ),
-         '$[*]'
-         COLUMNS (
-           COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
-           IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
-         )
-    )
-    WHERE IS_UNIQUE = 'true';
+console.log("Duplicate validator RESULT:", procResult);
 
-    /* Step 3: Duplicate check */
-    LV_SQL :=
-    'SELECT COUNT(*) FROM (
-        SELECT ' || LV_COLS || '
-          FROM COM_SCB_FILEUPLOAD_MASTER_DUMMY
-          CROSS JOIN JSON_TABLE(
-              JSON_DATA,
-              ''$[*]''
-              COLUMNS ( ' || LV_JSON_COLS || ' )
-          )
-         WHERE ID = ''' || :P_ID || '''
-         GROUP BY ' || LV_COLS || '
-         HAVING COUNT(*) > 1
-     )';
+const status = procResult[0].O_STATUS;
+const message = procResult[0].O_MESSAGE;
 
-    EXECUTE IMMEDIATE :LV_SQL INTO LV_DUP_CNT;
+if (status === 'E') {
 
-    /* Step 4: RETURN RESULT SET (CRITICAL FIX) */
-    IF :LV_DUP_CNT > 0 THEN
-        SELECT
-          'E' AS O_STATUS,
-          'Duplicate data found for unique column combination' AS O_MESSAGE
-        FROM DUMMY;
-        RETURN;
-    END IF;
+  await tx.run(
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
+  );
 
-    SELECT
-      'S' AS O_STATUS,
-      'Validation successful' AS O_MESSAGE
-    FROM DUMMY;
+  return {
+    flag: false,
+    message: message
+  };
+}
 
-END;
+return {
+  flag: true,
+  message: "Proceed"
+};
