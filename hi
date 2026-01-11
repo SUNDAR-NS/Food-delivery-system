@@ -1,8 +1,38 @@
-[odata] - POST /service/ValidateTemplate 
-Duplicate validator RESULT: {}
-[cds] - ❗️Uncaught TypeError: Cannot read properties of undefined (reading 'O_STATUS')
-    at ApplicationService.<anonymous> (/home/user/projects/SCBFileHub_recent/srv/service.js:215:32)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async next (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:64:17)
-    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:62:10)
-    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/libx/_runtime/common/Service.js:81:16)
+const procResult = await tx.run(
+  `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
+  [
+    dummyId,
+    MODULE_NAME,
+    SUB_MODULE_NAME,
+    LOAD_TEMPLATE
+  ]
+);
+
+console.log("Duplicate validator RESULT:", procResult);
+
+// ✅ HANDLE CAP RETURN SHAPE CORRECTLY
+const row = Array.isArray(procResult) ? procResult[0] : procResult;
+
+if (!row || !row.O_STATUS) {
+  throw new Error("Duplicate validator returned no result");
+}
+
+const status = row.O_STATUS;
+const message = row.O_MESSAGE;
+
+if (status === 'E') {
+
+  await tx.run(
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
+  );
+
+  return {
+    flag: false,
+    message: message
+  };
+}
+
+return {
+  flag: true,
+  message: "Proceed"
+};
