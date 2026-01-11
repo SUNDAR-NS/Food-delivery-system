@@ -1,47 +1,88 @@
-[odata] - POST /service/ValidateTemplate 
-Duplicate validator SQL:
- 
-      SELECT O_STATUS, O_MESSAGE FROM (
-        CALL "GENERIC_DATA_VALIDATOR"(
-          P_ID            => 'd99b78fd-8e1e-4819-9ecc-5e72bca01bb1',
-          P_MODULE        => 'NFRP',
-          P_SUB_MODULE    => 'MAPPING_MASTER_NEW',
-          P_LOAD_TEMPLATE => 'MFU_DIM_ACCOUNT'
-        )
+var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
+
+if (message1 === "All datatypes and constraints are valid") {
+
+  // generate UUID for dummy table
+  const dummyId = cds.utils.uuid();
+
+  // insert JSON into Dummy table
+  await tx.run(
+    INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
+      ID: dummyId,
+      JSON_DATA: JSON.stringify(jsonData)
+    })
+  );
+
+  try {
+
+    const sql = `
+DO BEGIN
+  DECLARE v_status NVARCHAR(1);
+  DECLARE v_message NCLOB;
+
+  CALL "GENERIC_DATA_VALIDATOR"(
+    P_ID            => '${dummyId}',
+    P_MODULE        => '${MODULE_NAME}',
+    P_SUB_MODULE    => '${SUB_MODULE_NAME}',
+    P_LOAD_TEMPLATE => '${LOAD_TEMPLATE}',
+    O_STATUS        => v_status,
+    O_MESSAGE       => v_message
+  );
+
+  SELECT :v_status  AS O_STATUS,
+         :v_message AS O_MESSAGE
+  FROM DUMMY;
+END;
+`;
+
+    console.log("Duplicate validator SQL:\n", sql);
+
+    const procResult = await tx.run(sql);
+
+    console.log("RAW procResult:", JSON.stringify(procResult, null, 2));
+
+    // 🔑 FIND THE LAST NON-EMPTY RESULT SET
+    const resultSet = procResult
+      .slice()
+      .reverse()
+      .find(r => Array.isArray(r) && r.length > 0);
+
+    if (!resultSet) {
+      throw new Error("No result returned from GENERIC_DATA_VALIDATOR");
+    }
+
+    const status = resultSet[0].O_STATUS;
+    const message = resultSet[0].O_MESSAGE;
+
+    console.log("Duplicate validator STATUS:", status);
+    console.log("Duplicate validator MESSAGE:", message);
+
+    if (status === 'E') {
+
+      await tx.run(
+        DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
       );
-    
-Duplicate validation FAILED: Error: sql syntax error: incorrect syntax near "(": line 3 col 38 (at pos 79)
-    at Socket.<anonymous> (/home/user/projects/SCBFileHub_recent/node_modules/@sap/hana-client/lib/index.js:53:13)
-    at Socket.emit (node:events:524:28)
-    at addChunk (node:internal/streams/readable:561:12)
-    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
-    at Readable.push (node:internal/streams/readable:392:5)
-    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
-    at Pipe.callbackTrampoline (node:internal/async_hooks:130:17) {
-  code: 257,
-  sqlState: 'HY000',
-  query: '\n' +
-    '      SELECT O_STATUS, O_MESSAGE FROM (\n' +
-    '        CALL "GENERIC_DATA_VALIDATOR"(\n' +
-    "          P_ID            => 'd99b78fd-8e1e-4819-9ecc-5e72bca01bb1',\n" +
-    "          P_MODULE        => 'NFRP',\n" +
-    "          P_SUB_MODULE    => 'MAPPING_MASTER_NEW',\n" +
-    "          P_LOAD_TEMPLATE => 'MFU_DIM_ACCOUNT'\n" +
-    '        )\n' +
-    '      );\n' +
-    '    '
-}
-[cds] - Error: sql syntax error: incorrect syntax near "(": line 3 col 38 (at pos 79)
-    at ApplicationService.<anonymous> (/home/user/projects/SCBFileHub_recent/srv/service.js:249:9)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async next (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:64:17)
-    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:62:10)
-    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/libx/_runtime/common/Service.js:81:16) {
-  code: 500,
-  numericSeverity: 4
-}
-[error] - 500 > {
-  code: '500',
-  message: 'sql syntax error: incorrect syntax near "(": line 3 col 38 (at pos 79)',
-  '@Common.numericSeverity': 4
+
+      return {
+        flag: false,
+        message: message
+      };
+    }
+
+  } catch (e) {
+    console.error("Duplicate validation FAILED:", e);
+    req.error(500, e.message);
+  }
+
+  // no duplicates → proceed
+  return {
+    message: "Proceed",
+    flag: true
+  };
+
+} else {
+  return {
+    message: message1,
+    flag: false
+  };
 }
