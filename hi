@@ -1,18 +1,54 @@
-const { CONTAINER_NAME } = containerName[0];
+var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
+      if (message1 === "All datatypes and constraints are valid") {
 
-      try {
-        // Use db.run() and let HANA return OUT param as a record
-        const sql = `
-      DO BEGIN
-        DECLARE v_result NVARCHAR(500);
-        CALL "${CONTAINER_NAME}"."GENERIC_DATA_LOADER"(ID => '${id}', V_OUT => v_result);
-        SELECT :v_result AS V_OUT FROM DUMMY;
-      END;
-    `
+        // generate UUID for dummy table
+        const dummyId = cds.utils.uuid();
 
-        const result = await db.run(sql)
+        // insert JSON into Dummy table
+        await tx.run(
+          INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
+            ID: dummyId,
+            JSON_DATA: JSON.stringify(jsonData)
+          })
+        );
 
+        const procResult = await tx.run(
+  `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
+  [
+    dummyId,
+    MODULE_NAME,
+    SUB_MODULE_NAME,
+    LOAD_TEMPLATE,
+  ]
+);
 
-      } catch (error) {
-        req.error(500, `Proc call failed: ${error.message}`);
+const outParams = procResult[procResult.length - 1][0];
+const status = outParams.O_STATUS;
+const message = outParams.O_MESSAGE;
+
+if (status === 'E') {
+
+  await tx.run(
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
+  );
+
+  return {
+    message: message,
+    flag: false
+  };
+}
+
+        // no duplicates → proceed
+        return {
+          message: "Proceed",
+          flag: true
+        };
+
+      } else {
+        return {
+          message: message1,
+          flag: false
+        };
       }
+
+    }
