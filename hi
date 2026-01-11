@@ -1,28 +1,15 @@
-var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
-
-if (message1 === "All datatypes and constraints are valid") {
-
-  const dummyId = cds.utils.uuid();
-
-  await tx.run(
-    INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
-      ID: dummyId,
-      JSON_DATA: JSON.stringify(jsonData)
-    })
-  );
-
-  try {
-
-    const sql = `
+[odata] - POST /service/ValidateTemplate 
+Duplicate validator SQL:
+ 
 DO BEGIN
   DECLARE v_status NVARCHAR(1);
   DECLARE v_message NCLOB;
 
   CALL "GENERIC_DATA_VALIDATOR"(
-    P_ID            => '${dummyId}',
-    P_MODULE        => '${MODULE_NAME}',
-    P_SUB_MODULE    => '${SUB_MODULE_NAME}',
-    P_LOAD_TEMPLATE => '${LOAD_TEMPLATE}',
+    P_ID            => 'f90c675d-e3a1-4a21-8cb9-5810a07803f9',
+    P_MODULE        => 'NFRP',
+    P_SUB_MODULE    => 'MAPPING_MASTER_NEW',
+    P_LOAD_TEMPLATE => 'MFU_DIM_ACCOUNT',
     O_STATUS        => v_status,
     O_MESSAGE       => v_message
   );
@@ -31,50 +18,127 @@ DO BEGIN
          :v_message AS O_MESSAGE
   FROM DUMMY;
 END;
-`;
 
-    console.log("Duplicate validator SQL:\n", sql);
-
-    // 🔥 IMPORTANT FIX HERE
-    const procResult = await cds.db.run(sql);
-
-    console.log("RAW procResult:", JSON.stringify(procResult, null, 2));
-
-    if (!procResult || procResult.length === 0) {
-      throw new Error("No result returned from GENERIC_DATA_VALIDATOR");
-    }
-
-    const status = procResult[0].O_STATUS;
-    const message = procResult[0].O_MESSAGE;
-
-    console.log("Duplicate validator STATUS:", status);
-    console.log("Duplicate validator MESSAGE:", message);
-
-    if (status === 'E') {
-
-      await tx.run(
-        DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
-      );
-
-      return {
-        flag: false,
-        message: message
-      };
-    }
-
-  } catch (e) {
-    console.error("Duplicate validation FAILED:", e);
-    req.error(500, e.message);
-  }
-
-  return {
-    message: "Proceed",
-    flag: true
-  };
-
-} else {
-  return {
-    message: message1,
-    flag: false
-  };
+RAW procResult: []
+Duplicate validation FAILED: Error: No result returned from GENERIC_DATA_VALIDATOR
+    at ApplicationService.<anonymous> (/home/user/projects/SCBFileHub_recent/srv/service.js:232:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async next (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:64:17)
+    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:62:10)
+    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/libx/_runtime/common/Service.js:81:16)
+[cds] - Error: No result returned from GENERIC_DATA_VALIDATOR
+    at ApplicationService.<anonymous> (/home/user/projects/SCBFileHub_recent/srv/service.js:255:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async next (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:64:17)
+    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:62:10)
+    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/libx/_runtime/common/Service.js:81:16) {
+  code: 500,
+  numericSeverity: 4
 }
+[error] - 500 > {
+  code: '500',
+  message: 'No result returned from GENERIC_DATA_VALIDATOR',
+  '@Common.numericSeverity': 4
+}
+
+PROCEDURE "GENERIC_DATA_VALIDATOR"
+(
+    IN  P_ID            NVARCHAR(36),
+    IN  P_MODULE        NVARCHAR(100),
+    IN  P_SUB_MODULE    NVARCHAR(100),
+    IN  P_LOAD_TEMPLATE NVARCHAR(100),
+    OUT O_STATUS        NVARCHAR(1),      -- 'S' or 'E'
+    OUT O_MESSAGE       NCLOB
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+READS SQL DATA AS
+BEGIN
+
+    DECLARE LV_COLS        NVARCHAR(2000);
+    DECLARE LV_JSON_COLS   NVARCHAR(3000);
+    DECLARE LV_SQL         NVARCHAR(5000);
+    DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
+
+    /*************************************************
+     Step 1: Get UNIQUE columns from JSON_TEMPLATE
+    *************************************************/
+    SELECT STRING_AGG(COLUMN_NAME, ',')
+      INTO LV_COLS
+      FROM JSON_TABLE(
+           ( SELECT JSON_TEMPLATE
+               FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
+              WHERE MODULE_NAME     = :P_MODULE
+                AND SUB_MODULE_NAME = :P_SUB_MODULE
+                AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
+           ),
+           '$[*]'
+           COLUMNS (
+             COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
+             IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
+           )
+      )
+     WHERE IS_UNIQUE = 'true';
+
+    -- If no unique columns defined → validation passes
+    IF :LV_COLS IS NULL THEN
+        O_STATUS  := 'S';
+        O_MESSAGE := 'No unique columns defined in template';
+        RETURN;
+    END IF;
+
+    /*************************************************
+     Step 2: Build JSON_TABLE column mapping
+    *************************************************/
+    SELECT STRING_AGG(
+           COLUMN_NAME || ' NVARCHAR(500) PATH ''$.' || COLUMN_NAME || '''',
+           ','
+    )
+    INTO LV_JSON_COLS
+    FROM JSON_TABLE(
+         ( SELECT JSON_TEMPLATE
+             FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
+            WHERE MODULE_NAME     = :P_MODULE
+              AND SUB_MODULE_NAME = :P_SUB_MODULE
+              AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
+         ),
+         '$[*]'
+         COLUMNS (
+           COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
+           IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
+         )
+    )
+    WHERE IS_UNIQUE = 'true';
+
+    /*************************************************
+     Step 3: Dynamic duplicate DATA check
+    *************************************************/
+    LV_SQL :=
+    'SELECT COUNT(*) FROM (
+        SELECT ' || LV_COLS || ', COUNT(*) CNT
+          FROM COM_SCB_FILEUPLOAD_MASTER_DUMMY 
+          CROSS JOIN JSON_TABLE(
+              COM_SCB_FILEUPLOAD_MASTER_DUMMY.JSON_DATA,
+              ''$[*]''
+              COLUMNS ( ' || LV_JSON_COLS || ' )
+          ) JT
+         WHERE COM_SCB_FILEUPLOAD_MASTER_DUMMY.ID = ''' || :P_ID || '''
+         GROUP BY ' || LV_COLS || '
+         HAVING COUNT(*) > 1
+     )';
+
+    EXECUTE IMMEDIATE :LV_SQL INTO LV_DUP_CNT;
+
+    /*************************************************
+     Step 4: Result
+    *************************************************/
+    IF :LV_DUP_CNT > 0 THEN
+        O_STATUS  := 'E';
+        O_MESSAGE := 'Duplicate data found for unique column combination';
+        RETURN;
+    END IF;
+
+    O_STATUS  := 'S';
+    O_MESSAGE := 'Validation successful';
+
+END;
