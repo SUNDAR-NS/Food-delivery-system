@@ -1,4 +1,17 @@
-const procResult = await tx.run(
+var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
+
+if (message1 === "All datatypes and constraints are valid") {
+
+  const dummyId = cds.utils.uuid();
+
+  await tx.run(
+    INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
+      ID: dummyId,
+      JSON_DATA: JSON.stringify(jsonData)
+    })
+  );
+
+  const procResult = await tx.run(
   `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
   [
     dummyId,
@@ -36,3 +49,11 @@ return {
   flag: true,
   message: "Proceed"
 };
+
+} else {
+  return {
+    flag: false,
+    message: message1
+  };
+}
+    }
