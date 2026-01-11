@@ -1,52 +1,23 @@
-var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
-
-if (message1 === "All datatypes and constraints are valid") {
-
-  const dummyId = cds.utils.uuid();
-
-  await tx.run(
-    INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
-      ID: dummyId,
-      JSON_DATA: JSON.stringify(jsonData)
-    })
-  );
-
-  // ✅ CALL PROCEDURE THAT RETURNS RESULT SET
-  const procResult = await tx.run(
-    `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
-    [
-      dummyId,
-      MODULE_NAME,
-      SUB_MODULE_NAME,
-      LOAD_TEMPLATE
-    ]
-  );
-
-  console.log("Duplicate validator RESULT:", procResult);
-
-  const status = procResult[0].O_STATUS;
-  const message = procResult[0].O_MESSAGE;
-
-  if (status === 'E') {
-
-    await tx.run(
-      DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
-    );
-
-    return {
-      flag: false,
-      message: message
-    };
-  }
-
-  return {
-    flag: true,
-    message: "Proceed"
-  };
-
-} else {
-  return {
-    flag: false,
-    message: message1
-  };
+[odata] - POST /service/ValidateTemplate 
+[cds] - Error: invalid argument: "T1GDTL_PHY"."GENERIC_DATA_VALIDATOR": line 81 col 5 (at pos 2300): column must be prefixed with table: line 5 col 15 (at pos 144)
+    at Socket.<anonymous> (/home/user/projects/SCBFileHub_recent/node_modules/@sap/hana-client/lib/index.js:53:13)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+    at Pipe.callbackTrampoline (node:internal/async_hooks:130:17) {
+  code: 8,
+  sqlState: 'HY000',
+  query: 'CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)',
+  values: [
+    'e5c8636c-08c0-43a0-b4d2-7ded66eb25ca',
+    'NFRP',
+    'MAPPING_MASTER_NEW',
+    'MFU_DIM_ACCOUNT'
+  ]
+}
+[error] - 500 > {
+  code: '8',
+  message: 'invalid argument: "T1GDTL_PHY"."GENERIC_DATA_VALIDATOR": line 81 col 5 (at pos 2300): column must be prefixed with table: line 5 col 15 (at pos 144)'
 }
