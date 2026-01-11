@@ -1,58 +1,19 @@
-var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
-      if (message1 === "All datatypes and constraints are valid") {
-
-        // generate UUID for dummy table
-        const dummyId = cds.utils.uuid();
-
-        // insert JSON into Dummy table
-        await tx.run(
-          INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
-            ID: dummyId,
-            JSON_DATA: JSON.stringify(jsonData)
-          })
-        );
-
-        // call HANA procedure for duplicate validation
-        const procResult = await tx.run(
-          SELECT.from('GENERIC_DATA_VALIDATOR')
-            .columns('O_STATUS', 'O_MESSAGE')
-            .where({
-              P_ID: dummyId,
-              P_MODULE: MODULE_NAME,
-              P_SUB_MODULE: SUB_MODULE_NAME,
-              P_LOAD_TEMPLATE: LOAD_TEMPLATE
-            })
-        );
-
-        const procOut = procResult[0];
-        const status = procOut.O_STATUS;
-        const message = procOut.O_MESSAGE;
-
-        // if duplicate found
-        if (status === 'E') {
-
-          // cleanup dummy data
-          await tx.run(
-            DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
-          );
-
-          return {
-            message: message,
-            flag: false
-          };
-        }
-
-        // no duplicates → proceed
-        return {
-          message: "Proceed",
-          flag: true
-        };
-
-      } else {
-        return {
-          message: message1,
-          flag: false
-        };
-      }
-
-    }
+ailed to load resource: the server responded with a status of 500 (Internal Server Error)
+Log-dbg.js:497  2026-01-12 00:35:27.457599 Failed to invoke /ValidateTemplate(...) - invalid table name:  Could not find table/view GENERIC_DATA_VALIDATOR in schema T1GDTL_PHY: line 1 col 62 (at pos 61)
+Error: Communication error: 500 Internal Server Error
+    at Object.createError (https://sapui5.hana.ondemand.com/1.138.0/resources/sap/ui/core/library-preload.js:2334:3891)
+    at Object.<anonymous> (https://sapui5.hana.ondemand.com/1.138.0/resources/sap/ui/core/library-preload.js:2364:20629)
+    at Object.<anonymous> (https://sapui5.hana.ondemand.com/1.138.0/resources/sap-ui-core.js:1198:9657)
+    at u (https://sapui5.hana.ondemand.com/1.138.0/resources/sap-ui-core.js:1244:25639)
+    at Object.fireWith [as rejectWith] (https://sapui5.hana.ondemand.com/1.138.0/resources/sap-ui-core.js:1244:26474)
+    at k (https://sapui5.hana.ondemand.com/1.138.0/resources/sap-ui-core.js:1244:84147)
+    at XMLHttpRequest.<anonymous> (https://sapui5.hana.ondemand.com/1.138.0/resources/sap-ui-core.js:1244:86804) sap.ui.model.odata.v4.ODataContextBinding
+u @ Log-dbg.js:497
+index.html#/fileuploader:1  Uncaught (in promise) Error: invalid table name:  Could not find table/view GENERIC_DATA_VALIDATOR in schema T1GDTL_PHY: line 1 col 62 (at pos 61)
+    at Object.createError (_Helper-dbg.js:616:15)
+    at Object.<anonymous> (_Requestor-dbg.js:2153:24)
+    at Object.<anonymous> (jquery-compat-dbg.js:725:30)
+    at u (jquery-dbg.js:3500:31)
+    at Object.fireWith [as rejectWith] (jquery-dbg.js:3630:7)
+    at k (jquery-dbg.js:9913:14)
+    at XMLHttpRequest.<anonymous> (jquery-dbg.js:10172:9)
