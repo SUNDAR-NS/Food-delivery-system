@@ -1,30 +1,15 @@
-var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
-
-if (message1 === "All datatypes and constraints are valid") {
-
-  // generate UUID for dummy table
-  const dummyId = cds.utils.uuid();
-
-  // insert JSON into Dummy table
-  await tx.run(
-    INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
-      ID: dummyId,
-      JSON_DATA: JSON.stringify(jsonData)
-    })
-  );
-
-  try {
-
-    const sql = `
+[odata] - POST /service/ValidateTemplate 
+Duplicate validator SQL:
+ 
 DO BEGIN
   DECLARE v_status NVARCHAR(1);
   DECLARE v_message NCLOB;
 
   CALL "GENERIC_DATA_VALIDATOR"(
-    P_ID            => '${dummyId}',
-    P_MODULE        => '${MODULE_NAME}',
-    P_SUB_MODULE    => '${SUB_MODULE_NAME}',
-    P_LOAD_TEMPLATE => '${LOAD_TEMPLATE}',
+    P_ID            => 'fe9706d5-7c7a-41b2-8cc9-7b6139396d94',
+    P_MODULE        => 'NFRP',
+    P_SUB_MODULE    => 'MAPPING_MASTER_NEW',
+    P_LOAD_TEMPLATE => 'MFU_DIM_ACCOUNT',
     O_STATUS        => v_status,
     O_MESSAGE       => v_message
   );
@@ -33,56 +18,25 @@ DO BEGIN
          :v_message AS O_MESSAGE
   FROM DUMMY;
 END;
-`;
 
-    console.log("Duplicate validator SQL:\n", sql);
-
-    const procResult = await tx.run(sql);
-
-    console.log("RAW procResult:", JSON.stringify(procResult, null, 2));
-
-    // 🔑 FIND THE LAST NON-EMPTY RESULT SET
-    const resultSet = procResult
-      .slice()
-      .reverse()
-      .find(r => Array.isArray(r) && r.length > 0);
-
-    if (!resultSet) {
-      throw new Error("No result returned from GENERIC_DATA_VALIDATOR");
-    }
-
-    const status = resultSet[0].O_STATUS;
-    const message = resultSet[0].O_MESSAGE;
-
-    console.log("Duplicate validator STATUS:", status);
-    console.log("Duplicate validator MESSAGE:", message);
-
-    if (status === 'E') {
-
-      await tx.run(
-        DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
-      );
-
-      return {
-        flag: false,
-        message: message
-      };
-    }
-
-  } catch (e) {
-    console.error("Duplicate validation FAILED:", e);
-    req.error(500, e.message);
-  }
-
-  // no duplicates → proceed
-  return {
-    message: "Proceed",
-    flag: true
-  };
-
-} else {
-  return {
-    message: message1,
-    flag: false
-  };
+RAW procResult: []
+Duplicate validation FAILED: Error: No result returned from GENERIC_DATA_VALIDATOR
+    at ApplicationService.<anonymous> (/home/user/projects/SCBFileHub_recent/srv/service.js:239:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async next (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:64:17)
+    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:62:10)
+    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/libx/_runtime/common/Service.js:81:16)
+[cds] - Error: No result returned from GENERIC_DATA_VALIDATOR
+    at ApplicationService.<anonymous> (/home/user/projects/SCBFileHub_recent/srv/service.js:262:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async next (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:64:17)
+    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/lib/srv/srv-dispatch.js:62:10)
+    at async ApplicationService.handle (/home/user/projects/SCBFileHub_recent/node_modules/@sap/cds/libx/_runtime/common/Service.js:81:16) {
+  code: 500,
+  numericSeverity: 4
+}
+[error] - 500 > {
+  code: '500',
+  message: 'No result returned from GENERIC_DATA_VALIDATOR',
+  '@Common.numericSeverity': 4
 }
