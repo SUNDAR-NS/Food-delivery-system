@@ -1,23 +1,96 @@
-[odata] - POST /service/ValidateTemplate 
-[cds] - Error: invalid argument: "T1GDTL_PHY"."GENERIC_DATA_VALIDATOR": line 81 col 5 (at pos 2300): column must be prefixed with table: line 5 col 15 (at pos 144)
-    at Socket.<anonymous> (/home/user/projects/SCBFileHub_recent/node_modules/@sap/hana-client/lib/index.js:53:13)
-    at Socket.emit (node:events:524:28)
-    at addChunk (node:internal/streams/readable:561:12)
-    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
-    at Readable.push (node:internal/streams/readable:392:5)
-    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
-    at Pipe.callbackTrampoline (node:internal/async_hooks:130:17) {
-  code: 8,
-  sqlState: 'HY000',
-  query: 'CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)',
-  values: [
-    'e5c8636c-08c0-43a0-b4d2-7ded66eb25ca',
-    'NFRP',
-    'MAPPING_MASTER_NEW',
-    'MFU_DIM_ACCOUNT'
-  ]
-}
-[error] - 500 > {
-  code: '8',
-  message: 'invalid argument: "T1GDTL_PHY"."GENERIC_DATA_VALIDATOR": line 81 col 5 (at pos 2300): column must be prefixed with table: line 5 col 15 (at pos 144)'
-}
+PROCEDURE "GENERIC_DATA_VALIDATOR"
+(
+    IN  P_ID            NVARCHAR(36),
+    IN  P_MODULE        NVARCHAR(100),
+    IN  P_SUB_MODULE    NVARCHAR(100),
+    IN  P_LOAD_TEMPLATE NVARCHAR(100)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+READS SQL DATA AS
+BEGIN
+ 
+    DECLARE LV_COLS        NVARCHAR(2000);
+    DECLARE LV_JSON_COLS   NVARCHAR(3000);
+    DECLARE LV_SQL         NVARCHAR(5000);
+    DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
+ 
+    /* Step 1: Get UNIQUE columns */
+    SELECT STRING_AGG(COLUMN_NAME, ',')
+      INTO LV_COLS
+      FROM JSON_TABLE(
+           ( SELECT JSON_TEMPLATE
+               FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
+              WHERE MODULE_NAME     = :P_MODULE
+                AND SUB_MODULE_NAME = :P_SUB_MODULE
+                AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
+           ),
+           '$[*]'
+           COLUMNS (
+             COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
+             IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
+           )
+      )
+     WHERE IS_UNIQUE = 'true';
+ 
+    IF :LV_COLS IS NULL THEN
+        SELECT
+          'S' AS O_STATUS,
+          'No unique columns defined in template' AS O_MESSAGE
+        FROM DUMMY;
+        RETURN;
+    END IF;
+ 
+    /* Step 2: Build JSON_TABLE mapping */
+    SELECT STRING_AGG(
+           COLUMN_NAME || ' NVARCHAR(500) PATH ''$.' || COLUMN_NAME || '''',
+           ','
+    )
+    INTO LV_JSON_COLS
+    FROM JSON_TABLE(
+         ( SELECT JSON_TEMPLATE
+             FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
+            WHERE MODULE_NAME     = :P_MODULE
+              AND SUB_MODULE_NAME = :P_SUB_MODULE
+              AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
+         ),
+         '$[*]'
+         COLUMNS (
+           COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
+           IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
+         )
+    )
+    WHERE IS_UNIQUE = 'true';
+ 
+    /* Step 3: Duplicate check */
+    LV_SQL :=
+    'SELECT COUNT(*) FROM (
+        SELECT ' || LV_COLS || '
+          FROM COM_SCB_FILEUPLOAD_MASTER_DUMMY
+          CROSS JOIN JSON_TABLE(
+              JSON_DATA,
+              ''$[*]''
+              COLUMNS ( ' || LV_JSON_COLS || ' )
+          )
+         WHERE ID = ''' || :P_ID || '''
+         GROUP BY ' || LV_COLS || '
+         HAVING COUNT(*) > 1
+     )';
+ 
+    EXECUTE IMMEDIATE :LV_SQL INTO LV_DUP_CNT;
+ 
+    /* Step 4: RETURN RESULT SET (CRITICAL FIX) */
+    IF :LV_DUP_CNT > 0 THEN
+        SELECT
+          'E' AS O_STATUS,
+          'Duplicate data found for unique column combination' AS O_MESSAGE
+        FROM DUMMY;
+        RETURN;
+    END IF;
+ 
+    SELECT
+      'S' AS O_STATUS,
+      'Validation successful' AS O_MESSAGE
+    FROM DUMMY;
+ 
+END;
