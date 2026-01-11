@@ -1,43 +1,80 @@
-// After datatype + constraint validation success
+var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
 
-const dummyId = cds.utils.uuid();
+if (message1 === "All datatypes and constraints are valid") {
 
-await tx.run(
-  INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
-    ID: dummyId,
-    JSON_DATA: JSON.stringify(jsonData)
-  })
-);
-
-// Call procedure normally
-const procResult = await tx.run(
-  `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
-  [
-    dummyId,
-    MODULE_NAME,
-    SUB_MODULE_NAME,
-    LOAD_TEMPLATE
-  ]
-);
-
-console.log("Duplicate validator RESULT:", procResult);
-
-const status = procResult[0].O_STATUS;
-const message = procResult[0].O_MESSAGE;
-
-if (status === 'E') {
+  const dummyId = cds.utils.uuid();
 
   await tx.run(
-    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
+    INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
+      ID: dummyId,
+      JSON_DATA: JSON.stringify(jsonData)
+    })
   );
 
+  try {
+
+    const sql = `
+DO BEGIN
+  DECLARE v_status NVARCHAR(1);
+  DECLARE v_message NCLOB;
+
+  CALL "GENERIC_DATA_VALIDATOR"(
+    P_ID            => '${dummyId}',
+    P_MODULE        => '${MODULE_NAME}',
+    P_SUB_MODULE    => '${SUB_MODULE_NAME}',
+    P_LOAD_TEMPLATE => '${LOAD_TEMPLATE}',
+    O_STATUS        => v_status,
+    O_MESSAGE       => v_message
+  );
+
+  SELECT :v_status  AS O_STATUS,
+         :v_message AS O_MESSAGE
+  FROM DUMMY;
+END;
+`;
+
+    console.log("Duplicate validator SQL:\n", sql);
+
+    // 🔥 IMPORTANT FIX HERE
+    const procResult = await cds.db.run(sql);
+
+    console.log("RAW procResult:", JSON.stringify(procResult, null, 2));
+
+    if (!procResult || procResult.length === 0) {
+      throw new Error("No result returned from GENERIC_DATA_VALIDATOR");
+    }
+
+    const status = procResult[0].O_STATUS;
+    const message = procResult[0].O_MESSAGE;
+
+    console.log("Duplicate validator STATUS:", status);
+    console.log("Duplicate validator MESSAGE:", message);
+
+    if (status === 'E') {
+
+      await tx.run(
+        DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
+      );
+
+      return {
+        flag: false,
+        message: message
+      };
+    }
+
+  } catch (e) {
+    console.error("Duplicate validation FAILED:", e);
+    req.error(500, e.message);
+  }
+
   return {
-    flag: false,
-    message: message
+    message: "Proceed",
+    flag: true
+  };
+
+} else {
+  return {
+    message: message1,
+    flag: false
   };
 }
-
-return {
-  flag: true,
-  message: "Proceed"
-};
