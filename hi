@@ -1,17 +1,17 @@
-var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
+var message1 = errors.length > 0
+  ? errors.join("\n")
+  : "All datatypes and constraints are valid";
 
 if (message1 === "All datatypes and constraints are valid") {
 
+  // ✅ ALWAYS new ID per upload
   const dummyId = cds.utils.uuid();
 
-  await tx.run(
-    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY")
-  );
+  // ✅ CLEAN old state (CRITICAL)
+  await tx.run(DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY"));
+  await tx.run(DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT"));
 
-  await tx.run(
-    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT")
-  );
-
+  // ✅ Insert current file JSON
   await tx.run(
     INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
       ID: dummyId,
@@ -19,51 +19,49 @@ if (message1 === "All datatypes and constraints are valid") {
     })
   );
 
-  // Call procedure (procedure writes result into result table)
-await tx.run(
-  `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
-  [
-    dummyId,
-    MODULE_NAME,
-    SUB_MODULE_NAME,
-    LOAD_TEMPLATE
-  ]
-);
-
-// Read result from RESULT TABLE
-const result = await tx.run(
-  SELECT.one.from('COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT')
-    .where({ ID: dummyId })
-);
-
-await tx.run(
-  DELETE.from('COM_SCB_FILEUPLOAD_MASTER_DUMMY')
-    .where({ ID: dummyId })
-);
-
-if (!result.length) {
-  throw new Error("Duplicate validation result not found");
-}
-
-const status = result[0].O_STATUS;
-const message = result[0].O_MESSAGE;
-
-if (status === 'E') {
-
+  // ✅ Call procedure (procedure writes into RESULT table)
   await tx.run(
-    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
+    `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
+    [
+      dummyId,
+      MODULE_NAME,
+      SUB_MODULE_NAME,
+      LOAD_TEMPLATE
+    ]
   );
 
-  return {
-    flag: false,
-    message: message
-  };
-}
+  // ✅ Read validation result (SELECT.one → OBJECT)
+  const result = await tx.run(
+    SELECT.one
+      .from("COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT")
+      .where({ ID: dummyId })
+  );
 
-return {
-  flag: true,
-  message: "Proceed"
-};
+  // ✅ Cleanup dummy data after validation
+  await tx.run(
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY")
+      .where({ ID: dummyId })
+  );
+
+  // ✅ Safety check
+  if (!result) {
+    throw new Error("Duplicate validation result not found");
+  }
+
+  const status = result.STATUS;
+  const message = result.MESSAGE;
+
+  if (status === "E") {
+    return {
+      flag: false,
+      message: message
+    };
+  }
+
+  return {
+    flag: true,
+    message: "Proceed"
+  };
 
 } else {
   return {
