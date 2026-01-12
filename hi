@@ -16,17 +16,17 @@ BEGIN
     DECLARE LV_SQL         NVARCHAR(5000);
     DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
 
-    ------------------------------------------------------------------
-    -- Remove old validation result
-    ------------------------------------------------------------------
+    ---------------------------------------------------
+    -- Clear old result
+    ---------------------------------------------------
     DELETE FROM COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
     WHERE ID = :P_ID;
 
-    ------------------------------------------------------------------
-    -- Step 1: UNIQUE columns (SAFE CAST for comparison)
-    ------------------------------------------------------------------
+    ---------------------------------------------------
+    -- Step 1: UNIQUE columns (NO CASTING)
+    ---------------------------------------------------
     SELECT STRING_AGG(
-           'TRIM(TO_NVARCHAR(JT.' || COLUMN_NAME || '))',
+           'JT.' || COLUMN_NAME,
            ','
     )
     INTO LV_COLS
@@ -45,23 +45,18 @@ BEGIN
     )
     WHERE IS_UNIQUE = 'true';
 
-    ------------------------------------------------------------------
+    ---------------------------------------------------
     -- No UNIQUE columns → PASS
-    ------------------------------------------------------------------
+    ---------------------------------------------------
     IF :LV_COLS IS NULL THEN
         INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
-        VALUES (
-          :P_ID,
-          'S',
-          'No unique columns defined in template',
-          CURRENT_TIMESTAMP
-        );
+        VALUES (:P_ID, 'S', 'No unique columns defined', CURRENT_TIMESTAMP);
         RETURN;
     END IF;
 
-    ------------------------------------------------------------------
-    -- Step 2: JSON_TABLE mapping (KEEP template datatype untouched)
-    ------------------------------------------------------------------
+    ---------------------------------------------------
+    -- Step 2: JSON_TABLE mapping
+    ---------------------------------------------------
     SELECT STRING_AGG(
            COLUMN_NAME || ' NVARCHAR(500) PATH ''$.' || COLUMN_NAME || '''',
            ','
@@ -82,11 +77,11 @@ BEGIN
     )
     WHERE IS_UNIQUE = 'true';
 
-    ------------------------------------------------------------------
-    -- Step 3: Ignore NULL / EMPTY only for UNIQUE columns
-    ------------------------------------------------------------------
+    ---------------------------------------------------
+    -- Step 3: Ignore NULL / EMPTY ONLY
+    ---------------------------------------------------
     SELECT STRING_AGG(
-           'JT.' || COLUMN_NAME || ' IS NOT NULL AND TRIM(TO_NVARCHAR(JT.' || COLUMN_NAME || ')) <> ''''',
+           'JT.' || COLUMN_NAME || ' IS NOT NULL AND JT.' || COLUMN_NAME || ' <> ''''',
            ' AND '
     )
     INTO LV_WHERE
@@ -105,19 +100,19 @@ BEGIN
     )
     WHERE IS_UNIQUE = 'true';
 
-    ------------------------------------------------------------------
-    -- Step 4: Duplicate check (ONLY UNIQUE columns)
-    ------------------------------------------------------------------
+    ---------------------------------------------------
+    -- Step 4: Duplicate check
+    ---------------------------------------------------
     LV_SQL :=
     'SELECT COUNT(*) FROM (
         SELECT ' || LV_COLS || '
-          FROM COM_SCB_FILEUPLOAD_MASTER_DUMMY
+          FROM COM_SCB_FILEUPLOAD_MASTER_DUMMY D
           CROSS JOIN JSON_TABLE(
-              COM_SCB_FILEUPLOAD_MASTER_DUMMY.JSON_DATA,
+              D.JSON_DATA,
               ''$[*]''
               COLUMNS ( ' || LV_JSON_COLS || ' )
           ) JT
-         WHERE COM_SCB_FILEUPLOAD_MASTER_DUMMY.ID = ''' || :P_ID || '''
+         WHERE D.ID = ''' || :P_ID || '''
            AND ' || LV_WHERE || '
          GROUP BY ' || LV_COLS || '
          HAVING COUNT(*) > 1
@@ -125,26 +120,16 @@ BEGIN
 
     EXECUTE IMMEDIATE :LV_SQL INTO LV_DUP_CNT;
 
-    ------------------------------------------------------------------
+    ---------------------------------------------------
     -- Step 5: Result
-    ------------------------------------------------------------------
+    ---------------------------------------------------
     IF :LV_DUP_CNT > 0 THEN
         INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
-        VALUES (
-          :P_ID,
-          'E',
-          'Duplicate data found for unique column',
-          CURRENT_TIMESTAMP
-        );
+        VALUES (:P_ID, 'E', 'Duplicate data found for unique column', CURRENT_TIMESTAMP);
         RETURN;
     END IF;
 
     INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
-    VALUES (
-      :P_ID,
-      'S',
-      'Validation successful',
-      CURRENT_TIMESTAMP
-    );
+    VALUES (:P_ID, 'S', 'Validation successful', CURRENT_TIMESTAMP);
 
 END;
