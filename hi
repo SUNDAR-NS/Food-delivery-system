@@ -7,7 +7,6 @@ PROCEDURE "GENERIC_DATA_VALIDATOR"
 )
 LANGUAGE SQLSCRIPT
 SQL SECURITY INVOKER
-MODIFIES SQL DATA
 AS
 BEGIN
 
@@ -17,13 +16,13 @@ BEGIN
     DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
 
     ------------------------------------------------------------------
-    -- Cleanup old result for this ID (important)
+    -- Cleanup previous result
     ------------------------------------------------------------------
     DELETE FROM COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
     WHERE ID = :P_ID;
 
     ------------------------------------------------------------------
-    -- Step 1: Get UNIQUE columns from template JSON
+    -- Step 1: Get UNIQUE columns
     ------------------------------------------------------------------
     SELECT STRING_AGG('JT.' || COLUMN_NAME, ',')
       INTO LV_COLS
@@ -42,9 +41,6 @@ BEGIN
       )
      WHERE IS_UNIQUE = 'true';
 
-    ------------------------------------------------------------------
-    -- If no unique columns → validation success
-    ------------------------------------------------------------------
     IF :LV_COLS IS NULL THEN
         INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
         VALUES (
@@ -57,7 +53,7 @@ BEGIN
     END IF;
 
     ------------------------------------------------------------------
-    -- Step 2: Build JSON_TABLE column mapping
+    -- Step 2: JSON_TABLE column mapping
     ------------------------------------------------------------------
     SELECT STRING_AGG(
            COLUMN_NAME || ' NVARCHAR(500) PATH ''$.' || COLUMN_NAME || '''',
@@ -80,7 +76,7 @@ BEGIN
     WHERE IS_UNIQUE = 'true';
 
     ------------------------------------------------------------------
-    -- Step 3: Dynamic duplicate check
+    -- Step 3: Duplicate check
     ------------------------------------------------------------------
     LV_SQL :=
     'SELECT COUNT(*) FROM (
