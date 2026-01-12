@@ -1,26 +1,26 @@
 onPrimaryKeyToggle: function (oEvent) {
-      const isOn = oEvent.getParameter("pressed");
-      this._bPKToggleOn = isOn;
+  const isOn = oEvent.getParameter("state"); // ✅ FIX
+  this._bPKToggleOn = isOn;
 
-      var aItems = this.byId("columnsTable").getItems();
-      aItems.forEach(item => {
-        var cb = item.getCells()[0];
-        cb.setVisible(isOn);
-        if (!isOn) cb.setSelected(false);
-      });
-    },
+  var aItems = this.byId("columnsTable").getItems();
+  aItems.forEach(item => {
+    var cb = item.getCells()[0]; // PK checkbox
+    cb.setVisible(isOn);
+    if (!isOn) {
+      cb.setSelected(false); // clear selection
+      item.removeStyleClass("pkSelectedRow"); // clear highlight
+    }
+  });
+},
 
-    //checkbox primary key function - shivani 
-    onCheckboxSelect: function (oEvent) {
-      // We don’t need to deselect other checkboxes
-      // Multiple selection is allowed
-      // Optional: highlight row visually
-      var selectedCB = oEvent.getSource();
-      var row = selectedCB.getParent();
+// checkbox select
+onCheckboxSelect: function (oEvent) {
+  var selectedCB = oEvent.getSource();
+  var row = selectedCB.getParent();
 
-      if (selectedCB.getSelected()) {
-        row.addStyleClass("pkSelectedRow"); // optional visual highlight
-      } else {
-        row.removeStyleClass("pkSelectedRow");
-      }
-    },
+  if (selectedCB.getSelected()) {
+    row.addStyleClass("pkSelectedRow");
+  } else {
+    row.removeStyleClass("pkSelectedRow");
+  }
+},
