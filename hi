@@ -1,17 +1,5 @@
-var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
-
-if (message1 === "All datatypes and constraints are valid") {
-
-  const dummyId = cds.utils.uuid();
-
-  await tx.run(
-    INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
-      ID: dummyId,
-      JSON_DATA: JSON.stringify(jsonData)
-    })
-  );
-
-  const procResult = await tx.run(
+// Call procedure (procedure writes result into result table)
+await tx.run(
   `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
   [
     dummyId,
@@ -21,38 +9,124 @@ if (message1 === "All datatypes and constraints are valid") {
   ]
 );
 
-console.log("Duplicate validator RESULT:", procResult);
+// Read result from RESULT TABLE
+const result = await tx.run(
+  SELECT.from('COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT')
+    .where({ ID: dummyId })
+    .orderBy('CREATED_AT desc')
+    .limit(1)
+);
 
-// ✅ HANDLE CAP RETURN SHAPE CORRECTLY
-const row = Array.isArray(procResult) ? procResult[0] : procResult;
-
-if (!row || !row.O_STATUS) {
-  throw new Error("Duplicate validator returned no result");
+if (!result.length) {
+  throw new Error("Duplicate validation result not found");
 }
 
-const status = row.O_STATUS;
-const message = row.O_MESSAGE;
+const status = result[0].O_STATUS;
+const message = result[0].O_MESSAGE;
 
-if (status === 'E') {
 
-  await tx.run(
-    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
-  );
 
-  return {
-    flag: false,
-    message: message
-  };
+
+entity DuplicateValidationResult {
+  key ID        : UUID;
+  O_STATUS      : String(1);
+  O_MESSAGE     : String(500);
+  CREATED_AT    : Timestamp;
 }
 
-return {
-  flag: true,
-  message: "Proceed"
-};
 
-} else {
-  return {
-    flag: false,
-    message: message1
-  };
-}
+
+
+PROCEDURE "GENERIC_DATA_VALIDATOR"
+(
+    IN  P_ID            NVARCHAR(36),
+    IN  P_MODULE        NVARCHAR(100),
+    IN  P_SUB_MODULE    NVARCHAR(100),
+    IN  P_LOAD_TEMPLATE NVARCHAR(100)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+READS SQL DATA AS
+BEGIN
+
+    DECLARE LV_COLS        NVARCHAR(2000);
+    DECLARE LV_JSON_COLS   NVARCHAR(3000);
+    DECLARE LV_SQL         NVARCHAR(5000);
+    DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
+
+    -- Cleanup previous result
+    DELETE FROM COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
+    WHERE ID = :P_ID;
+
+    /* Step 1: Get unique columns */
+    SELECT STRING_AGG('JT.' || COLUMN_NAME, ',')
+      INTO LV_COLS
+      FROM JSON_TABLE(
+           ( SELECT JSON_TEMPLATE
+               FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
+              WHERE MODULE_NAME     = :P_MODULE
+                AND SUB_MODULE_NAME = :P_SUB_MODULE
+                AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
+           ),
+           '$[*]'
+           COLUMNS (
+             COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
+             IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
+           )
+      )
+     WHERE IS_UNIQUE = 'true';
+
+    IF :LV_COLS IS NULL THEN
+        INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
+        VALUES (:P_ID, 'S', 'No unique columns defined in template', CURRENT_TIMESTAMP);
+        RETURN;
+    END IF;
+
+    /* Step 2: JSON column mapping */
+    SELECT STRING_AGG(
+           COLUMN_NAME || ' NVARCHAR(500) PATH ''$.' || COLUMN_NAME || '''',
+           ','
+    )
+    INTO LV_JSON_COLS
+    FROM JSON_TABLE(
+         ( SELECT JSON_TEMPLATE
+             FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
+            WHERE MODULE_NAME     = :P_MODULE
+              AND SUB_MODULE_NAME = :P_SUB_MODULE
+              AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
+         ),
+         '$[*]'
+         COLUMNS (
+           COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
+           IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
+         )
+    )
+    WHERE IS_UNIQUE = 'true';
+
+    /* Step 3: Duplicate check */
+    LV_SQL :=
+    'SELECT COUNT(*) FROM (
+        SELECT ' || LV_COLS || '
+          FROM COM_SCB_FILEUPLOAD_MASTER_DUMMY AS D
+          CROSS JOIN JSON_TABLE(
+              D.JSON_DATA,
+              ''$[*]''
+              COLUMNS ( ' || LV_JSON_COLS || ' )
+          ) AS JT
+         WHERE D.ID = ''' || :P_ID || '''
+         GROUP BY ' || LV_COLS || '
+         HAVING COUNT(*) > 1
+     )';
+
+    EXECUTE IMMEDIATE :LV_SQL INTO LV_DUP_CNT;
+
+    IF :LV_DUP_CNT > 0 THEN
+        INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
+        VALUES (:P_ID, 'E', 'Duplicate data found for unique column combination', CURRENT_TIMESTAMP);
+        RETURN;
+    END IF;
+
+    INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
+    VALUES (:P_ID, 'S', 'Validation successful', CURRENT_TIMESTAMP);
+
+END;
