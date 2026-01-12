@@ -1,9 +1,13 @@
-var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
+var message1 = errors.length > 0
+  ? errors.join("\n")
+  : "All datatypes and constraints are valid";
 
 if (message1 === "All datatypes and constraints are valid") {
 
+  // Always new ID
   const dummyId = cds.utils.uuid();
 
+  // Insert JSON into dummy table
   await tx.run(
     INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
       ID: dummyId,
@@ -11,48 +15,50 @@ if (message1 === "All datatypes and constraints are valid") {
     })
   );
 
-  // Call procedure (procedure writes result into result table)
-await tx.run(
-  `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
-  [
-    dummyId,
-    MODULE_NAME,
-    SUB_MODULE_NAME,
-    LOAD_TEMPLATE
-  ]
-);
-
-// Read result from RESULT TABLE
-const result = await tx.run(
-  SELECT.from('COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT')
-    .where({ ID: dummyId })
-    .orderBy('CREATED_AT desc')
-    .limit(1)
-);
-
-if (!result.length) {
-  throw new Error("Duplicate validation result not found");
-}
-
-const status = result[0].O_STATUS;
-const message = result[0].O_MESSAGE;
-
-if (status === 'E') {
-
+  // Call duplicate validator procedure
   await tx.run(
-    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
+    `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
+    [
+      dummyId,
+      MODULE_NAME,
+      SUB_MODULE_NAME,
+      LOAD_TEMPLATE
+    ]
   );
 
-  return {
-    flag: false,
-    message: message
-  };
-}
+  // Read latest validation result
+  const result = await tx.run(
+    SELECT.one
+      .from("COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT")
+      .where({ ID: dummyId })
+      .orderBy({ CREATED_AT: "desc" })
+  );
 
-return {
-  flag: true,
-  message: "Proceed"
-};
+  if (!result) {
+    throw new Error("Duplicate validation result not found");
+  }
+
+  const status = result.STATUS;   // ✅ CORRECT
+  const message = result.MESSAGE; // ✅ CORRECT
+
+  // Cleanup dummy data
+  await tx.run(
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY")
+      .where({ ID: dummyId })
+  );
+
+  // Handle duplicate error
+  if (status === "E") {
+    return {
+      flag: false,
+      message: message
+    };
+  }
+
+  return {
+    flag: true,
+    message: "Proceed"
+  };
 
 } else {
   return {
