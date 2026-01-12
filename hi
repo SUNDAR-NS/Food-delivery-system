@@ -1,24 +1,9 @@
-var message1 = errors.length > 0
-  ? errors.join("\n")
-  : "All datatypes and constraints are valid";
+var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
 
 if (message1 === "All datatypes and constraints are valid") {
 
-  // 🔑 Always new ID per upload
   const dummyId = cds.utils.uuid();
 
-  // 🔑 Clean only THIS upload's old data (safety)
-  await tx.run(
-    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY")
-      .where({ ID: dummyId })
-  );
-
-  await tx.run(
-    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT")
-      .where({ ID: dummyId })
-  );
-
-  // Insert JSON
   await tx.run(
     INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
       ID: dummyId,
@@ -26,45 +11,48 @@ if (message1 === "All datatypes and constraints are valid") {
     })
   );
 
-  // Call procedure
+  // Call procedure (procedure writes result into result table)
+await tx.run(
+  `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
+  [
+    dummyId,
+    MODULE_NAME,
+    SUB_MODULE_NAME,
+    LOAD_TEMPLATE
+  ]
+);
+
+// Read result from RESULT TABLE
+const result = await tx.run(
+  SELECT.from('COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT')
+    .where({ ID: dummyId })
+    .orderBy('CREATED_AT desc')
+    .limit(1)
+);
+
+if (!result.length) {
+  throw new Error("Duplicate validation result not found");
+}
+
+const status = result[0].O_STATUS;
+const message = result[0].O_MESSAGE;
+
+if (status === 'E') {
+
   await tx.run(
-    `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
-    [
-      dummyId,
-      MODULE_NAME,
-      SUB_MODULE_NAME,
-      LOAD_TEMPLATE
-    ]
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
   );
-
-  // Read result
-  const result = await tx.run(
-    SELECT.one
-      .from("COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT")
-      .where({ ID: dummyId })
-  );
-
-  // Cleanup dummy AFTER read
-  await tx.run(
-    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY")
-      .where({ ID: dummyId })
-  );
-
-  if (!result) {
-    throw new Error("Duplicate validation result not found");
-  }
-
-  if (result.STATUS === "E") {
-    return {
-      flag: false,
-      message: result.MESSAGE
-    };
-  }
 
   return {
-    flag: true,
-    message: "Proceed"
+    flag: false,
+    message: message
   };
+}
+
+return {
+  flag: true,
+  message: "Proceed"
+};
 
 } else {
   return {
