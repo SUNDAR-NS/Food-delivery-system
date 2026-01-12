@@ -4,14 +4,21 @@ var message1 = errors.length > 0
 
 if (message1 === "All datatypes and constraints are valid") {
 
-  // ✅ ALWAYS new ID per upload
+  // 🔑 Always new ID per upload
   const dummyId = cds.utils.uuid();
 
-  // ✅ CLEAN old state (CRITICAL)
-  await tx.run(DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY"));
-  await tx.run(DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT"));
+  // 🔑 Clean only THIS upload's old data (safety)
+  await tx.run(
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY")
+      .where({ ID: dummyId })
+  );
 
-  // ✅ Insert current file JSON
+  await tx.run(
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT")
+      .where({ ID: dummyId })
+  );
+
+  // Insert JSON
   await tx.run(
     INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
       ID: dummyId,
@@ -19,7 +26,7 @@ if (message1 === "All datatypes and constraints are valid") {
     })
   );
 
-  // ✅ Call procedure (procedure writes into RESULT table)
+  // Call procedure
   await tx.run(
     `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
     [
@@ -30,31 +37,27 @@ if (message1 === "All datatypes and constraints are valid") {
     ]
   );
 
-  // ✅ Read validation result (SELECT.one → OBJECT)
+  // Read result
   const result = await tx.run(
     SELECT.one
       .from("COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT")
       .where({ ID: dummyId })
   );
 
-  // ✅ Cleanup dummy data after validation
+  // Cleanup dummy AFTER read
   await tx.run(
     DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY")
       .where({ ID: dummyId })
   );
 
-  // ✅ Safety check
   if (!result) {
     throw new Error("Duplicate validation result not found");
   }
 
-  const status = result.STATUS;
-  const message = result.MESSAGE;
-
-  if (status === "E") {
+  if (result.STATUS === "E") {
     return {
       flag: false,
-      message: message
+      message: result.MESSAGE
     };
   }
 
