@@ -1,133 +1,73 @@
-PROCEDURE "GENERIC_DATA_VALIDATOR"
-(
-    IN  P_ID            NVARCHAR(36),
-    IN  P_MODULE        NVARCHAR(100),
-    IN  P_SUB_MODULE    NVARCHAR(100),
-    IN  P_LOAD_TEMPLATE NVARCHAR(100)
-)
-LANGUAGE SQLSCRIPT
-SQL SECURITY INVOKER
-AS
-BEGIN
+var message1 = errors.length > 0 ? errors.join("\n") : "All datatypes and constraints are valid";
 
-    DECLARE LV_COLS        NVARCHAR(3000);
-    DECLARE LV_JSON_COLS   NVARCHAR(3000);
-    DECLARE LV_WHERE       NVARCHAR(4000);
-    DECLARE LV_SQL         NVARCHAR(6000);
-    DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
+if (message1 === "All datatypes and constraints are valid") {
 
-    ------------------------------------------------------------------
-    -- Cleanup old result
-    ------------------------------------------------------------------
-    DELETE FROM COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
-    WHERE ID = :P_ID;
+  const dummyId = cds.utils.uuid();
 
-    ------------------------------------------------------------------
-    -- Step 1: Build NORMALIZED unique columns
-    ------------------------------------------------------------------
-    SELECT STRING_AGG(
-           'TRIM(TO_NVARCHAR(JT.' || COLUMN_NAME || '))',
-           ','
-    )
-    INTO LV_COLS
-    FROM JSON_TABLE(
-        ( SELECT JSON_TEMPLATE
-            FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
-           WHERE MODULE_NAME     = :P_MODULE
-             AND SUB_MODULE_NAME = :P_SUB_MODULE
-             AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
-        ),
-        '$[*]'
-        COLUMNS (
-          COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
-          IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
-        )
-    )
-    WHERE IS_UNIQUE = 'true';
+  await tx.run(
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY")
+  );
 
-    IF :LV_COLS IS NULL THEN
-        INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
-        VALUES (:P_ID, 'S', 'No unique columns defined', CURRENT_TIMESTAMP);
-        RETURN;
-    END IF;
+  await tx.run(
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT")
+  );
 
-    ------------------------------------------------------------------
-    -- Step 2: JSON_TABLE mapping
-    ------------------------------------------------------------------
-    SELECT STRING_AGG(
-           COLUMN_NAME || ' NVARCHAR(500) PATH ''$.' || COLUMN_NAME || '''',
-           ','
-    )
-    INTO LV_JSON_COLS
-    FROM JSON_TABLE(
-        ( SELECT JSON_TEMPLATE
-            FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
-           WHERE MODULE_NAME     = :P_MODULE
-             AND SUB_MODULE_NAME = :P_SUB_MODULE
-             AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
-        ),
-        '$[*]'
-        COLUMNS (
-          COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
-          IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
-        )
-    )
-    WHERE IS_UNIQUE = 'true';
+  await tx.run(
+    INSERT.into("COM_SCB_FILEUPLOAD_MASTER_DUMMY").entries({
+      ID: dummyId,
+      JSON_DATA: JSON.stringify(jsonData)
+    })
+  );
 
-    ------------------------------------------------------------------
-    -- Step 3: Ignore NULL / EMPTY values AFTER normalization
-    ------------------------------------------------------------------
-    SELECT STRING_AGG(
-           'TRIM(TO_NVARCHAR(JT.' || COLUMN_NAME || ')) IS NOT NULL
-            AND TRIM(TO_NVARCHAR(JT.' || COLUMN_NAME || ')) <> ''''',
-           ' AND '
-    )
-    INTO LV_WHERE
-    FROM JSON_TABLE(
-        ( SELECT JSON_TEMPLATE
-            FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
-           WHERE MODULE_NAME     = :P_MODULE
-             AND SUB_MODULE_NAME = :P_SUB_MODULE
-             AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
-        ),
-        '$[*]'
-        COLUMNS (
-          COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
-          IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
-        )
-    )
-    WHERE IS_UNIQUE = 'true';
+  // Call procedure (procedure writes result into result table)
+await tx.run(
+  `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
+  [
+    dummyId,
+    MODULE_NAME,
+    SUB_MODULE_NAME,
+    LOAD_TEMPLATE
+  ]
+);
 
-    ------------------------------------------------------------------
-    -- Step 4: Duplicate detection
-    ------------------------------------------------------------------
-    LV_SQL :=
-    'SELECT COUNT(*) FROM (
-        SELECT ' || LV_COLS || '
-          FROM COM_SCB_FILEUPLOAD_MASTER_DUMMY D
-          CROSS JOIN JSON_TABLE(
-              D.JSON_DATA,
-              ''$[*]''
-              COLUMNS ( ' || LV_JSON_COLS || ' )
-          ) JT
-         WHERE D.ID = ''' || :P_ID || '''
-           AND ' || LV_WHERE || '
-         GROUP BY ' || LV_COLS || '
-         HAVING COUNT(*) > 1
-     )';
+// Read result from RESULT TABLE
+const result = await tx.run(
+  SELECT.one.from('COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT')
+    .where({ ID: dummyId })
+);
 
-    EXECUTE IMMEDIATE :LV_SQL INTO LV_DUP_CNT;
+await tx.run(
+  DELETE.from('COM_SCB_FILEUPLOAD_MASTER_DUMMY')
+    .where({ ID: dummyId })
+);
 
-    ------------------------------------------------------------------
-    -- Step 5: Result
-    ------------------------------------------------------------------
-    IF :LV_DUP_CNT > 0 THEN
-        INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
-        VALUES (:P_ID, 'E', 'Duplicate data found for unique column', CURRENT_TIMESTAMP);
-        RETURN;
-    END IF;
+if (!result.length) {
+  throw new Error("Duplicate validation result not found");
+}
 
-    INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
-    VALUES (:P_ID, 'S', 'Validation successful', CURRENT_TIMESTAMP);
+const status = result[0].O_STATUS;
+const message = result[0].O_MESSAGE;
 
-END;
+if (status === 'E') {
+
+  await tx.run(
+    DELETE.from("COM_SCB_FILEUPLOAD_MASTER_DUMMY").where({ ID: dummyId })
+  );
+
+  return {
+    flag: false,
+    message: message
+  };
+}
+
+return {
+  flag: true,
+  message: "Proceed"
+};
+
+} else {
+  return {
+    flag: false,
+    message: message1
+  };
+}
