@@ -13,18 +13,19 @@ BEGIN
     DECLARE LV_COLS        NVARCHAR(2000);
     DECLARE LV_JSON_COLS   NVARCHAR(3000);
     DECLARE LV_SQL         NVARCHAR(5000);
+    DECLARE LV_WHERE       NVARCHAR(4000);
     DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
 
     ------------------------------------------------------------------
-    -- Cleanup previous result
+    -- Remove old result for same upload
     ------------------------------------------------------------------
     DELETE FROM COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
     WHERE ID = :P_ID;
 
     ------------------------------------------------------------------
-    -- Step 1: Get UNIQUE columns
+    -- Step 1: Get UNIQUE columns (with alias)
     ------------------------------------------------------------------
-    SELECT STRING_AGG('JT.' || COLUMN_NAME, ',')
+    SELECT STRING_AGG('TRIM(JT.' || COLUMN_NAME || ')', ',')
       INTO LV_COLS
       FROM JSON_TABLE(
            ( SELECT JSON_TEMPLATE
@@ -41,6 +42,9 @@ BEGIN
       )
      WHERE IS_UNIQUE = 'true';
 
+    ------------------------------------------------------------------
+    -- No unique columns → success
+    ------------------------------------------------------------------
     IF :LV_COLS IS NULL THEN
         INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
         VALUES (
@@ -76,7 +80,30 @@ BEGIN
     WHERE IS_UNIQUE = 'true';
 
     ------------------------------------------------------------------
-    -- Step 3: Duplicate check
+    -- Step 3: Build NULL / EMPTY filter dynamically
+    ------------------------------------------------------------------
+    SELECT STRING_AGG(
+           'JT.' || COLUMN_NAME || ' IS NOT NULL AND TRIM(JT.' || COLUMN_NAME || ') <> ''''',
+           ' AND '
+    )
+    INTO LV_WHERE
+    FROM JSON_TABLE(
+         ( SELECT JSON_TEMPLATE
+             FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
+            WHERE MODULE_NAME     = :P_MODULE
+              AND SUB_MODULE_NAME = :P_SUB_MODULE
+              AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
+         ),
+         '$[*]'
+         COLUMNS (
+           COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
+           IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
+         )
+    )
+    WHERE IS_UNIQUE = 'true';
+
+    ------------------------------------------------------------------
+    -- Step 4: Duplicate check (REAL duplicates only)
     ------------------------------------------------------------------
     LV_SQL :=
     'SELECT COUNT(*) FROM (
@@ -88,6 +115,7 @@ BEGIN
               COLUMNS ( ' || LV_JSON_COLS || ' )
           ) AS JT
          WHERE D.ID = ''' || :P_ID || '''
+           AND ' || LV_WHERE || '
          GROUP BY ' || LV_COLS || '
          HAVING COUNT(*) > 1
      )';
@@ -95,7 +123,7 @@ BEGIN
     EXECUTE IMMEDIATE :LV_SQL INTO LV_DUP_CNT;
 
     ------------------------------------------------------------------
-    -- Step 4: Write result into RESULT table
+    -- Step 5: Write result
     ------------------------------------------------------------------
     IF :LV_DUP_CNT > 0 THEN
         INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
