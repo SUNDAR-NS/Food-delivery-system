@@ -12,18 +12,26 @@ BEGIN
 
     DECLARE LV_COLS        NVARCHAR(2000);
     DECLARE LV_JSON_COLS   NVARCHAR(3000);
-    DECLARE LV_WHERE       NVARCHAR(3000);
+    DECLARE LV_WHERE       NVARCHAR(4000);
     DECLARE LV_SQL         NVARCHAR(5000);
     DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
 
-    /* -------------------------------------------------
-       STEP 1: Get UNIQUE columns list
-    ------------------------------------------------- */
-    SELECT STRING_AGG(COLUMN_NAME, ',')
-      INTO LV_COLS
-      FROM JSON_TABLE(
-           (
-             SELECT JSON_TEMPLATE
+    ------------------------------------------------------------------
+    -- Remove old validation result
+    ------------------------------------------------------------------
+    DELETE FROM COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
+    WHERE ID = :P_ID;
+
+    ------------------------------------------------------------------
+    -- Step 1: UNIQUE columns (SAFE CAST for comparison)
+    ------------------------------------------------------------------
+    SELECT STRING_AGG(
+           'TRIM(TO_NVARCHAR(JT.' || COLUMN_NAME || '))',
+           ','
+    )
+    INTO LV_COLS
+    FROM JSON_TABLE(
+           ( SELECT JSON_TEMPLATE
                FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
               WHERE MODULE_NAME     = :P_MODULE
                 AND SUB_MODULE_NAME = :P_SUB_MODULE
@@ -32,103 +40,111 @@ BEGIN
            '$[*]'
            COLUMNS (
              COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
-             IS_UNIQUE   BOOLEAN       PATH '$.IS_UNIQUE'
+             IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
            )
-      )
-     WHERE IS_UNIQUE = TRUE;
+    )
+    WHERE IS_UNIQUE = 'true';
 
-    /* If no unique columns → always valid */
+    ------------------------------------------------------------------
+    -- No UNIQUE columns → PASS
+    ------------------------------------------------------------------
     IF :LV_COLS IS NULL THEN
-        SELECT
-          'S' AS O_STATUS,
-          'No unique columns defined' AS O_MESSAGE
-        FROM DUMMY;
+        INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
+        VALUES (
+          :P_ID,
+          'S',
+          'No unique columns defined in template',
+          CURRENT_TIMESTAMP
+        );
         RETURN;
     END IF;
 
-    /* -------------------------------------------------
-       STEP 2: Build JSON_TABLE column mapping
-    ------------------------------------------------- */
+    ------------------------------------------------------------------
+    -- Step 2: JSON_TABLE mapping (KEEP template datatype untouched)
+    ------------------------------------------------------------------
     SELECT STRING_AGG(
            COLUMN_NAME || ' NVARCHAR(500) PATH ''$.' || COLUMN_NAME || '''',
            ','
     )
     INTO LV_JSON_COLS
     FROM JSON_TABLE(
-         (
-           SELECT JSON_TEMPLATE
-             FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
-            WHERE MODULE_NAME     = :P_MODULE
-              AND SUB_MODULE_NAME = :P_SUB_MODULE
-              AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
-         ),
-         '$[*]'
-         COLUMNS (
-           COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
-           IS_UNIQUE   BOOLEAN       PATH '$.IS_UNIQUE'
-         )
+           ( SELECT JSON_TEMPLATE
+               FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
+              WHERE MODULE_NAME     = :P_MODULE
+                AND SUB_MODULE_NAME = :P_SUB_MODULE
+                AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
+           ),
+           '$[*]'
+           COLUMNS (
+             COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
+             IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
+           )
     )
-    WHERE IS_UNIQUE = TRUE;
+    WHERE IS_UNIQUE = 'true';
 
-    /* -------------------------------------------------
-       STEP 3: Ignore NULL / empty UNIQUE values
-       (CRITICAL FIX)
-    ------------------------------------------------- */
+    ------------------------------------------------------------------
+    -- Step 3: Ignore NULL / EMPTY only for UNIQUE columns
+    ------------------------------------------------------------------
     SELECT STRING_AGG(
-           COLUMN_NAME || ' IS NOT NULL AND ' || COLUMN_NAME || ' <> ''''',
+           'JT.' || COLUMN_NAME || ' IS NOT NULL AND TRIM(TO_NVARCHAR(JT.' || COLUMN_NAME || ')) <> ''''',
            ' AND '
     )
     INTO LV_WHERE
     FROM JSON_TABLE(
-         (
-           SELECT JSON_TEMPLATE
-             FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
-            WHERE MODULE_NAME     = :P_MODULE
-              AND SUB_MODULE_NAME = :P_SUB_MODULE
-              AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
-         ),
-         '$[*]'
-         COLUMNS (
-           COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
-           IS_UNIQUE   BOOLEAN       PATH '$.IS_UNIQUE'
-         )
+           ( SELECT JSON_TEMPLATE
+               FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
+              WHERE MODULE_NAME     = :P_MODULE
+                AND SUB_MODULE_NAME = :P_SUB_MODULE
+                AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE
+           ),
+           '$[*]'
+           COLUMNS (
+             COLUMN_NAME NVARCHAR(100) PATH '$.COLUMN_NAME',
+             IS_UNIQUE   NVARCHAR(10)  PATH '$.IS_UNIQUE'
+           )
     )
-    WHERE IS_UNIQUE = TRUE;
+    WHERE IS_UNIQUE = 'true';
 
-    /* -------------------------------------------------
-       STEP 4: Duplicate check ONLY on UNIQUE columns
-    ------------------------------------------------- */
+    ------------------------------------------------------------------
+    -- Step 4: Duplicate check (ONLY UNIQUE columns)
+    ------------------------------------------------------------------
     LV_SQL :=
     'SELECT COUNT(*) FROM (
-        SELECT ' || :LV_COLS || '
-          FROM COM_SCB_FILEUPLOAD_MASTER_DUMMY D
+        SELECT ' || LV_COLS || '
+          FROM COM_SCB_FILEUPLOAD_MASTER_DUMMY
           CROSS JOIN JSON_TABLE(
-              D.JSON_DATA,
+              COM_SCB_FILEUPLOAD_MASTER_DUMMY.JSON_DATA,
               ''$[*]''
-              COLUMNS ( ' || :LV_JSON_COLS || ' )
-          ) J
-         WHERE D.ID = ''' || :P_ID || '''
-           AND ' || :LV_WHERE || '
-         GROUP BY ' || :LV_COLS || '
+              COLUMNS ( ' || LV_JSON_COLS || ' )
+          ) JT
+         WHERE COM_SCB_FILEUPLOAD_MASTER_DUMMY.ID = ''' || :P_ID || '''
+           AND ' || LV_WHERE || '
+         GROUP BY ' || LV_COLS || '
          HAVING COUNT(*) > 1
      )';
 
     EXECUTE IMMEDIATE :LV_SQL INTO LV_DUP_CNT;
 
-    /* -------------------------------------------------
-       STEP 5: Return result
-    ------------------------------------------------- */
+    ------------------------------------------------------------------
+    -- Step 5: Result
+    ------------------------------------------------------------------
     IF :LV_DUP_CNT > 0 THEN
-        SELECT
-          'E' AS O_STATUS,
-          'Duplicate data found for UNIQUE column(s)' AS O_MESSAGE
-        FROM DUMMY;
+        INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
+        VALUES (
+          :P_ID,
+          'E',
+          'Duplicate data found for unique column',
+          CURRENT_TIMESTAMP
+        );
         RETURN;
     END IF;
 
-    SELECT
-      'S' AS O_STATUS,
-      'Validation successful' AS O_MESSAGE
-    FROM DUMMY;
+    INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUPLICATEVALIDATIONRESULT
+    VALUES (
+      :P_ID,
+      'S',
+      'Validation successful',
+      CURRENT_TIMESTAMP
+    );
 
 END;
