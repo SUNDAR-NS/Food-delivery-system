@@ -1,19 +1,19 @@
 onPrimaryKeyToggle: function (oEvent) {
-  const isOn = oEvent.getParameter("state"); // ✅ FIX
+  const isOn = oEvent.getParameter("state"); 
   this._bPKToggleOn = isOn;
 
   var aItems = this.byId("columnsTable").getItems();
   aItems.forEach(item => {
-    var cb = item.getCells()[0]; // PK checkbox
+    var cb = item.getCells()[0]; 
     cb.setVisible(isOn);
     if (!isOn) {
-      cb.setSelected(false); // clear selection
-      item.removeStyleClass("pkSelectedRow"); // clear highlight
+      cb.setSelected(false); 
+      item.removeStyleClass("pkSelectedRow"); 
     }
   });
 },
 
-// checkbox select
+
 onCheckboxSelect: function (oEvent) {
   var selectedCB = oEvent.getSource();
   var row = selectedCB.getParent();
