@@ -1,42 +1,3 @@
-// Call procedure (procedure writes result into result table)
-await tx.run(
-  `CALL "GENERIC_DATA_VALIDATOR"(?, ?, ?, ?)`,
-  [
-    dummyId,
-    MODULE_NAME,
-    SUB_MODULE_NAME,
-    LOAD_TEMPLATE
-  ]
-);
-
-// Read result from RESULT TABLE
-const result = await tx.run(
-  SELECT.from('COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT')
-    .where({ ID: dummyId })
-    .orderBy('CREATED_AT desc')
-    .limit(1)
-);
-
-if (!result.length) {
-  throw new Error("Duplicate validation result not found");
-}
-
-const status = result[0].O_STATUS;
-const message = result[0].O_MESSAGE;
-
-
-
-
-entity DuplicateValidationResult {
-  key ID        : UUID;
-  O_STATUS      : String(1);
-  O_MESSAGE     : String(500);
-  CREATED_AT    : Timestamp;
-}
-
-
-
-
 PROCEDURE "GENERIC_DATA_VALIDATOR"
 (
     IN  P_ID            NVARCHAR(36),
@@ -46,7 +7,8 @@ PROCEDURE "GENERIC_DATA_VALIDATOR"
 )
 LANGUAGE SQLSCRIPT
 SQL SECURITY INVOKER
-READS SQL DATA AS
+MODIFIES SQL DATA
+AS
 BEGIN
 
     DECLARE LV_COLS        NVARCHAR(2000);
@@ -54,11 +16,15 @@ BEGIN
     DECLARE LV_SQL         NVARCHAR(5000);
     DECLARE LV_DUP_CNT     INTEGER DEFAULT 0;
 
-    -- Cleanup previous result
+    ------------------------------------------------------------------
+    -- Cleanup old result for this ID (important)
+    ------------------------------------------------------------------
     DELETE FROM COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
     WHERE ID = :P_ID;
 
-    /* Step 1: Get unique columns */
+    ------------------------------------------------------------------
+    -- Step 1: Get UNIQUE columns from template JSON
+    ------------------------------------------------------------------
     SELECT STRING_AGG('JT.' || COLUMN_NAME, ',')
       INTO LV_COLS
       FROM JSON_TABLE(
@@ -76,13 +42,23 @@ BEGIN
       )
      WHERE IS_UNIQUE = 'true';
 
+    ------------------------------------------------------------------
+    -- If no unique columns → validation success
+    ------------------------------------------------------------------
     IF :LV_COLS IS NULL THEN
         INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
-        VALUES (:P_ID, 'S', 'No unique columns defined in template', CURRENT_TIMESTAMP);
+        VALUES (
+          :P_ID,
+          'S',
+          'No unique columns defined in template',
+          CURRENT_TIMESTAMP
+        );
         RETURN;
     END IF;
 
-    /* Step 2: JSON column mapping */
+    ------------------------------------------------------------------
+    -- Step 2: Build JSON_TABLE column mapping
+    ------------------------------------------------------------------
     SELECT STRING_AGG(
            COLUMN_NAME || ' NVARCHAR(500) PATH ''$.' || COLUMN_NAME || '''',
            ','
@@ -103,7 +79,9 @@ BEGIN
     )
     WHERE IS_UNIQUE = 'true';
 
-    /* Step 3: Duplicate check */
+    ------------------------------------------------------------------
+    -- Step 3: Dynamic duplicate check
+    ------------------------------------------------------------------
     LV_SQL :=
     'SELECT COUNT(*) FROM (
         SELECT ' || LV_COLS || '
@@ -120,13 +98,26 @@ BEGIN
 
     EXECUTE IMMEDIATE :LV_SQL INTO LV_DUP_CNT;
 
+    ------------------------------------------------------------------
+    -- Step 4: Write result into RESULT table
+    ------------------------------------------------------------------
     IF :LV_DUP_CNT > 0 THEN
         INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
-        VALUES (:P_ID, 'E', 'Duplicate data found for unique column combination', CURRENT_TIMESTAMP);
+        VALUES (
+          :P_ID,
+          'E',
+          'Duplicate data found for unique column combination',
+          CURRENT_TIMESTAMP
+        );
         RETURN;
     END IF;
 
     INSERT INTO COM_SCB_FILEUPLOAD_MASTER_DUP_RESULT
-    VALUES (:P_ID, 'S', 'Validation successful', CURRENT_TIMESTAMP);
+    VALUES (
+      :P_ID,
+      'S',
+      'Validation successful',
+      CURRENT_TIMESTAMP
+    );
 
 END;
