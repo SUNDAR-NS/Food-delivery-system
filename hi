@@ -1,25 +1,365 @@
-onPrimaryKeyToggle: function (oEvent) {
-  this._bPKToggleOn = oEvent.getParameter("state");
+<mvc:View controllerName="fileuploader.controller.templateuploader"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+        xmlns:l="sap.ui.layout"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:table="sap.ui.table"
+    xmlns:unified="sap.ui.unified">
 
-  const oTable = this.byId("columnsTable");
+  <Page id="page2" showHeader="false">
 
-  const fnApplyPKVisibility = () => {
-    oTable.getItems().forEach(item => {
-      const oCB = item.getCells()[0];
+ <content>
+<IconTabBar id="_IDGenIconTabBar2" headerMode ="Standard" expanded="true"
+expandable="false" class="sapUiResponsiveContentPadding">
+  
+  <!-- Tab 1: Upload + Preview -->
+  <items>
 
-      oCB.setVisible(this._bPKToggleOn);
 
-      if (!this._bPKToggleOn) {
-        oCB.setSelected(false);
-        item.removeStyleClass("pkSelectedRow");
-      }
-    });
-  };
 
-  // Apply immediately
-  fnApplyPKVisibility();
+    <!-- Tab 2: Full Static Table -->
+    <IconTabFilter id="templateCheckerTab" text="Template Dashboard" key="fullTable" visible="false">
+      <Panel id="_IDGenPanel42" height="100%" class="fullTableCard card-container" expandable="false">
+  <headerToolbar>
+    <OverflowToolbar id="_IDGenOverflowToolbar141">
+      <Title id="_IDGenTitle14" text="Template Submissions"/>
+      <ToolbarSpacer id="_IDGenToolbarSpacer41" /> <!-- pushes following content to right -->
 
-  // 👇 APPLY AGAIN WHEN NEW ROW IS ADDED
-  oTable.detachUpdateFinished(fnApplyPKVisibility);
-  oTable.attachUpdateFinished(fnApplyPKVisibility);
-},
+      <Button id="templateEdit" text="Edit" icon="sap-icon://write-new" press="onEditPress" visible="false"></Button>
+
+      <Button id="templateApprove" text="Approve" icon="sap-icon://complete" press="onActionPress" visible="false">
+
+        <customData>
+          <core:CustomData key="action" value="approved" />
+        </customData>
+
+      </Button>  
+      <Button id="templateReject" text="Reject" icon="sap-icon://sys-cancel" press="onActionPress" visible="false">
+        <customData>
+          <core:CustomData key="action" value="rejected" />
+        </customData>
+      </Button>
+
+    </OverflowToolbar>
+  </headerToolbar>
+
+
+
+		<table:Table id="templateDashTable" 
+                  rows="{/TemplateStorage}"
+                  selectionMode="MultiToggle"
+                  enableColumnReordering="true"
+                  selectionBehavior="Row"
+                  busy="true"
+                  enableBusyIndicator="false"
+                   class="customTableWithStickyHeader">
+                   
+      <table:Column id="_IDGenColumn21"
+        filterProperty="MODULE_NAME"
+        sortProperty="MODULE_NAME"
+        label="{i18n>Module Name}">
+        <Label id="_IDGenLabel611" text="Module Name" />
+        <table:template>
+          <Text id="_IDGenText121" text="{MODULE_NAME}" />
+        </table:template>
+      </table:Column>
+
+      <table:Column id="_IDGenColumn311"
+        filterProperty="SUB_MODULE_NAME"
+        sortProperty="SUB_MODULE_NAME"
+        label="{i18n>Sub Module Name}">
+        <Label id="_IDGenLabel711" text="Sub Module Name" />
+        <table:template>
+          <Text id="_IDGenText111" text="{SUB_MODULE_NAME}" />
+        </table:template>
+      </table:Column>
+
+      <table:Column id="_IDGenColumn411"
+        filterProperty="LOAD_TEMPLATE"
+        sortProperty="LOAD_TEMPLATE"
+        label="{i18n>Load Template}">
+        <Label id="_IDGenLabel811" text="Load Template" />
+        <table:template>
+          <Text id="_IDGenText311" text="{LOAD_TEMPLATE}" />
+        </table:template>
+      </table:Column>
+
+      <table:Column 
+          id="statusColumn1"
+          filterProperty="STATUS"
+          sortProperty="STATUS"
+          label="{i18n>Status}">
+          
+          <table:template>
+              <ObjectStatus id="_IDGenObjectStatus1"
+                  text="{STATUS}"
+                  icon="{= ${STATUS} === 'uploaded' ? 'sap-icon://accept' : 
+                          ${STATUS} === 'pending'  ? 'sap-icon://pending' :
+                          ${STATUS} === 'approved' ? 'sap-icon://sys-enter' :
+                                                    'sap-icon://decline' }"
+                  state="{= ${STATUS} === 'uploaded' ? 'Success' : 
+                          ${STATUS} === 'pending'  ? 'Warning' :
+                          ${STATUS} === 'approved' ? 'Success' :
+                                                      'Error' }" />
+          </table:template>
+      </table:Column>
+
+      <table:Column id="_IDGenColumn6109"
+        sortProperty="EXPIRY_DATE"
+        label="{i18n>Expiry Date}">
+        <Label id="_IDGenLabel10081" text="Expiry Date" />
+        <table:template>
+          <Text id="_IDGenText5018" text="{EXPIRY_DATE}" />
+        </table:template>
+      </table:Column>
+
+      <table:Column id="_IDGenColumn615"
+        autoResizable="true"
+        label="{i18n>Created By}">
+        <Label id="_IDGenLabel119" text="Created By" />
+        <table:template>
+          <!--<Text id="_IDGenText518" wrapping="false" text="{createdBy}" />-->
+          <Button id="_IDGenLabel117" text= "{createdBy}" type= "Transparent"  
+          icon= "sap-icon://hr-approval" tooltip= "{createdBy}" press="copyToClipboard" />
+
+                        
+        </table:template>
+      </table:Column>
+
+            <table:Column id="_IDGenColumn6815"
+        sortProperty="createdAt"
+        label="{i18n>Created At}">
+        <Label id="_IDGenLabel14518" text="Created At" />
+        <table:template>
+          <Button id="_IDGenLabel14218" text= "{createdAt}" type= "Transparent"  
+          icon= "sap-icon://date-time" tooltip= "{createdAt}" press="copyToClipboard" />        </table:template>
+      </table:Column>
+
+      <table:Column id="commentColumn10" label="Preview">
+          <table:template>
+              <HBox id="_IDGenHBox101" justifyContent="Start">
+                  <core:Icon
+                      id="_IDGenIcon102"
+                      src="sap-icon://message-information"
+                      press=".onPreviewPress"
+                      tooltip="View Preview">
+                      <core:customData>
+                          <core:CustomData key="uuid" value="{ID}" writeToDom="true" />
+                      </core:customData>
+                  </core:Icon>
+              </HBox>
+          </table:template>
+      </table:Column>
+  
+            
+    </table:Table>
+
+      </Panel>
+    </IconTabFilter>
+
+    <IconTabFilter id="templateMakerTab" text="Create Template" key="uploadPreview"
+    visible="false">
+
+        <!-- Card 1: Upload Section -->
+        <Panel id="_IDGenPanel2x" height="100%" class="sapUiNoContentPadding sapUiNoMargin card-container" width="100%" expandable="false">
+         
+                 <Wizard id="templateWizard" showNextButton="false">
+
+
+            <!-- Step 1: Template Details -->
+            <WizardStep id="step1" title="Create Template" icon="sap-icon://edit" validated= "true">
+                <VBox id="_IDGenVBox1" class="sapUiSmallMargin">
+                    <HBox id="_IDGenHBox2" class="sapUiSmallMarginBottom">
+                        <ComboBox id="moduleComboBox1" placeholder="Select Module" width="100%"
+                                items="{
+                                    path: '/TemplateModules'
+                                }">
+                          <core:Item id="_IDGenItem1" key="{ID}" text="{name}" />
+                            
+                        </ComboBox>
+                    </HBox>
+
+                    <HBox id="_IDGenHBox45" class="sapUiSmallMarginBottom">
+                        <Input id="submoduleInput" width="205.333px" placeholder="Enter submodule name"/>
+                    </HBox>
+
+                    <HBox id="_IDGenHBox4" class="sapUiSmallMarginBottom">
+                        <Input id="templateNameInput" width="205.333px" placeholder="Enter template name"/>
+                    </HBox>
+
+                    <HBox id="_IDGenHBox453" class="sapUiSmallMarginBottom">
+                      <DatePicker
+                        id="datePickerId"
+                        value="{path: 'yourModel>/yourDateProperty', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"
+                        placeholder="Select template expiry"
+                        displayFormat="long"
+                        valueFormat="yyyy-MM-dd"
+                        change="onDateChange"
+                    />
+                    </HBox>
+                </VBox>
+
+                <content>
+                    <Button id="_IDGenButton"  text="Next" press="onNextStepPress"/>
+                </content>
+            </WizardStep>
+
+            <!-- Step 2: Columns Definition -->
+            <WizardStep id="step2" title="Define Columns" icon="sap-icon://table-view" validated= "true"
+            >
+
+
+<VBox id="_IDGenVBox9" class="sapUiSmallMargin">
+        
+        <!-- Header + Add Button on Right -->
+        <HBox id="_IDGenHBox5" justifyContent="End" class="sapUiTinyMarginBottom">
+
+        <HBox id="_IDGenHBoxPK" alignItems="Center" justifyContent="Start" class="pkContainer">
+
+
+            <Switch id="_IDGenSwitchPK" change=".onPrimaryKeyToggle" state="false"/>
+        </HBox>
+
+             <Button id="_IDGenButton59" 
+                text="Template" 
+                icon="sap-icon://excel-attachment" 
+                type="Ghost" 
+                press=".downloadTemplate"/>       
+
+            <Button id="_IDGenButton54" 
+                text="Import" 
+                icon="sap-icon://upload" 
+                type="Ghost" 
+                press=".onOpenFileDialog"/>
+
+            <Button id="_IDGenButton5" 
+                text="Add Column" 
+                icon="sap-icon://add" 
+                type="Ghost" 
+                press=".onAddColumn"/>
+        </HBox>
+<Table
+    id="columnsTable"
+    inset="false"
+    items="{columnsModel>/columns}"
+    class="sapUiSizeCompact">
+
+    <columns>
+        <Column id = "_IDGenColumn11" hAlign="Center" width="3rem">
+           <Text id="_IDGenText9" text=""/>
+        </Column>
+        <Column id="_IDGenColumn"><Text id="_IDGenText2" text="Column Name"/></Column>
+        <Column id="_IDGenColumn6"><Text id="_IDGenText4" text="Data Type"/></Column>
+        <Column id="_IDGenColumn7"><Text id="_IDGenText5" text="Length / Precision"/></Column>
+        <Column id="_IDGenColumn8"><Text id="_IDGenText6" text="Scale"/></Column>
+        <Column id="_IDGenColumn9"><Text id="_IDGenText7" text="Constraints"/></Column>
+        <!-- Delete column -->
+        <Column id="_IDGenColumn10" hAlign="Center" width="3rem">
+            <Text id="_IDGenText8" text=""/>
+        </Column>
+    </columns>
+
+    <items>
+    <ColumnListItem id="_IDGenColumnListItem1">
+            <cells>
+                <!-- checkbox for  primary key // shivani -->
+                <CheckBox id="_IDGenCheckbox1"
+                    select=".onCheckboxSelect"
+                    visible= "false"
+                    class="pkCheckbox"/>
+                <!-- Column Name -->
+                <Input id="_IDGenInput"
+                    value="{columnsModel>COLUMN_NAME}"
+                    type = "Text"
+                    placeholder="Enter column name"
+                    required="true"
+                    maxLength = "30"
+                    liveChange = "onColumnNameChange"
+                    width="100%" />
+
+                <!-- Data Type -->
+                <Select id="_IDGenSelect"
+                    selectedKey="{columnsModel>DATATYPE}"
+                    width="100%"
+                    change=".onDataTypeChange">
+                    <items>
+                        <core:Item id="_IDGenItem2" key="NVARCHAR" text="NVARCHAR"/>
+                        <core:Item id="_IDGenItem3" key="TIMESTAMP" text="TIMESTAMP"/>
+                        <core:Item id="_IDGenItem4" key="DECIMAL" text="DECIMAL"/>
+                        <core:Item id="_IDGenItem5" key="DATE" text="DATE"/>
+                        <core:Item id="_IDGenItem8" key="TIME" text="TIME"/>
+                    </items>
+                </Select>
+
+                <!-- Length / Precision -->
+                <StepInput id="_IDGenStepInput"
+                    value="{columnsModel>LENGTH_PRECISION}"
+                    min="1"
+                    max="1000"
+                    enabled="{= ${columnsModel>DATATYPE} === 'NVARCHAR' || ${columnsModel>DATATYPE} === 'DECIMAL'}"
+                    placeholder="Length / Precision"
+                    width="100%" />
+
+                <!-- Scale -->
+                <StepInput id="_IDGenStepInput1"
+                    value="{columnsModel>SCALE}"
+                    min="0"
+                    max="38"
+                    enabled="{= ${columnsModel>DATATYPE} === 'DECIMAL'}"
+                    placeholder="Scale"
+                    width="100%" />
+
+                <!-- Constraints -->
+                <Select id="_IDGenSelect1"
+                    selectedKey="{columnsModel>CONSTRAINTS}"
+                    width="100%">
+                    <items>
+                        <core:Item id="_IDGenItem6" key="NULL" text="NULL"/>
+                        <core:Item id="_IDGenItem7" key="NOT NULL" text="NOT NULL"/>
+                    </items>
+                </Select>
+
+                <!-- Delete Button -->
+                <Button id="_IDGenButton4"
+                    icon="sap-icon://delete"
+                    type="Transparent"
+                    tooltip="Delete Row"
+                    press=".onDeleteRow"/>
+            </cells>
+        </ColumnListItem>
+    </items>
+</Table>
+</VBox>
+
+                    <content>
+                    <Button id="_IDGenButtons"  text="Next" press="onNextSummary"/>
+                </content>
+
+            </WizardStep>
+
+            <!-- Step 3: Summary -->
+            <WizardStep id="step3" title="Summary" icon="sap-icon://documents" validated= "true">
+
+
+            </WizardStep>
+
+        </Wizard>
+
+        
+        
+        </Panel>
+
+    
+
+
+    </IconTabFilter>    
+  
+  </items>
+</IconTabBar>
+    </content>
+
+
+    </Page>
+
+</mvc:View>
