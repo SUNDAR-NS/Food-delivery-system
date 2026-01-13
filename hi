@@ -1,166 +1,25 @@
 onPrimaryKeyToggle: function (oEvent) {
   this._bPKToggleOn = oEvent.getParameter("state");
 
-  const aItems = this.byId("columnsTable").getItems();
-
-  aItems.forEach(item => {
-    const oCB = item.getCells()[0];
-
-    oCB.setVisible(this._bPKToggleOn);
-
-    if (!this._bPKToggleOn) {
-      oCB.setSelected(false);
-      item.removeStyleClass("pkSelectedRow");
-    }
-  });
-},
-
-onCheckboxSelect: function (oEvent) {
-  const oCB = oEvent.getSource();
-  const oRow = oCB.getParent();
-
-  oCB.getSelected()
-    ? oRow.addStyleClass("pkSelectedRow")
-    : oRow.removeStyleClass("pkSelectedRow");
-},
-
-onNextSummary: function () {
-
-  const oModel = this.getView().getModel("columnsModel");
-  const aData = oModel.getProperty("/columns");
-
-  for (const row of aData) {
-    if (!row.COLUMN_NAME || !row.DATATYPE || !row.CONSTRAINTS) {
-      sap.m.MessageToast.show("Please fill all required inputs.");
-      return;
-    }
-  }
-
-  if (this._bPKToggleOn) {
-    const bAnySelected = this.byId("columnsTable")
-      .getItems()
-      .some(item => item.getCells()[0].getSelected());
-
-    if (!bAnySelected) {
-      sap.m.MessageToast.show("Please select at least one Unique column.");
-      return;
-    }
-  }
-
-  this._freezeTable();
-  this.byId("_IDGenButtons").setVisible(false);
-  this.byId("templateWizard").nextStep();
-},
-
-_freezeTable: function () {
-
   const oTable = this.byId("columnsTable");
-  const aItems = oTable.getItems();
-  const aColumns = this.getView().getModel("columnsModel").getData().columns;
 
-  aItems.forEach(item => {
-    item.getCells().forEach(c => c.setEnabled(false));
-    item.getCells()[0].setEditable(false);
-  });
+  const fnApplyPKVisibility = () => {
+    oTable.getItems().forEach(item => {
+      const oCB = item.getCells()[0];
 
-  oTable.setMode("None");
-  oTable.rerender();
+      oCB.setVisible(this._bPKToggleOn);
 
-  ["_IDGenButton5", "_IDGenButton54", "_IDGenButton59"]
-    .forEach(id => this.byId(id).setEnabled(false));
-
-  /* ---------- Summary Columns ---------- */
-
-  const aSummaryCols = [
-    new sap.m.Column({ header: new sap.m.Label({ text: "Column Name" }) }),
-    new sap.m.Column({ header: new sap.m.Label({ text: "Data Type" }) }),
-    new sap.m.Column({ header: new sap.m.Label({ text: "Constraint" }) })
-  ];
-
-  if (this._bPKToggleOn) {
-    aSummaryCols.push(
-      new sap.m.Column({ header: new sap.m.Label({ text: "Unique" }) })
-    );
-  }
-
-  /* ---------- Summary Table ---------- */
-
-  const oSummaryTable = new sap.m.Table({
-    inset: false,
-    columns: aSummaryCols,
-    items: aColumns.map((col, i) => {
-
-      let displayType = col.DATATYPE;
-
-      if (col.DATATYPE === "NVARCHAR") {
-        displayType += `(${Math.min(col.LENGTH_PRECISION || 1, 10000)})`;
+      if (!this._bPKToggleOn) {
+        oCB.setSelected(false);
+        item.removeStyleClass("pkSelectedRow");
       }
-      if (col.DATATYPE === "DECIMAL") {
-        displayType += `(${Math.min(col.LENGTH_PRECISION || 1, 1000)},${Math.min(col.SCALE || 0, 38)})`;
-      }
-
-      const aCells = [
-        new sap.m.Text({ text: col.COLUMN_NAME }),
-        new sap.m.Text({ text: displayType }),
-        new sap.m.Text({ text: col.CONSTRAINTS })
-      ];
-
-      if (this._bPKToggleOn) {
-        const bUnique = aItems[i].getCells()[0].getSelected();
-        aCells.push(
-          new sap.ui.core.Icon({
-            src: bUnique ? "sap-icon://accept" : "sap-icon://decline"
-          })
-        );
-      }
-
-      return new sap.m.ColumnListItem({ cells: aCells });
-    })
-  });
-
-  const oSubmit = new sap.m.Button({
-    text: "Submit",
-    type: "Ghost",
-    press: this.openTempateDashboard.bind(this, oSummaryTable)
-  });
-
-  const oStep3 = this.byId("step3");
-  oStep3.removeAllContent();
-  oStep3.addContent(new sap.m.VBox({ items: [oSummaryTable, oSubmit] }));
-},
-
-openTempateDashboard: async function (oTable) {
-
-  const aData = oTable.getItems().map(item => {
-    const aCells = item.getCells();
-
-    const oRow = {
-      COLUMN_NAME: aCells[0].getText(),
-      DATA_TYPE: aCells[1].getText(),
-      CONSTRAINTS: aCells[2].getText()
-    };
-
-    if (this._bPKToggleOn) {
-      oRow.IS_UNIQUE = aCells[3].getSrc() === "sap-icon://accept";
-    }
-
-    return oRow;
-  });
-
-  const payload = {
-    MODULE_NAME: this.byId("moduleComboBox1").getSelectedKey(),
-    SUB_MODULE_NAME: this.byId("submoduleInput").getValue(),
-    LOAD_TEMPLATE: this.byId("templateNameInput").getValue(),
-    STATUS: "pending",
-    EXPIRY_DATE: this.byId("datePickerId").getValue(),
-    JSON_TEMPLATE: JSON.stringify(aData)
+    });
   };
 
-  const listBinding = this.oModel.bindList("/TemplateStorage");
-  const ctx = await listBinding.create(payload);
-  await ctx.created();
+  // Apply immediately
+  fnApplyPKVisibility();
 
-  location.reload();
+  // 👇 APPLY AGAIN WHEN NEW ROW IS ADDED
+  oTable.detachUpdateFinished(fnApplyPKVisibility);
+  oTable.attachUpdateFinished(fnApplyPKVisibility);
 },
-
-
