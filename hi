@@ -1,26 +1,135 @@
-onInit: function () {
-  this._bPKToggleOn = false;
+/* Enter your custom styles here */
 
-  const oPKModel = new sap.ui.model.json.JSONModel({
-    enabled: false
-  });
+/* Custom style for the file upload section */
+.file-upload-container .file-upload-box {
+  border: 2px dashed #ccc; /* Dotted border for drag and drop */
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+  background-color: #f9f9f9; /* Light background for visibility */
+}
 
-  this.getView().setModel(oPKModel, "pkModel");
-},
+/* Optional: Add hover effect to make it visually responsive during drag */
+.file-upload-container .file-upload-box:hover {
+  border-color: #007acc; /* Change border color on hover */
+  background-color: #e6f7ff; /* Slight background change on hover */
+}
+
+.card-container {
+  background-color: #fff; /* White background */
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 8px; /* Rounded corners */
+  padding: 16px; /* Padding inside the card */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for 3D effect */
+  transition: box-shadow 0.3s ease-in-out; /* Smooth shadow transition on hover */
+}
+
+.card-container:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Darker shadow on hover */
+}
+
+.customTableWithStickyHeader {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 9 !important;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 2px -2px gray;
+}
+
+.dialogGrid {
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.gridItem {
+  border: 1px solid #ccc;
+  padding: 8px;
+  margin: 2px;
+  box-sizing: border-box;
+}
+
+.pkContainer .sapMSwtText
+{
+  opacity: 0.3;
+  font-size: 0.01px !important;
+}
+
+.pkContainer .sapMSwt
+{
+  background-color: #c4bdbd !important;
+  border: 1.5px solid #d1d5db !important;
+  box-shadow: none !important;
+  width: 40px;
+  height: 20px;
+  border-radius: 10px;
+}
+
+.pkContainer .sapMSwt.sapMSwtOn
+{
+  border: 1.5px solid #0a6ed1 !important;
+}
+
+.pkContainer .sapMSwtHandle
+{
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  top: 1px;
+  left: 1px;
+  background-color: #ffffff !important;
+  border: 1.5px solid #9ca3af !important;
+}
+
+.pkContainer .sapMSwt.sapMSwtOn .sapMSwtHandle
+{
+  border: 1.5px solid #0a6ed1 !important;
+}
+
+.pkContainer .sapMSwtOn
+{
+  box-shadow: none !important;
+}
 
 
-onPrimaryKeyToggle: function (oEvent) {
-  this._bPKToggleOn = oEvent.getParameter("state");
 
-  // 🔥 THIS LINE FIXES EVERYTHING
-  this.getView().getModel("pkModel").setProperty("/enabled", this._bPKToggleOn);
+/*  ------------------------------------------------------------- */
 
-  const aItems = this.byId("columnsTable").getItems();
-
-  if (!this._bPKToggleOn) {
-    aItems.forEach(item => {
-      item.getCells()[0].setSelected(false);
-      item.removeStyleClass("pkSelectedRow");
-    });
+.sideNavigationToggleButton {
+    border-radius: 8px;
+    background: rgba(0, 122, 255, 0.1);
   }
-},
+  
+  .sideNavigationToggleButton .sapMBtnIcon {
+    color: #007aff !important;
+  }
+  
+  .gradientTitle {
+    text-align: center;
+    width: 100%;
+    color: #0070f2;
+    font-weight: bold;
+    display: block;
+
+  }
+  
+  
+  .iconbtns {
+    background-color: #007aff !important;
+  
+  } 
+  
+  .sapMFlexItemAlignAuto {
+    margin-left: 10px;
+  
+  }
+  
+  
+  .logo {
+    height: 40px !important;
+  }
+  
+  .navListIcon .sapTntNLIIcon,
+  .navListIcon .sapMText {
+    color: #007aff !important;
+  }
+  
