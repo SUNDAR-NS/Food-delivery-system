@@ -1,18 +1,51 @@
-Dimension Calculation Views
-Purpose of a Dimension Calculation View
-A dimension calculation view is used to expose master data from source tables. You can combine multiple data sources, define filters, calculate additional attributes, and create hierarchies to provide a meaningful view of master data. A dimension calculation view is a highly-reusable, centralized object that provides consistent data. You would typically define a dimension calculation view and share it with other colleagues who would consume it in their own calculation views.
+Cube Calculation Views
+When you would like to create a calculation view that includes measures, you use a calculation view of the following type: cube.
 
-An example of a dimension view for customer that accesses columns from different database tables. ID, Name, and Country are accessed from the Customer Table. Contact Frequency is accessed from the Contact Preference Table.
-Dimension calculation views are only built from attributes. They do not include measures. Every column from the data source is treated as an attribute. This means that any numerical column in the source record, such as price or salary, is treated as an attribute and not a measure. This means when you query a dimension calculation view, a complete list of every single individual value in the source is produced in the output. Even the numerical values such as quantities are listed individually and not aggregated. If you want to sum values then you need a cube calculation view where it is possible to define measures.
+An example of a cube calculation view for orders that accesses columns from different database tables. Order ID, Customer ID, and Quantity Sold are accessed from the Sales Table. Quantity Returned is accessed from the Returns Table.
+By default, all the measures in this type of calculation view will always be aggregated by the attributes requested by the query. Consequently, even though the calculation view may be able to provide many attributes, the measures are always automatically aggregated only by the attributes that were requested by the query.
 
-If you would like to produce only a distinct list of attribute values, you can specify aggregation on any column. Then each unique value appears only once in the result.
+For example, your cube calculation view provides the measure: revenue, and the attributes: country and city. The query requests only country, and so revenue is summed by country and not by city. If the next query requests the measure: revenue, and the attributes: country and city, then the revenue would be summed by city and also country. This means that you will have two levels of aggregation.
 
-A dimension calculation view does not need to be based only on a single table. You can combine master data tables in a dimension. For example, you could join the customer table to the customer contacts table to generate a comprehensive view of customer information.
+This type of calculation view is optimized for ad-hoc analysis, where unpredictable slice-and-dice is required over the measures by any combination of attributes within the model.
 
-Although dimension calculation views can be directly consumed by most reporting tools, it is more likely that your dimension calculation views will be consumed in cube calculation views.
+Create a Simple CUBE Calculation View
+In this demonstration, you will learn how to create a simple CUBE calculation view.
 
-Sharing Dimension Calculation Views
-Dimension calculation views are reusable objects and can be shared between several cube calculation views.
+Demo
+Start Demo
+Cube with Star Join Calculation View
+An extension to the cube calculation view is the cube with star join.
 
-One Product DIMENSION Calculation View can be used in several CUBE Calculation Views. For details, see the following text.
-For example, the product dimension can be used in a purchase order cube calculation view and also in a sales order cube calculation view. Both cube calculation views require information about products. The dimension calculation view provides that shared information.
+An example of a cube with star join Calculation View for sales. In addition to sales and returns data from tables, customer name and contact frequency are accessed from the customer dimension Calculation View.
+In addition to the capabilities of the cube type of calculation view, a cube with star join calculation view allows you to connect dimension calculation views so that you significantly expand the capabilities for analysis by providing additional attributes. For example, if you create a sales cube calculation view, which provides only limited attributes such as a product number, you could then join the product dimension calculation view to provide many more product-related attributes such as product description, supplier, color, and price. You could then aggregate the sales revenues by product color, supplier, and so on.
+
+Cube with star join calculation views are the most advanced type of calculation view and are popular in analytical scenarios where ad-hoc analysis is required. Cube with star join calculation views are processing by a dedicated SAP HANA Cloud OLAP engine to provide high performance.
+
+The type of joins between the fact and dimension tables within the star schema can be defined in the Star Join node. The available joins are as follows:
+
+Referential Join
+
+Inner Join
+
+Left Outer Join
+
+Right Outer Join
+
+Full Outer Join, with some specific restrictions (see previous information)
+
+Text Join
+
+Screen capture of a definition of a Calculation View containing first a Join node, then a Star Join node, then a Semantics node on top. The lower level Join acts as fact table. The Star Join node above includes several dimension Views.
+Shared Columns from DIMENSION Calculation Views
+In a cube with star join calculation view, the Columns tab of the Semantics node separates columns into two categories:
+
+Private
+Private columns are columns that are defined inside the calculation view itself. These can be measures or attributes. You have full control over these columns.
+
+Shared
+Shared columns are columns that are defined "externally", in one or more dimension calculation views that are referenced by your cube with star join calculation view. On these columns, you have logically less control, because they are potentially "shared" with another cube with a star join calculation view. Still, you can hide some of these columns to only keep the ones that you need.
+
+Regarding the shared columns, their Name and Label properties cannot be changed, compared with a private column, but you can define an Alias Name and an Alias Label. Moreover, providing Alias Names is mandatory if column names from the underlying dimension calculation views conflict with each other or conflict with the private column names.
+
+Create a CUBE with Star Join Calculation View
+In this demonstration, you will learn how to create a CUBE with a star join calculation view.
