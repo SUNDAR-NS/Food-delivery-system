@@ -1,125 +1,76 @@
-PROCEDURE "GENERIC_DATA_VALIDATOR"
-(
-    IN  P_ID            NVARCHAR(36),
-    IN  P_MODULE        NVARCHAR(100),
-    IN  P_SUB_MODULE    NVARCHAR(100),
-    IN  P_LOAD_TEMPLATE NVARCHAR(100)
-)
-LANGUAGE SQLSCRIPT
-SQL SECURITY INVOKER
-AS
+PROCEDURE "GENERIC_DATA_LOADER"(IN ID NVARCHAR(200),
+V_OUT NVARCHAR(5000))
+   LANGUAGE SQLSCRIPT
+   SQL SECURITY INVOKER
+   --DEFAULT SCHEMA <default_schema_name>
+  --READS SQL DATA AS
+  AS
+     lv_cols NVARCHAR(5000);
+     lv_sql  NVARCHAR(10000);
+     lv_insert_sql NVARCHAR(5000);
+     lv_MODULE_NAME NVARCHAR(100);
+     lv_SUB_MODULE_NAME NVARCHAR(100);
+     lV_LOAD_TEMPLATE NVARCHAR(100);
+     lv_target NVARCHAR(100);
+     lv_Truncate NVARCHAR(100);
+     lv_LOAD_TYPE NVARCHAR(100);
+     lv_Count NVARCHAR(5000);
+BEGIN	 
 
-   LV_TEMPLATE_SQL NVARCHAR(10000);
-   LV_COLUMNS NVARCHAR(10000);
-   LV_JSON_COLS NVARCHAR(10000);
-   LV_SELECT_COLS NVARCHAR(10000);
-   LV_SQL NVARCHAR(10000);
-   LV_TEMPLATE_ID NVARCHAR(100);
-   LV_VALID_FLAG BOOLEAN;
-   LV_COL_DEF NVARCHAR(1000);
-   LV_CREATE_SQL NVARCHAR(10000);
-   LV_DROP_SQL NVARCHAR(100);
-   LV_ROW_CNT INTEGER;
-   LV_COUNT_QUERY NVARCHAR(100);
-   LV_JSON_SQL NVARCHAR(10000);
-   LV_RESULT_NCLOB NCLOB;
+    select LT.STG_TABLE,ST.LOAD_TYPE into lv_target ,lv_LOAD_TYPE
+	from COM_SCB_FILEUPLOAD_MASTER_REPORTFILESTORAGE ST
+		inner join COM_SCB_FILEUPLOAD_MASTER_LOADTABLE LT
+on ST.MODULE_NAME=LT.MODULE_NAME 
+and ST.SUB_MODULE_NAME=LT.SUB_MODULE_NAME
+and ST.LOAD_TEMPLATE=LT.LOAD_TEMPLATE 
+where ST.ID = :ID;
+
+lv_Truncate  = ' TRUNCATE TABLE ' || :lv_target;
+IF 
+  lv_LOAD_TYPE = 'TRUNCATE' then
+  EXECUTE IMMEDIATE lv_Truncate ;
+END IF;
+--EXECUTE IMMEDIATE :lv_Truncate;
 
 
-BEGIN
-
-       CREATE LOCAL TEMPORARY TABLE #TMP_UNIQUE_COLS (
-        COLUMN_NAME NVARCHAR(200),
-        DATA_TYPE   NVARCHAR(200)
-    );
-
-    SELECT ID INTO LV_TEMPLATE_ID FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE 
-        WHERE MODULE_NAME     = :P_MODULE
-             AND SUB_MODULE_NAME = :P_SUB_MODULE
-             AND LOAD_TEMPLATE   = :P_LOAD_TEMPLATE;
-
-    LV_TEMPLATE_SQL :=
-        'INSERT INTO #TMP_UNIQUE_COLS SELECT
-            JT.COLUMN_NAME,
-            JT.DATA_TYPE
-         FROM
-         COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE
-            CROSS JOIN JSON_TABLE(
-                (SELECT JSON_TEMPLATE FROM COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE WHERE ID = ''' || :LV_TEMPLATE_ID || ''' ),
-                ''$[*]''
-                COLUMNS (
-                    COLUMN_NAME NVARCHAR(200) PATH ''$.COLUMN_NAME'' ,
-                    DATA_TYPE NVARCHAR(200) PATH ''$.DATA_TYPE'' ,
-                    IS_UNIQUE   NVARCHAR(200)       PATH ''$.IS_UNIQUE''
-                )
-            ) JT
-         WHERE
-            JT.IS_UNIQUE = ''true'' AND
-            COM_SCB_FILEUPLOAD_MASTER_TEMPLATESTORAGE.ID = ''' || :LV_TEMPLATE_ID || '''
-        ';
-
-    EXECUTE IMMEDIATE :LV_TEMPLATE_SQL;
-
+--select :lv_target as ABC from DUMMY;
+  select MODULE_NAME,SUB_MODULE_NAME,LOAD_TEMPLATE into lv_MODULE_NAME,lv_SUB_MODULE_NAME,lV_LOAD_TEMPLATE from com_scb_fileupload_master_ReportFileStorage
+  where ID = :ID;
+    -- 1) Generate dynamic JSON_TABLE columns
     SELECT STRING_AGG(
-          COLUMN_NAME || ' ' || DATA_TYPE ||
-          ' PATH ''$.' || COLUMN_NAME || '''',
-          ', '
-    )
-    INTO LV_JSON_COLS
-    FROM #TMP_UNIQUE_COLS;
+             '"' || COLUMN_NAME || '" ' || COLUMN_DATATYPE ||
+             ' PATH ''$.' || COLUMN_NAME || '''',
+             ','
+           )
+      INTO lv_cols
+      FROM com_scb_fileupload_master_LoadMap
+      WHERE MODULE_NAME     = :lv_MODULE_NAME
+       AND SUB_MODULE_NAME = :lv_SUB_MODULE_NAME
+       AND LOAD_TEMPLATE   = :lV_LOAD_TEMPLATE;
 
-    SELECT STRING_AGG('JT.' || COLUMN_NAME, ', ')
-    INTO LV_SELECT_COLS
-    FROM #TMP_UNIQUE_COLS;
+    -- 2) Build lv_sql exactly as before
+    lv_sql :=
+        'SELECT  com_scb_fileupload_master_ReportFileStorage.ID,jt.*,com_scb_fileupload_master_ReportFileStorage.EXPIRY_DATE ' ||
+        'FROM com_scb_fileupload_master_ReportFileStorage, ' ||
+        'JSON_TABLE((SELECT  JSON_DATA FROM com_scb_fileupload_master_ReportFileStorage WHERE com_scb_fileupload_master_ReportFileStorage.ID = ''' || :ID || '''), ''$[*]'' ' ||
+        'COLUMNS (' || :lv_cols || ')) AS jt ' ||
+        'WHERE com_scb_fileupload_master_ReportFileStorage.ID = ''' || :ID || ''' ';
+       -- select :lv_sql from DUMMY;
 
-    SELECT STRING_AGG(
-    COLUMN_NAME || ' ' || DATA_TYPE,
-    ', '
-    )
-    INTO LV_COL_DEF
-    FROM #TMP_UNIQUE_COLS;
+    -- 3) Wrap lv_sql into an INSERT dynamically
+    lv_insert_sql := 'INSERT INTO ' || :lv_target || ' ' || :lv_sql;
+    --select :lv_insert_sql from DUMMY;
+    --lv_insert_sql := 'INSERT INTO ' || :lv_target ||  '(M_ACCOUNT_0,M_SEGMENT_0,AMOUNT,FISCAL_YEAR)' ||' ' || :lv_sql;
+    -- 4) Execute the insert
+    EXECUTE IMMEDIATE :lv_insert_sql;
 
-    LV_CREATE_SQL :=
-    'CREATE LOCAL TEMPORARY TABLE #TMP_RESULT (
-        ' || :LV_COL_DEF || ',
-        DUP_CNT INTEGER
-    )';
+    --V_OUT := select count(*) from :lv_insert_sql
+   lv_Count := 'select count(*) from (('||:lv_sql ||'))';
+   EXECUTE IMMEDIATE :lv_Count;
+   /*V_OUT := 'Number of Records Inserted is ' || 
+            'select count(*) from (('||:lv_sql ||'))' ;*/
+    V_OUT := 'Number of Records Inserted is ' || :lv_Count;
+    --select V_OUT from DUMMY;
+   --select V_OUT from DUMMY;
 
-    EXECUTE IMMEDIATE :LV_CREATE_SQL;
-
-        LV_SQL :=
-        'INSERT INTO #TMP_RESULT
-        SELECT
-            ' || :LV_SELECT_COLS || ' ,
-            COUNT(*) AS DUP_CNT
-         FROM
-         COM_SCB_FILEUPLOAD_MASTER_DATAVALIDATOR
-            CROSS JOIN JSON_TABLE(
-                (SELECT JSON_DATA FROM COM_SCB_FILEUPLOAD_MASTER_DATAVALIDATOR WHERE ID = ''' || :P_ID || ''' ),
-                ''$[*]''
-                COLUMNS (
-                   '|| :LV_JSON_COLS ||'
-                )
-            ) JT
-         WHERE
-            COM_SCB_FILEUPLOAD_MASTER_DATAVALIDATOR.ID = ''' || :P_ID || '''
-         GROUP BY
-            ' || :LV_SELECT_COLS || '
-         HAVING COUNT(*) > 1';
-
-    EXECUTE IMMEDIATE :LV_SQL;
-
-
-    LV_JSON_SQL :=
-        'SELECT * FROM #TMP_RESULT FOR JSON;';
-
-    EXECUTE IMMEDIATE :LV_JSON_SQL INTO LV_RESULT_NCLOB;
-
-    UPDATE COM_SCB_FILEUPLOAD_MASTER_DATAVALIDATOR 
-    SET ERROR_MESSAGE = :LV_RESULT_NCLOB
-    WHERE ID = :P_ID;
-
-    LV_DROP_SQL := 'DROP TABLE #TMP_RESULT';
-    EXECUTE IMMEDIATE :LV_DROP_SQL;
-    DROP TABLE #TMP_UNIQUE_COLS;
-
-END;
+END
