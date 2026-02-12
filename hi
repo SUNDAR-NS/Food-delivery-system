@@ -1,51 +1,5 @@
-catch (error) {
-
-        // 🔥 ADDED LOGIC STARTS HERE
-        if (error.message?.toLowerCase().includes("invalidated procedure")) {
-
-          console.log("Invalidated procedure detected. Dropping & recreating synonyms...");
-
-          try {
-
-            // Drop synonyms
-            await db.run(`DROP SYNONYM "ReportFileStorage" IF EXISTS`);
-            await db.run(`DROP SYNONYM "loadmap" IF EXISTS`);
-            await db.run(`DROP SYNONYM "loadtable" IF EXISTS`);
-
-            // Recreate synonyms using same container
-            await db.run(`
-              CREATE SYNONYM "ReportFileStorage"
-              FOR "${CONTAINER_NAME}"."ReportFileStorage"
-            `);
-
-            await db.run(`
-              CREATE SYNONYM "loadmap"
-              FOR "${CONTAINER_NAME}"."loadmap"
-            `);
-
-            await db.run(`
-              CREATE SYNONYM "loadtable"
-              FOR "${CONTAINER_NAME}"."loadtable"
-            `);
-
-            console.log("Synonyms recreated. Retrying procedure...");
-
-            // Retry procedure once
-            await db.run(`
-              DO BEGIN
-                DECLARE v_result NVARCHAR(500);
-                CALL "${CONTAINER_NAME}"."GENERIC_DATA_LOADER"(ID => '${id}', V_OUT => v_result);
-                SELECT :v_result AS V_OUT FROM DUMMY;
-              END;
-            `);
-
-          } catch (synError) {
-            req.error(500, `Synonym recreation failed: ${synError.message}`);
-          }
-
-        } else {
-          req.error(500, `Proc call failed: ${error.message}`);
-        }
-        // 🔥 ADDED LOGIC ENDS HERE
-      }
-    }
+CALL "T1NFRP_PHY#DI".MAKE(
+    DEPLOY_PATHS => ARRAY('src/'),
+    UNDEPLOY_PATHS => ARRAY(),
+    PARAMETERS => _SYS_DI.TT_PARAMETERS()
+);
