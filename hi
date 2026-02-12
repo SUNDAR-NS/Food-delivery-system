@@ -2,6 +2,7 @@ DO
 BEGIN
 
     DECLARE lv_return_code INTEGER;
+    DECLARE lv_request_id BIGINT;
     DECLARE lt_messages _SYS_DI.TT_MESSAGES;
 
     CALL "T1NFRP_PHY#DI".MAKE(
@@ -10,9 +11,13 @@ BEGIN
         PATH_PARAMETERS => _SYS_DI.TT_PATH_PARAMETERS(),
         PARAMETERS      => _SYS_DI.TT_PARAMETERS(),
         RETURN_CODE     => lv_return_code,
+        REQUEST_ID      => lv_request_id,
         MESSAGES        => lt_messages
     );
 
-    SELECT :lv_return_code AS RETURN_CODE FROM DUMMY;
+    SELECT 
+        :lv_return_code AS RETURN_CODE,
+        :lv_request_id  AS REQUEST_ID
+    FROM DUMMY;
 
 END;
