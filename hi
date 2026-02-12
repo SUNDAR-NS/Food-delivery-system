@@ -13,54 +13,55 @@ AS
      lv_MODULE_NAME NVARCHAR(100);
      lv_SUB_MODULE_NAME NVARCHAR(100);
      lV_LOAD_TEMPLATE NVARCHAR(100);
-     lv_target NVARCHAR(100);
-     lv_Truncate NVARCHAR(100);
+     lv_target NVARCHAR(200);
+     lv_Truncate NVARCHAR(500);
      lv_LOAD_TYPE NVARCHAR(100);
      lv_Count NVARCHAR(5000);
 
 BEGIN	 
 
-    select LT.STG_TABLE,ST.LOAD_TYPE into lv_target ,lv_LOAD_TYPE
-	from COM_SCB_FILEUPLOAD_MASTER_REPORTFILESTORAGE ST
-		inner join COM_SCB_FILEUPLOAD_MASTER_LOADTABLE LT
-on ST.MODULE_NAME=LT.MODULE_NAME 
-and ST.SUB_MODULE_NAME=LT.SUB_MODULE_NAME
-and ST.LOAD_TEMPLATE=LT.LOAD_TEMPLATE 
-where ST.ID = :ID;
+    select LT.STG_TABLE,ST.LOAD_TYPE 
+    into lv_target ,lv_LOAD_TYPE
+	from "T1GDTL_PHY"."COM_SCB_FILEUPLOAD_MASTER_REPORTFILESTORAGE" ST
+	inner join "T1GDTL_PHY"."COM_SCB_FILEUPLOAD_MASTER_LOADTABLE" LT
+    on ST.MODULE_NAME=LT.MODULE_NAME 
+    and ST.SUB_MODULE_NAME=LT.SUB_MODULE_NAME
+    and ST.LOAD_TEMPLATE=LT.LOAD_TEMPLATE 
+    where ST.ID = :ID;
 
-lv_Truncate  = ' TRUNCATE TABLE ' || :lv_target;
+    lv_Truncate  = ' TRUNCATE TABLE ' || :lv_target;
 
-IF lv_LOAD_TYPE = 'TRUNCATE' then
-  EXECUTE IMMEDIATE lv_Truncate ;
-END IF;
+    IF lv_LOAD_TYPE = 'TRUNCATE' then
+        EXECUTE IMMEDIATE :lv_Truncate ;
+    END IF;
 
-  select MODULE_NAME,SUB_MODULE_NAME,LOAD_TEMPLATE 
-  into lv_MODULE_NAME,lv_SUB_MODULE_NAME,lV_LOAD_TEMPLATE 
-  from com_scb_fileupload_master_ReportFileStorage
-  where ID = :ID;
+    select MODULE_NAME,SUB_MODULE_NAME,LOAD_TEMPLATE 
+    into lv_MODULE_NAME,lv_SUB_MODULE_NAME,lV_LOAD_TEMPLATE 
+    from "T1GDTL_PHY"."COM_SCB_FILEUPLOAD_MASTER_REPORTFILESTORAGE"
+    where ID = :ID;
 
     SELECT STRING_AGG(
              '"' || COLUMN_NAME || '" ' || COLUMN_DATATYPE ||
              ' PATH ''$.' || COLUMN_NAME || '''',
              ','
            )
-      INTO lv_cols
-      FROM com_scb_fileupload_master_LoadMap
-      WHERE MODULE_NAME     = :lv_MODULE_NAME
-       AND SUB_MODULE_NAME = :lv_SUB_MODULE_NAME
-       AND LOAD_TEMPLATE   = :lV_LOAD_TEMPLATE;
+    INTO lv_cols
+    FROM "T1GDTL_PHY"."COM_SCB_FILEUPLOAD_MASTER_LOADMAP"
+    WHERE MODULE_NAME     = :lv_MODULE_NAME
+      AND SUB_MODULE_NAME = :lv_SUB_MODULE_NAME
+      AND LOAD_TEMPLATE   = :lV_LOAD_TEMPLATE;
 
     lv_sql :=
-        'SELECT  com_scb_fileupload_master_ReportFileStorage.ID,
+        'SELECT  ST.ID,
                  jt.*,
-                 com_scb_fileupload_master_ReportFileStorage.EXPIRY_DATE ' ||
-        'FROM com_scb_fileupload_master_ReportFileStorage, ' ||
+                 ST.EXPIRY_DATE ' ||
+        'FROM "T1GDTL_PHY"."COM_SCB_FILEUPLOAD_MASTER_REPORTFILESTORAGE" ST, ' ||
         'JSON_TABLE((SELECT JSON_DATA 
-                     FROM com_scb_fileupload_master_ReportFileStorage 
-                     WHERE com_scb_fileupload_master_ReportFileStorage.ID = ''' || :ID || '''), 
+                     FROM "T1GDTL_PHY"."COM_SCB_FILEUPLOAD_MASTER_REPORTFILESTORAGE" 
+                     WHERE ID = ''' || :ID || '''), 
                      ''$[*]'' 
                      COLUMNS (' || :lv_cols || ')) AS jt ' ||
-        'WHERE com_scb_fileupload_master_ReportFileStorage.ID = ''' || :ID || ''' ';
+        'WHERE ST.ID = ''' || :ID || ''' ';
 
     lv_insert_sql := 'INSERT INTO ' || :lv_target || ' ' || :lv_sql;
 
