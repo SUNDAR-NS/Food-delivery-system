@@ -1,51 +1,91 @@
-Cube Calculation Views
-When you would like to create a calculation view that includes measures, you use a calculation view of the following type: cube.
+srv.on('UpdateStatusComments', async (req) => {
 
-An example of a cube calculation view for orders that accesses columns from different database tables. Order ID, Customer ID, and Quantity Sold are accessed from the Sales Table. Quantity Returned is accessed from the Returns Table.
-By default, all the measures in this type of calculation view will always be aggregated by the attributes requested by the query. Consequently, even though the calculation view may be able to provide many attributes, the measures are always automatically aggregated only by the attributes that were requested by the query.
+    const { id, action, comments, module } = req.data;
 
-For example, your cube calculation view provides the measure: revenue, and the attributes: country and city. The query requests only country, and so revenue is summed by country and not by city. If the next query requests the measure: revenue, and the attributes: country and city, then the revenue would be summed by city and also country. This means that you will have two levels of aggregation.
+    var actionType = ""
+    if (action === "reject") {
+      actionType = "rejected";
+      console.log(actionType)
+    }
+    if (action === "approve") {
+      actionType = "approved";
 
-This type of calculation view is optimized for ad-hoc analysis, where unpredictable slice-and-dice is required over the measures by any combination of attributes within the model.
 
-Create a Simple CUBE Calculation View
-In this demonstration, you will learn how to create a simple CUBE calculation view.
+      const containerName = await db.run(
+        SELECT
+          .from('com.scb.fileupload.master.ModuleContainerMap')
+          .columns('CONTAINER_NAME')
+          .where({ MODULE_NAME: module })
+      );
 
-Demo
-Start Demo
-Cube with Star Join Calculation View
-An extension to the cube calculation view is the cube with star join.
+      const { CONTAINER_NAME } = containerName[0];
 
-An example of a cube with star join Calculation View for sales. In addition to sales and returns data from tables, customer name and contact frequency are accessed from the customer dimension Calculation View.
-In addition to the capabilities of the cube type of calculation view, a cube with star join calculation view allows you to connect dimension calculation views so that you significantly expand the capabilities for analysis by providing additional attributes. For example, if you create a sales cube calculation view, which provides only limited attributes such as a product number, you could then join the product dimension calculation view to provide many more product-related attributes such as product description, supplier, color, and price. You could then aggregate the sales revenues by product color, supplier, and so on.
+      try {
+        // Use db.run() and let HANA return OUT param as a record
+        const sql = `
+      DO BEGIN
+        DECLARE v_result NVARCHAR(500);
+        CALL "${CONTAINER_NAME}"."GENERIC_DATA_LOADER"(ID => '${id}', V_OUT => v_result);
+        SELECT :v_result AS V_OUT FROM DUMMY;
+      END;
+    `
 
-Cube with star join calculation views are the most advanced type of calculation view and are popular in analytical scenarios where ad-hoc analysis is required. Cube with star join calculation views are processing by a dedicated SAP HANA Cloud OLAP engine to provide high performance.
+        const result = await db.run(sql)
 
-The type of joins between the fact and dimension tables within the star schema can be defined in the Star Join node. The available joins are as follows:
 
-Referential Join
+      } catch (error) {
+        req.error(500, `Proc call failed: ${error.message}`);
+      }
 
-Inner Join
 
-Left Outer Join
+    }
+    if (!id) return req.error(400, "ID is required");
+    if (!action) return req.error(400, "Action is required");
 
-Right Outer Join
+    try {
 
-Full Outer Join, with some specific restrictions (see previous information)
 
-Text Join
+      const updated = await UPDATE('com.scb.fileupload.master.ReportFileStorage')
+        .set({
+          STATUS: actionType,
+          COMMENTS: comments?.substring(0, 300) || null
+        })
+        .where({ ID: id });
 
-Screen capture of a definition of a Calculation View containing first a Join node, then a Star Join node, then a Semantics node on top. The lower level Join acts as fact table. The Star Join node above includes several dimension Views.
-Shared Columns from DIMENSION Calculation Views
-In a cube with star join calculation view, the Columns tab of the Semantics node separates columns into two categories:
+      if (updated === 0) {
+        return `No record found for ID ${id}`;
+      }
+      console.log(req.user);
+      const updateUser = await UPDATE('com.scb.fileupload.master.ReportFileStorage')
+        .set({
+          ACTION_BY: req.user.id
+        })
+        .where({ ID: id });
 
-Private
-Private columns are columns that are defined inside the calculation view itself. These can be measures or attributes. You have full control over these columns.
+      //add 3 audit trail logs here
 
-Shared
-Shared columns are columns that are defined "externally", in one or more dimension calculation views that are referenced by your cube with star join calculation view. On these columns, you have logically less control, because they are potentially "shared" with another cube with a star join calculation view. Still, you can hide some of these columns to only keep the ones that you need.
+      await UPDATE('com.scb.fileupload.master.AuditTrailReport')
+        .set({ STATUS: actionType })
+        .where({ REPORT_ID: id });
 
-Regarding the shared columns, their Name and Label properties cannot be changed, compared with a private column, but you can define an Alias Name and an Alias Label. Moreover, providing Alias Names is mandatory if column names from the underlying dimension calculation views conflict with each other or conflict with the private column names.
+      await UPDATE('com.scb.fileupload.master.AuditTrailReport')
+        .set({ ACTION_BY: req.user.id })
+        .where({ REPORT_ID: id });
 
-Create a CUBE with Star Join Calculation View
-In this demonstration, you will learn how to create a CUBE with a star join calculation view.
+      await UPDATE('com.scb.fileupload.master.AuditTrailReport')
+        .set({ ACTION_AT: new Date() })
+        .where({ REPORT_ID: id });
+
+      // Return professional message
+      if (action === "approve") {
+        return `Record approved successfully`;
+      }
+      if (action === "reject") {
+        return `Record rejected successfully`;
+      }
+
+    } catch (err) {
+      req.error(500, `Database update failed: ${err.message}`);
+    }
+
+  });
