@@ -1,91 +1,51 @@
-srv.on('UpdateStatusComments', async (req) => {
+catch (error) {
 
-    const { id, action, comments, module } = req.data;
+        // 🔥 ADDED LOGIC STARTS HERE
+        if (error.message?.toLowerCase().includes("invalidated procedure")) {
 
-    var actionType = ""
-    if (action === "reject") {
-      actionType = "rejected";
-      console.log(actionType)
+          console.log("Invalidated procedure detected. Dropping & recreating synonyms...");
+
+          try {
+
+            // Drop synonyms
+            await db.run(`DROP SYNONYM "ReportFileStorage" IF EXISTS`);
+            await db.run(`DROP SYNONYM "loadmap" IF EXISTS`);
+            await db.run(`DROP SYNONYM "loadtable" IF EXISTS`);
+
+            // Recreate synonyms using same container
+            await db.run(`
+              CREATE SYNONYM "ReportFileStorage"
+              FOR "${CONTAINER_NAME}"."ReportFileStorage"
+            `);
+
+            await db.run(`
+              CREATE SYNONYM "loadmap"
+              FOR "${CONTAINER_NAME}"."loadmap"
+            `);
+
+            await db.run(`
+              CREATE SYNONYM "loadtable"
+              FOR "${CONTAINER_NAME}"."loadtable"
+            `);
+
+            console.log("Synonyms recreated. Retrying procedure...");
+
+            // Retry procedure once
+            await db.run(`
+              DO BEGIN
+                DECLARE v_result NVARCHAR(500);
+                CALL "${CONTAINER_NAME}"."GENERIC_DATA_LOADER"(ID => '${id}', V_OUT => v_result);
+                SELECT :v_result AS V_OUT FROM DUMMY;
+              END;
+            `);
+
+          } catch (synError) {
+            req.error(500, `Synonym recreation failed: ${synError.message}`);
+          }
+
+        } else {
+          req.error(500, `Proc call failed: ${error.message}`);
+        }
+        // 🔥 ADDED LOGIC ENDS HERE
+      }
     }
-    if (action === "approve") {
-      actionType = "approved";
-
-
-      const containerName = await db.run(
-        SELECT
-          .from('com.scb.fileupload.master.ModuleContainerMap')
-          .columns('CONTAINER_NAME')
-          .where({ MODULE_NAME: module })
-      );
-
-      const { CONTAINER_NAME } = containerName[0];
-
-      try {
-        // Use db.run() and let HANA return OUT param as a record
-        const sql = `
-      DO BEGIN
-        DECLARE v_result NVARCHAR(500);
-        CALL "${CONTAINER_NAME}"."GENERIC_DATA_LOADER"(ID => '${id}', V_OUT => v_result);
-        SELECT :v_result AS V_OUT FROM DUMMY;
-      END;
-    `
-
-        const result = await db.run(sql)
-
-
-      } catch (error) {
-        req.error(500, `Proc call failed: ${error.message}`);
-      }
-
-
-    }
-    if (!id) return req.error(400, "ID is required");
-    if (!action) return req.error(400, "Action is required");
-
-    try {
-
-
-      const updated = await UPDATE('com.scb.fileupload.master.ReportFileStorage')
-        .set({
-          STATUS: actionType,
-          COMMENTS: comments?.substring(0, 300) || null
-        })
-        .where({ ID: id });
-
-      if (updated === 0) {
-        return `No record found for ID ${id}`;
-      }
-      console.log(req.user);
-      const updateUser = await UPDATE('com.scb.fileupload.master.ReportFileStorage')
-        .set({
-          ACTION_BY: req.user.id
-        })
-        .where({ ID: id });
-
-      //add 3 audit trail logs here
-
-      await UPDATE('com.scb.fileupload.master.AuditTrailReport')
-        .set({ STATUS: actionType })
-        .where({ REPORT_ID: id });
-
-      await UPDATE('com.scb.fileupload.master.AuditTrailReport')
-        .set({ ACTION_BY: req.user.id })
-        .where({ REPORT_ID: id });
-
-      await UPDATE('com.scb.fileupload.master.AuditTrailReport')
-        .set({ ACTION_AT: new Date() })
-        .where({ REPORT_ID: id });
-
-      // Return professional message
-      if (action === "approve") {
-        return `Record approved successfully`;
-      }
-      if (action === "reject") {
-        return `Record rejected successfully`;
-      }
-
-    } catch (err) {
-      req.error(500, `Database update failed: ${err.message}`);
-    }
-
-  });
