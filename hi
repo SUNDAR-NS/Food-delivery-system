@@ -1,10 +1,12 @@
-PROCEDURE "GENERIC_DATA_LOADER"(IN ID NVARCHAR(200),
-V_OUT NVARCHAR(5000))
-   LANGUAGE SQLSCRIPT
-   SQL SECURITY INVOKER
-   --DEFAULT SCHEMA <default_schema_name>
-  --READS SQL DATA AS
-  AS
+CREATE OR REPLACE PROCEDURE "T1NFRP_PHY"."GENERIC_DATA_LOADER"
+(
+    IN ID NVARCHAR(200),
+    OUT V_OUT NVARCHAR(5000)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+AS
+
      lv_cols NVARCHAR(5000);
      lv_sql  NVARCHAR(10000);
      lv_insert_sql NVARCHAR(5000);
@@ -15,6 +17,7 @@ V_OUT NVARCHAR(5000))
      lv_Truncate NVARCHAR(100);
      lv_LOAD_TYPE NVARCHAR(100);
      lv_Count NVARCHAR(5000);
+
 BEGIN	 
 
     select LT.STG_TABLE,ST.LOAD_TYPE into lv_target ,lv_LOAD_TYPE
@@ -30,13 +33,10 @@ IF
   lv_LOAD_TYPE = 'TRUNCATE' then
   EXECUTE IMMEDIATE lv_Truncate ;
 END IF;
---EXECUTE IMMEDIATE :lv_Truncate;
 
-
---select :lv_target as ABC from DUMMY;
   select MODULE_NAME,SUB_MODULE_NAME,LOAD_TEMPLATE into lv_MODULE_NAME,lv_SUB_MODULE_NAME,lV_LOAD_TEMPLATE from com_scb_fileupload_master_ReportFileStorage
   where ID = :ID;
-    -- 1) Generate dynamic JSON_TABLE columns
+
     SELECT STRING_AGG(
              '"' || COLUMN_NAME || '" ' || COLUMN_DATATYPE ||
              ' PATH ''$.' || COLUMN_NAME || '''',
@@ -48,29 +48,20 @@ END IF;
        AND SUB_MODULE_NAME = :lv_SUB_MODULE_NAME
        AND LOAD_TEMPLATE   = :lV_LOAD_TEMPLATE;
 
-    -- 2) Build lv_sql exactly as before
     lv_sql :=
         'SELECT  com_scb_fileupload_master_ReportFileStorage.ID,jt.*,com_scb_fileupload_master_ReportFileStorage.EXPIRY_DATE ' ||
         'FROM com_scb_fileupload_master_ReportFileStorage, ' ||
         'JSON_TABLE((SELECT  JSON_DATA FROM com_scb_fileupload_master_ReportFileStorage WHERE com_scb_fileupload_master_ReportFileStorage.ID = ''' || :ID || '''), ''$[*]'' ' ||
         'COLUMNS (' || :lv_cols || ')) AS jt ' ||
         'WHERE com_scb_fileupload_master_ReportFileStorage.ID = ''' || :ID || ''' ';
-       -- select :lv_sql from DUMMY;
 
-    -- 3) Wrap lv_sql into an INSERT dynamically
     lv_insert_sql := 'INSERT INTO ' || :lv_target || ' ' || :lv_sql;
-    --select :lv_insert_sql from DUMMY;
-    --lv_insert_sql := 'INSERT INTO ' || :lv_target ||  '(M_ACCOUNT_0,M_SEGMENT_0,AMOUNT,FISCAL_YEAR)' ||' ' || :lv_sql;
-    -- 4) Execute the insert
+
     EXECUTE IMMEDIATE :lv_insert_sql;
 
-    --V_OUT := select count(*) from :lv_insert_sql
    lv_Count := 'select count(*) from (('||:lv_sql ||'))';
    EXECUTE IMMEDIATE :lv_Count;
-   /*V_OUT := 'Number of Records Inserted is ' || 
-            'select count(*) from (('||:lv_sql ||'))' ;*/
-    V_OUT := 'Number of Records Inserted is ' || :lv_Count;
-    --select V_OUT from DUMMY;
-   --select V_OUT from DUMMY;
 
-END
+    V_OUT := 'Number of Records Inserted is ' || :lv_Count;
+
+END;
