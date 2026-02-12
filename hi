@@ -1,6 +1,18 @@
-CALL "T1NFRP_PHY#DI".MAKE(
-    DEPLOY_PATHS     => _SYS_DI.TT_FILE_PATHS('src/'),
-    UNDEPLOY_PATHS   => _SYS_DI.TT_FILE_PATHS(),
-    PATH_PARAMETERS  => _SYS_DI.TT_PATH_PARAMETERS(),
-    PARAMETERS       => _SYS_DI.TT_PARAMETERS()
-);
+DO
+BEGIN
+
+    DECLARE lv_return_code INTEGER;
+    DECLARE lt_messages _SYS_DI.TT_MESSAGES;
+
+    CALL "T1NFRP_PHY#DI".MAKE(
+        DEPLOY_PATHS    => _SYS_DI.TT_FILE_PATHS('src/'),
+        UNDEPLOY_PATHS  => _SYS_DI.TT_FILE_PATHS(),
+        PATH_PARAMETERS => _SYS_DI.TT_PATH_PARAMETERS(),
+        PARAMETERS      => _SYS_DI.TT_PARAMETERS(),
+        RETURN_CODE     => lv_return_code,
+        MESSAGES        => lt_messages
+    );
+
+    SELECT :lv_return_code AS RETURN_CODE FROM DUMMY;
+
+END;
