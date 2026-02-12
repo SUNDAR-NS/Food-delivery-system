@@ -1,4 +1,4 @@
-ALTER PROCEDURE "T1NFRP_PHY"."GENERIC_DATA_LOADER"
+CREATE OR REPLACE PROCEDURE "T1NFRP_PHY"."GENERIC_DATA_LOADER"
 (
     IN ID NVARCHAR(200),
     OUT V_OUT NVARCHAR(5000)
@@ -29,12 +29,14 @@ and ST.LOAD_TEMPLATE=LT.LOAD_TEMPLATE
 where ST.ID = :ID;
 
 lv_Truncate  = ' TRUNCATE TABLE ' || :lv_target;
-IF 
-  lv_LOAD_TYPE = 'TRUNCATE' then
+
+IF lv_LOAD_TYPE = 'TRUNCATE' then
   EXECUTE IMMEDIATE lv_Truncate ;
 END IF;
 
-  select MODULE_NAME,SUB_MODULE_NAME,LOAD_TEMPLATE into lv_MODULE_NAME,lv_SUB_MODULE_NAME,lV_LOAD_TEMPLATE from com_scb_fileupload_master_ReportFileStorage
+  select MODULE_NAME,SUB_MODULE_NAME,LOAD_TEMPLATE 
+  into lv_MODULE_NAME,lv_SUB_MODULE_NAME,lV_LOAD_TEMPLATE 
+  from com_scb_fileupload_master_ReportFileStorage
   where ID = :ID;
 
     SELECT STRING_AGG(
@@ -49,18 +51,24 @@ END IF;
        AND LOAD_TEMPLATE   = :lV_LOAD_TEMPLATE;
 
     lv_sql :=
-        'SELECT  com_scb_fileupload_master_ReportFileStorage.ID,jt.*,com_scb_fileupload_master_ReportFileStorage.EXPIRY_DATE ' ||
+        'SELECT  com_scb_fileupload_master_ReportFileStorage.ID,
+                 jt.*,
+                 com_scb_fileupload_master_ReportFileStorage.EXPIRY_DATE ' ||
         'FROM com_scb_fileupload_master_ReportFileStorage, ' ||
-        'JSON_TABLE((SELECT  JSON_DATA FROM com_scb_fileupload_master_ReportFileStorage WHERE com_scb_fileupload_master_ReportFileStorage.ID = ''' || :ID || '''), ''$[*]'' ' ||
-        'COLUMNS (' || :lv_cols || ')) AS jt ' ||
+        'JSON_TABLE((SELECT JSON_DATA 
+                     FROM com_scb_fileupload_master_ReportFileStorage 
+                     WHERE com_scb_fileupload_master_ReportFileStorage.ID = ''' || :ID || '''), 
+                     ''$[*]'' 
+                     COLUMNS (' || :lv_cols || ')) AS jt ' ||
         'WHERE com_scb_fileupload_master_ReportFileStorage.ID = ''' || :ID || ''' ';
 
     lv_insert_sql := 'INSERT INTO ' || :lv_target || ' ' || :lv_sql;
 
     EXECUTE IMMEDIATE :lv_insert_sql;
 
-   lv_Count := 'select count(*) from (('||:lv_sql ||'))';
-   EXECUTE IMMEDIATE :lv_Count;
+    lv_Count := 'select count(*) from (('||:lv_sql ||'))';
+
+    EXECUTE IMMEDIATE :lv_Count;
 
     V_OUT := 'Number of Records Inserted is ' || :lv_Count;
 
