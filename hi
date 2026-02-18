@@ -1,44 +1,9 @@
-COLUMN TABLE "CENTRAL_LOG_TEMP" ( 
-    "LOG_ID"                NVARCHAR(128) ,
-    "USECASE"               NVARCHAR(128) ,
-    "SESSION_ID"            NVARCHAR(128) ,
-    "COB_DATE"              NVARCHAR(128),
-    "USERNAME"              NVARCHAR(128) ,
-    "HOSTNAME"              NVARCHAR(128) ,
-    "RUN_METHOD"            NVARCHAR(128) ,
-    "SCHEDULE"              NVARCHAR(256) ,
-    "V_STEP"                NVARCHAR(100),
-    "FUNCTION"              NVARCHAR(128),
-    "SOURCE_NAME"           NVARCHAR(128),
-    "TABLE_NAME"            NVARCHAR(128),
-    "LAYER"                 NVARCHAR(128),
-    "STATUS"                NVARCHAR(128),
-    "COUNT"                 INTEGER,
-    "MESSAGE"               NVARCHAR(4000),
-    "LOG_MESSAGE"           NVARCHAR(4000),
-    "CURRENT_TIME_STAMP"    TIMESTAMP         DEFAULT CURRENT_TIMESTAMP,
-    "EXECUTION_TIME"        INTEGER
-    )
-
-
-COLUMN TABLE "CENTRAL_LOG" ( 
-    "LOG_ID"                NVARCHAR(128) ,
-    "USECASE"               NVARCHAR(128) ,
-    "SESSION_ID"            NVARCHAR(128) ,
-    "COB_DATE"              NVARCHAR(128),
-    "USERNAME"              NVARCHAR(128) ,
-    "HOSTNAME"              NVARCHAR(128) ,
-    "RUN_METHOD"            NVARCHAR(128) ,
-    "SCHEDULE"              NVARCHAR(256) ,
-    "V_STEP"                NVARCHAR(100),
-    "FUNCTION"              NVARCHAR(128),
-    "SOURCE_NAME"           NVARCHAR(128),
-    "TABLE_NAME"            NVARCHAR(128),
-    "LAYER"                 NVARCHAR(128),
-    "STATUS"                NVARCHAR(128),
-    "COUNT"                 INTEGER,
-    "MESSAGE"               NVARCHAR(4000),
-    "LOG_MESSAGE"           NVARCHAR(4000),
-    "CURRENT_TIME_STAMP"    TIMESTAMP         DEFAULT CURRENT_TIMESTAMP,
-    "EXECUTION_TIME"        INTEGER
-    )
+INSERT INTO "CENTRAL_LOG"
+VALUES (
+'1','UC1','S1','2026-02-18','user1','host1',
+'MANUAL','DAILY','STEP1','FUNC1',
+'SRC1','TAB1','L1','SUCCESS',
+100,'Msg','Log Msg',
+CURRENT_TIMESTAMP,
+10
+);
