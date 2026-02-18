@@ -1,7 +1,44 @@
-DECLARE lv_rowcount INT;
+COLUMN TABLE "CENTRAL_LOG_TEMP" ( 
+    "LOG_ID"                NVARCHAR(128) ,
+    "USECASE"               NVARCHAR(128) ,
+    "SESSION_ID"            NVARCHAR(128) ,
+    "COB_DATE"              NVARCHAR(128),
+    "USERNAME"              NVARCHAR(128) ,
+    "HOSTNAME"              NVARCHAR(128) ,
+    "RUN_METHOD"            NVARCHAR(128) ,
+    "SCHEDULE"              NVARCHAR(256) ,
+    "V_STEP"                NVARCHAR(100),
+    "FUNCTION"              NVARCHAR(128),
+    "SOURCE_NAME"           NVARCHAR(128),
+    "TABLE_NAME"            NVARCHAR(128),
+    "LAYER"                 NVARCHAR(128),
+    "STATUS"                NVARCHAR(128),
+    "COUNT"                 INTEGER,
+    "MESSAGE"               NVARCHAR(4000),
+    "LOG_MESSAGE"           NVARCHAR(4000),
+    "CURRENT_TIME_STAMP"    TIMESTAMP         DEFAULT CURRENT_TIMESTAMP,
+    "EXECUTION_TIME"        INTEGER
+    )
 
-lv_Count := 'select count(*) from ( ' || :lv_sql || ' )';
 
-EXECUTE IMMEDIATE :lv_Count INTO lv_rowcount;
-
-V_OUT := 'Number of Records Inserted is ' || TO_NVARCHAR(:lv_rowcount);
+COLUMN TABLE "CENTRAL_LOG" ( 
+    "LOG_ID"                NVARCHAR(128) ,
+    "USECASE"               NVARCHAR(128) ,
+    "SESSION_ID"            NVARCHAR(128) ,
+    "COB_DATE"              NVARCHAR(128),
+    "USERNAME"              NVARCHAR(128) ,
+    "HOSTNAME"              NVARCHAR(128) ,
+    "RUN_METHOD"            NVARCHAR(128) ,
+    "SCHEDULE"              NVARCHAR(256) ,
+    "V_STEP"                NVARCHAR(100),
+    "FUNCTION"              NVARCHAR(128),
+    "SOURCE_NAME"           NVARCHAR(128),
+    "TABLE_NAME"            NVARCHAR(128),
+    "LAYER"                 NVARCHAR(128),
+    "STATUS"                NVARCHAR(128),
+    "COUNT"                 INTEGER,
+    "MESSAGE"               NVARCHAR(4000),
+    "LOG_MESSAGE"           NVARCHAR(4000),
+    "CURRENT_TIME_STAMP"    TIMESTAMP         DEFAULT CURRENT_TIMESTAMP,
+    "EXECUTION_TIME"        INTEGER
+    )
