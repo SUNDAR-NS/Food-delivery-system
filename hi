@@ -1,9 +1,40 @@
-INSERT INTO "CENTRAL_LOG"
-VALUES (
-'1','UC1','S1','2026-02-18','user1','host1',
-'MANUAL','DAILY','STEP1','FUNC1',
-'SRC1','TAB1','L1','SUCCESS',
-100,'Msg','Log Msg',
-CURRENT_TIMESTAMP,
-10
+CENTRAL_LOG_REPL.hdbtrigger
+
+TRIGGER "CENTRAL_LOG_REPL"
+AFTER INSERT ON "CENTRAL_LOG"
+REFERENCING NEW ROW AS NEWROW
+FOR EACH ROW
+BEGIN
+INSERT INTO "CENTRAL_LOG" VALUES(
+    :NEWROW.LOG_ID,
+    :NEWROW.USECASE,
+    :NEWROW.SESSION_ID,           
+    :NEWROW.COB_DATE,              
+    :NEWROW.USERNAME,             
+    :NEWROW.HOSTNAME,             
+    :NEWROW.RUN_METHOD,      
+    :NEWROW.SCHEDULE,            
+    :NEWROW.V_STEP,             
+    :NEWROW.FUNCTION,              
+    :NEWROW.SOURCE_NAME,           
+    :NEWROW.TABLE_NAME,          
+    :NEWROW.LAYER,           
+    :NEWROW.STATUS,                
+    :NEWROW.COUNT,               
+    :NEWROW.MESSAGE,               
+    :NEWROW.LOG_MESSAGE,           
+    :NEWROW.CURRENT_TIME_STAMP,    
+    :NEWROW.EXECUTION_TIME
 );
+END
+
+CENTRAL_LOG_SYN.hdbsynonym
+
+{
+    "CENTRAL_LOG_SYN" : {
+        "target": {
+            "object": "CENTRAL_LOG",
+            "schema": "T1GDTL_PHY"
+        }
+    }
+}
