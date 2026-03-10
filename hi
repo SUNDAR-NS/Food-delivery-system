@@ -1,94 +1,31 @@
-import "./AnalyticalTableWidget";
+Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+App.jsx:5  Uncaught ReferenceError: React is not defined
+    at App (App.jsx:5:3)
+    at Object.react_stack_bottom_frame (react-dom-client.development.js:25904:20)
+    at renderWithHooks (react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (react-dom-client.development.js:10166:19)
+    at beginWork (react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (react-dom-client.development.js:871:30)
+    at performUnitOfWork (react-dom-client.development.js:17641:22)
+    at workLoopSync (react-dom-client.development.js:17469:41)
+    at renderRootSync (react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (react-dom-client.development.js:16583:35)
+App @ App.jsx:5
+react_stack_bottom_frame @ react-dom-client.development.js:25904
+renderWithHooks @ react-dom-client.development.js:7662
+updateFunctionComponent @ react-dom-client.development.js:10166
+beginWork @ react-dom-client.development.js:11778
+runWithFiberInDEV @ react-dom-client.development.js:871
+performUnitOfWork @ react-dom-client.development.js:17641
+workLoopSync @ react-dom-client.development.js:17469
+renderRootSync @ react-dom-client.development.js:17450
+performWorkOnRoot @ react-dom-client.development.js:16583
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:18957
+performWorkUntilDeadline @ scheduler.development.js:45
+<App>
+exports.createElement @ react.development.js:1054
+(anonymous) @ main.jsx:9
+main.jsx:9  An error occurred in the <App> component.
 
-function App() {
-
-  return (
-    <div style={{height:"600px", width:"100%"}}>
-      <h2>SAPUI5 Product Table</h2>
-
-      <analytical-table-widget />
-
-    </div>
-  );
-
-}
-
-export default App;
-
-
-(function () {
-
-class AnalyticalTableWidget extends HTMLElement {
-
-    connectedCallback() {
-        this.innerHTML = `<div id="ui5_content"></div>`;
-        this._loadUI5();
-    }
-
-    async _loadUI5() {
-
-        if (!window.sap) {
-
-            const script = document.createElement("script");
-            script.src = "https://sapui5.hana.ondemand.com/resources/sap-ui-core.js";
-
-            script.id = "sap-ui-bootstrap";
-            script.setAttribute("data-sap-ui-theme", "sap_fiori_3");
-            script.setAttribute("data-sap-ui-libs", "sap.ui.table,sap.m");
-            script.setAttribute("data-sap-ui-async", "true");
-
-            document.head.appendChild(script);
-
-            await new Promise(resolve => script.onload = resolve);
-        }
-
-        this._createTable();
-    }
-
-    _createTable() {
-
-        sap.ui.getCore().attachInit(() => {
-
-            const oModel = new sap.ui.model.odata.v2.ODataModel(
-                "https://services.odata.org/V2/Northwind/Northwind.svc/"
-            );
-
-            const oTable = new sap.ui.table.Table({
-                title: "Products Table",
-                visibleRowCount: 10,
-                selectionMode: "MultiToggle"
-            });
-
-            oTable.setModel(oModel);
-            oTable.bindRows("/Products");
-
-            oTable.addColumn(new sap.ui.table.Column({
-                label: new sap.m.Label({ text: "Product ID" }),
-                template: new sap.m.Text({ text: "{ProductID}" })
-            }));
-
-            oTable.addColumn(new sap.ui.table.Column({
-                label: new sap.m.Label({ text: "Product Name" }),
-                template: new sap.m.Text({ text: "{ProductName}" })
-            }));
-
-            oTable.addColumn(new sap.ui.table.Column({
-                label: new sap.m.Label({ text: "Unit Price" }),
-                template: new sap.m.Text({ text: "{UnitPrice}" })
-            }));
-
-            oTable.addColumn(new sap.ui.table.Column({
-                label: new sap.m.Label({ text: "Units In Stock" }),
-                template: new sap.m.Text({ text: "{UnitsInStock}" })
-            }));
-
-            oTable.placeAt("ui5_content");
-
-        });
-
-    }
-}
-
-customElements.define("analytical-table-widget", AnalyticalTableWidget);
-
-})();
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
