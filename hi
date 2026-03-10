@@ -1,4 +1,132 @@
-Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
-react-dom-client.development.js:28014  Uncaught Error: Target container is not a DOM element.
-    at exports.createRoot (react-dom-client.development.js:28014:15)
-    at main.jsx:5:23
+Uncaught NotSupportedError: Failed to execute 'createElement' on 'Document': The result must not have children
+    at completeWork (react-dom-client.development.js:12610:42)
+    at runWithFiberInDEV (react-dom-client.development.js:871:30)
+    at completeUnitOfWork (react-dom-client.development.js:17777:19)
+    at performUnitOfWork (react-dom-client.development.js:17658:11)
+    at workLoopSync (react-dom-client.development.js:17469:41)
+    at renderRootSync (react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (react-dom-client.development.js:16504:11)
+    at performWorkOnRootViaSchedulerTask (react-dom-client.development.js:18957:7)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:45:48)
+completeWork @ react-dom-client.development.js:12610
+runWithFiberInDEV @ react-dom-client.development.js:871
+completeUnitOfWork @ react-dom-client.development.js:17777
+performUnitOfWork @ react-dom-client.development.js:17658
+workLoopSync @ react-dom-client.development.js:17469
+renderRootSync @ react-dom-client.development.js:17450
+performWorkOnRoot @ react-dom-client.development.js:16504
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:18957
+performWorkUntilDeadline @ scheduler.development.js:45
+<analytical-table-widget>
+exports.createElement @ react.development.js:1054
+App @ App.jsx:10
+react_stack_bottom_frame @ react-dom-client.development.js:25904
+renderWithHooksAgain @ react-dom-client.development.js:7762
+renderWithHooks @ react-dom-client.development.js:7674
+updateFunctionComponent @ react-dom-client.development.js:10166
+beginWork @ react-dom-client.development.js:11778
+runWithFiberInDEV @ react-dom-client.development.js:871
+performUnitOfWork @ react-dom-client.development.js:17641
+workLoopSync @ react-dom-client.development.js:17469
+renderRootSync @ react-dom-client.development.js:17450
+performWorkOnRoot @ react-dom-client.development.js:16504
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:18957
+performWorkUntilDeadline @ scheduler.development.js:45
+<App>
+exports.createElement @ react.development.js:1054
+(anonymous) @ main.jsx:9
+24Tracking Prevention blocked access to storage for <URL>.
+Device-dbg.js:88 2026-03-10 14:37:05 Device API logging initialized - DEVICE
+Log-dbg.js:497  2026-03-10 14:37:05.809900 failed to load JavaScript resource: sap/ui/model/odata/library-preload.js -  sap.ui.ModuleSystem
+u @ Log-dbg.js:497
+(anonymous) @ Log-dbg.js:247
+(anonymous) @ Log-dbg.js:683
+i @ ui5loader-dbg.js:1489
+script
+qe @ ui5loader-dbg.js:1463
+i @ ui5loader-dbg.js:1485
+script
+qe @ ui5loader-dbg.js:1463
+De @ ui5loader-dbg.js:1744
+Ye @ ui5loader-dbg.js:2440
+_preloadJSFormat @ Lib-dbg.js:663
+_preload @ Lib-dbg.js:570
+(anonymous) @ Lib-dbg.js:1644
+(anonymous) @ Lib-dbg.js:1639
+P @ Core-dbg.js:814
+(anonymous) @ Core-dbg.js:796
+(anonymous) @ Object-dbg.js:282
+(anonymous) @ sap-ui-core.js:2
+Log-dbg.js:497  2026-03-10 14:37:05.810199 failed to load 'sap/ui/model/odata/library-preload.js' (failed to load 'sap/ui/model/odata/library-preload.js' from https://sapui5.hana.ondemand.com/resources/sap/ui/model/odata/library-preload.js: script load error), falling back to library-preload.json -  
+u @ Log-dbg.js:497
+(anonymous) @ Log-dbg.js:247
+(anonymous) @ Lib-dbg.js:684
+Promise.catch
+_preloadJSFormat @ Lib-dbg.js:666
+_preload @ Lib-dbg.js:570
+(anonymous) @ Lib-dbg.js:1644
+(anonymous) @ Lib-dbg.js:1639
+P @ Core-dbg.js:814
+(anonymous) @ Core-dbg.js:796
+(anonymous) @ Object-dbg.js:282
+(anonymous) @ sap-ui-core.js:2
+fetch-dbg.js:209   GET https://sapui5.hana.ondemand.com/resources/sap/ui/model/odata/library-preload.json 404 (Not Found)
+(anonymous) @ fetch-dbg.js:209
+n @ fetch-dbg.js:147
+t @ mixedFetch-dbg.js:54
+_preloadJSONFormat @ Lib-dbg.js:711
+(anonymous) @ Lib-dbg.js:685
+Promise.catch
+_preloadJSFormat @ Lib-dbg.js:666
+_preload @ Lib-dbg.js:570
+(anonymous) @ Lib-dbg.js:1644
+(anonymous) @ Lib-dbg.js:1639
+P @ Core-dbg.js:814
+(anonymous) @ Core-dbg.js:796
+(anonymous) @ Object-dbg.js:282
+(anonymous) @ sap-ui-core.js:2
+Log-dbg.js:497  2026-03-10 14:37:05.812600 failed to load 'https://sapui5.hana.ondemand.com/resources/sap/ui/model/odata/library-preload.json': Not Found -  
+u @ Log-dbg.js:497
+(anonymous) @ Log-dbg.js:247
+(anonymous) @ Lib-dbg.js:736
+Promise.catch
+_preloadJSONFormat @ Lib-dbg.js:735
+(anonymous) @ Lib-dbg.js:685
+Promise.catch
+_preloadJSFormat @ Lib-dbg.js:666
+_preload @ Lib-dbg.js:570
+(anonymous) @ Lib-dbg.js:1644
+(anonymous) @ Lib-dbg.js:1639
+P @ Core-dbg.js:814
+(anonymous) @ Core-dbg.js:796
+(anonymous) @ Object-dbg.js:282
+(anonymous) @ sap-ui-core.js:2
+Log-dbg.js:497  2026-03-10 14:37:06.189699 failed to load JavaScript resource: sap/ui/model/odata/library.js -  sap.ui.ModuleSystem
+u @ Log-dbg.js:497
+(anonymous) @ Log-dbg.js:247
+(anonymous) @ Log-dbg.js:683
+i @ ui5loader-dbg.js:1489
+script
+qe @ ui5loader-dbg.js:1463
+i @ ui5loader-dbg.js:1485
+script
+qe @ ui5loader-dbg.js:1463
+De @ ui5loader-dbg.js:1744
+Me @ ui5loader-dbg.js:1916
+r @ ui5loader-dbg.js:2187
+(anonymous) @ Lib-dbg.js:1449
+D @ Lib-dbg.js:1448
+Promise.then
+(anonymous) @ Lib-dbg.js:1648
+(anonymous) @ Core-dbg.js:1170
+(anonymous) @ Core-dbg.js:1130
+(anonymous) @ Core-dbg.js:753
+r @ Core-dbg.js:373
+(anonymous) @ Core-dbg.js:367
+(anonymous) @ Core-dbg.js:822
+Promise.then
+P @ Core-dbg.js:821
+(anonymous) @ Core-dbg.js:796
+(anonymous) @ Object-dbg.js:282
+(anonymous) @ sap-ui-core.js:2
+ui5loader-dbg.js:1199  Uncaught (in promise) ModuleError: failed to load 'sap/ui/model/odata/library.js' from https://sapui5.hana.ondemand.com/resources/sap/ui/model/odata/library.js: script load error
