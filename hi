@@ -1,33 +1,13 @@
-function App() {
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./index.css";
 
-  const products = [
-    {id:1, name:"Laptop", price:75000},
-    {id:2, name:"Mouse", price:500},
-    {id:3, name:"Keyboard", price:1500}
-  ];
+const root = ReactDOM.createRoot(document.getElementById("root"));
 
-  return (
-    <div>
-      <h2>Product Table</h2>
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 
-      <table border="1">
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Price</th>
-        </tr>
-
-        {products.map(p => (
-          <tr key={p.id}>
-            <td>{p.id}</td>
-            <td>{p.name}</td>
-            <td>{p.price}</td>
-          </tr>
-        ))}
-
-      </table>
-    </div>
-  );
-}
-
-export default App;
