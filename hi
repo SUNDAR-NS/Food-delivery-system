@@ -1,40 +1,33 @@
-CENTRAL_LOG_REPL.hdbtrigger
+function App() {
 
-TRIGGER "CENTRAL_LOG_REPL"
-AFTER INSERT ON "CENTRAL_LOG"
-REFERENCING NEW ROW AS NEWROW
-FOR EACH ROW
-BEGIN
-INSERT INTO "CENTRAL_LOG" VALUES(
-    :NEWROW.LOG_ID,
-    :NEWROW.USECASE,
-    :NEWROW.SESSION_ID,           
-    :NEWROW.COB_DATE,              
-    :NEWROW.USERNAME,             
-    :NEWROW.HOSTNAME,             
-    :NEWROW.RUN_METHOD,      
-    :NEWROW.SCHEDULE,            
-    :NEWROW.V_STEP,             
-    :NEWROW.FUNCTION,              
-    :NEWROW.SOURCE_NAME,           
-    :NEWROW.TABLE_NAME,          
-    :NEWROW.LAYER,           
-    :NEWROW.STATUS,                
-    :NEWROW.COUNT,               
-    :NEWROW.MESSAGE,               
-    :NEWROW.LOG_MESSAGE,           
-    :NEWROW.CURRENT_TIME_STAMP,    
-    :NEWROW.EXECUTION_TIME
-);
-END
+  const products = [
+    {id:1, name:"Laptop", price:75000},
+    {id:2, name:"Mouse", price:500},
+    {id:3, name:"Keyboard", price:1500}
+  ];
 
-CENTRAL_LOG_SYN.hdbsynonym
+  return (
+    <div>
+      <h2>Product Table</h2>
 
-{
-    "CENTRAL_LOG_SYN" : {
-        "target": {
-            "object": "CENTRAL_LOG",
-            "schema": "T1GDTL_PHY"
-        }
-    }
+      <table border="1">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Price</th>
+        </tr>
+
+        {products.map(p => (
+          <tr key={p.id}>
+            <td>{p.id}</td>
+            <td>{p.name}</td>
+            <td>{p.price}</td>
+          </tr>
+        ))}
+
+      </table>
+    </div>
+  );
 }
+
+export default App;
