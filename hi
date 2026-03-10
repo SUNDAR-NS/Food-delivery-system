@@ -43,7 +43,6 @@ class AnalyticalTableWidget extends HTMLElement {
             });
 
             oTable.setModel(oModel);
-
             oTable.bindRows("/Products");
 
             oTable.addColumn(new sap.ui.table.Column({
@@ -75,3 +74,22 @@ class AnalyticalTableWidget extends HTMLElement {
 customElements.define("analytical-table-widget", AnalyticalTableWidget);
 
 })();
+
+
+
+import React from "react";
+import "./AnalyticalTableWidget";
+
+function App() {
+
+  return (
+    <div style={{height:"600px", width:"100%"}}>
+      <h2>Product Table</h2>
+
+      <analytical-table-widget></analytical-table-widget>
+
+    </div>
+  );
+}
+
+export default App;
