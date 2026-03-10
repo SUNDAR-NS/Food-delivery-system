@@ -1,13 +1,77 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
-import "./index.css";
+(function () {
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+class AnalyticalTableWidget extends HTMLElement {
 
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+    constructor() {
+        super();
+        this.innerHTML = `<div id="ui5_content" style="width:100%;height:100%"></div>`;
+        this._loadUI5();
+    }
 
+    async _loadUI5() {
+
+        if (!window.sap) {
+
+            const script = document.createElement("script");
+            script.src = "https://sapui5.hana.ondemand.com/resources/sap-ui-core.js";
+
+            script.id = "sap-ui-bootstrap";
+            script.setAttribute("data-sap-ui-theme", "sap_fiori_3");
+            script.setAttribute("data-sap-ui-libs", "sap.ui.table,sap.m,sap.ui.model.odata");
+            script.setAttribute("data-sap-ui-async", "true");
+
+            document.head.appendChild(script);
+
+            await new Promise(resolve => script.onload = resolve);
+        }
+
+        this._createTable();
+    }
+
+    _createTable() {
+
+        sap.ui.getCore().attachInit(function () {
+
+            const oModel = new sap.ui.model.odata.v2.ODataModel(
+                "https://services.odata.org/V2/Northwind/Northwind.svc/"
+            );
+
+            const oTable = new sap.ui.table.Table({
+                title: "Products Table",
+                visibleRowCount: 10,
+                selectionMode: "MultiToggle"
+            });
+
+            oTable.setModel(oModel);
+
+            oTable.bindRows("/Products");
+
+            oTable.addColumn(new sap.ui.table.Column({
+                label: new sap.m.Label({ text: "Product ID" }),
+                template: new sap.m.Text({ text: "{ProductID}" })
+            }));
+
+            oTable.addColumn(new sap.ui.table.Column({
+                label: new sap.m.Label({ text: "Product Name" }),
+                template: new sap.m.Text({ text: "{ProductName}" })
+            }));
+
+            oTable.addColumn(new sap.ui.table.Column({
+                label: new sap.m.Label({ text: "Unit Price" }),
+                template: new sap.m.Text({ text: "{UnitPrice}" })
+            }));
+
+            oTable.addColumn(new sap.ui.table.Column({
+                label: new sap.m.Label({ text: "Units In Stock" }),
+                template: new sap.m.Text({ text: "{UnitsInStock}" })
+            }));
+
+            oTable.placeAt("ui5_content");
+
+        });
+    }
+}
+
+customElements.define("analytical-table-widget", AnalyticalTableWidget);
+
+})();
