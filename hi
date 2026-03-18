@@ -1,42 +1,49 @@
-{/* Top Section */}
-<div className="grid md:grid-cols-3 gap-4 mb-6">
+import React from "react";
 
-  {/* LEFT → KPI Cards (2x2) */}
-  <div className="grid grid-cols-2 gap-4">
+function Dashboard() {
+  return (
+    <div className="bg-gray-100 min-h-screen p-6">
 
-    <div className="bg-white p-4 rounded-xl shadow">
-      <p className="text-gray-500 text-sm">MFU Onboarded</p>
-      <h2 className="text-3xl font-bold text-green-600">133</h2>
-    </div>
+      {/* Header */}
+      <h1 className="text-2xl font-bold text-green-700 mb-6">
+        MFU Dashboard
+      </h1>
 
-    <div className="bg-white p-4 rounded-xl shadow">
-      <p className="text-gray-500 text-sm">Total Approved</p>
-      <h2 className="text-3xl font-bold text-green-600">61</h2>
-    </div>
+      {/* TOP SECTION */}
+      <div className="grid md:grid-cols-3 gap-4 mb-6">
 
-    <div className="bg-white p-4 rounded-xl shadow">
-      <p className="text-gray-500 text-sm">Total Uploaded</p>
-      <h2 className="text-3xl font-bold text-green-600">72</h2>
-    </div>
+        {/* LEFT → KPI Cards */}
+        <div className="grid grid-cols-2 gap-4">
 
-    <div className="bg-white p-4 rounded-xl shadow">
-      <p className="text-gray-500 text-sm">Rejected</p>
-      <h2 className="text-3xl font-bold text-green-600">0</h2>
-    </div>
+          <div className="bg-white p-4 rounded-xl shadow">
+            <p className="text-gray-500 text-sm">MFU Onboarded</p>
+            <h2 className="text-3xl font-bold text-green-600">133</h2>
+          </div>
 
-  </div>
+          <div className="bg-white p-4 rounded-xl shadow">
+            <p className="text-gray-500 text-sm">Total Approved</p>
+            <h2 className="text-3xl font-bold text-green-600">61</h2>
+          </div>
 
-  {/* RIGHT → Big Chart */}
-  <div className="md:col-span-2 bg-white rounded-xl shadow p-6">
+          <div className="bg-white p-4 rounded-xl shadow">
+            <p className="text-gray-500 text-sm">Total Uploaded</p>
+            <h2 className="text-3xl font-bold text-green-600">72</h2>
+          </div>
 
-    <h2 className="font-semibold mb-4">
-      MFU Templates by Modules
-    </h2>
+          <div className="bg-white p-4 rounded-xl shadow">
+            <p className="text-gray-500 text-sm">Rejected</p>
+            <h2 className="text-3xl font-bold text-green-600">0</h2>
+          </div>
 
-    <div className="h-64 flex items-center justify-center text-gray-400">
-      Chart Area
-    </div>
+        </div>
 
-  </div>
+        {/* RIGHT → Big Chart */}
+        <div className="md:col-span-2 bg-white rounded-xl shadow p-6">
 
-</div>
+          <h2 className="font-semibold mb-4">
+            MFU Templates by Modules
+          </h2>
+
+          <div className="h-64 flex items-center justify-center text-gray-400">
+            Chart Area
+          </div>
