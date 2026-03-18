@@ -1,26 +1,124 @@
-{
-  "name": "my-react-app",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "tailwind": "tailwindcss-cli -i ./src/index.css -o ./src/output.css --watch",
-    "dev:all": "concurrently \"npm run dev\" \"npm run tailwind\""
-  },
-  "devDependencies": {
-    "autoprefixer": "^10.4.27",
-    "concurrently": "^9.2.1",
-    "postcss": "^8.5.8",
-    "tailwindcss": "^4.2.1",
-    "tailwindcss-cli": "^0.1.2",
-    "vite": "^7.3.1"
-  },
-  "dependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-router-dom": "^7.13.1"
-  }
+import React from "react";
+
+function Dashboard() {
+  return (
+    <div className="bg-gray-100 min-h-screen p-6">
+
+      {/* Header */}
+      <h1 className="text-2xl font-bold text-green-700 mb-6">
+        MFU Dashboard
+      </h1>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+
+        <div className="bg-white p-4 rounded-xl shadow">
+          <p className="text-gray-500">MFU Onboarded</p>
+          <h2 className="text-3xl font-bold text-green-600">133</h2>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl shadow">
+          <p className="text-gray-500">Total Approved</p>
+          <h2 className="text-3xl font-bold text-green-600">61</h2>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl shadow">
+          <p className="text-gray-500">Total Uploaded</p>
+          <h2 className="text-3xl font-bold text-green-600">72</h2>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl shadow">
+          <p className="text-gray-500">Rejected</p>
+          <h2 className="text-3xl font-bold text-green-600">0</h2>
+        </div>
+
+      </div>
+
+      {/* Main Chart Section */}
+      <div className="bg-white rounded-xl shadow p-6 mb-6">
+        <h2 className="font-semibold mb-4">
+          MFU Templates by Modules
+        </h2>
+
+        <div className="h-48 flex items-center justify-center text-gray-400">
+          Chart Area
+        </div>
+      </div>
+
+      {/* Bottom Charts */}
+      <div className="grid md:grid-cols-4 gap-4 mb-6">
+
+        <div className="bg-white p-4 rounded-xl shadow">
+          <h3 className="font-semibold mb-2">Count</h3>
+          <div className="h-32 flex items-center justify-center text-gray-400">
+            Pie Chart
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl shadow">
+          <h3 className="font-semibold mb-2">Monthly</h3>
+          <div className="h-32 flex items-center justify-center text-gray-400">
+            Bar Chart
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl shadow">
+          <h3 className="font-semibold mb-2">Quarterly</h3>
+          <div className="h-32 flex items-center justify-center text-gray-400">
+            Bar Chart
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl shadow">
+          <h3 className="font-semibold mb-2">Yearly</h3>
+          <div className="h-32 flex items-center justify-center text-gray-400">
+            Bar Chart
+          </div>
+        </div>
+
+      </div>
+
+      {/* Table Section */}
+      <div className="bg-white rounded-xl shadow p-6">
+
+        <h2 className="font-semibold mb-4">MFU Details</h2>
+
+        <table className="w-full text-sm">
+
+          <thead>
+            <tr className="text-left border-b">
+              <th className="py-2">Module</th>
+              <th>Sub Module</th>
+              <th>LOB Type</th>
+              <th>LOB Template</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr className="border-b">
+              <td className="py-2">Module A</td>
+              <td>Sub A</td>
+              <td>Type 1</td>
+              <td>Template 1</td>
+              <td>10</td>
+            </tr>
+
+            <tr className="border-b">
+              <td className="py-2">Module B</td>
+              <td>Sub B</td>
+              <td>Type 2</td>
+              <td>Template 2</td>
+              <td>20</td>
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+  );
 }
+
+export default Dashboard;
