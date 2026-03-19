@@ -1,100 +1,327 @@
-/* PAGE BACKGROUND */
+<mvc:View controllerName="mfuanalytics.controller.mfureport"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
+
+<Page title="MFU Dashboard">
+
+<VBox class="mainContainer">
+
+<!-- ===== TOP SECTION ===== -->
+<HBox class="topContainer">
+
+<!-- LEFT KPI -->
+<VBox class="kpiSection">
+
+<VBox class="kpiGrid">
+
+<GenericTile header="MFU Onboarded" class="kpiCard">
+<TileContent>
+<NumericContent value="133"/>
+</TileContent>
+</GenericTile>
+
+<GenericTile header="Total Approved" class="kpiCard">
+<TileContent>
+<NumericContent value="61"/>
+</TileContent>
+</GenericTile>
+
+<GenericTile header="Total Uploaded" class="kpiCard">
+<TileContent>
+<NumericContent value="72"/>
+</TileContent>
+</GenericTile>
+
+<GenericTile header="Rejected" class="kpiCard">
+<TileContent>
+<NumericContent value="0"/>
+</TileContent>
+</GenericTile>
+
+</VBox>
+
+</VBox>
+
+<!-- RIGHT MAIN CHART -->
+<VBox class="chartSection">
+
+<Panel headerText="MFU Templates by Modules" class="chartPanel">
+
+<viz:VizFrame vizType="stacked_column" id="mainChart" height="300px">
+
+<viz:dataset>
+<viz.data:FlattenedDataset data="{/modules}">
+<viz.data:dimensions>
+<viz.data:DimensionDefinition name="Module" value="{module}"/>
+</viz.data:dimensions>
+
+<viz.data:measures>
+<viz.data:MeasureDefinition name="Approved" value="{approved}"/>
+<viz.data:MeasureDefinition name="Pending" value="{pending}"/>
+</viz.data:MeasureDefinition>
+</viz.data:measures>
+
+</viz.data:FlattenedDataset>
+</viz:dataset>
+
+<viz:feeds>
+<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved,Pending"/>
+<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
+</viz:feeds>
+
+</viz:VizFrame>
+
+</Panel>
+
+</VBox>
+
+</HBox>
+
+<!-- ===== BOTTOM SECTION ===== -->
+<HBox class="bottomGrid">
+
+<Panel headerText="Templates by Count">
+<viz:VizFrame id="pieChart" vizType="pie"/>
+</Panel>
+
+<Panel headerText="Monthly">
+<viz:VizFrame id="monthChart" vizType="column"/>
+</Panel>
+
+<Panel headerText="Quarterly">
+<viz:VizFrame id="quarterChart" vizType="column"/>
+</Panel>
+
+<Panel headerText="Yearly">
+<viz:VizFrame id="yearChart" vizType="column"/>
+</Panel>
+
+</HBox>
+
+<!-- ===== TABLE ===== -->
+<Panel headerText="MFU Details">
+
+<Table items="{/details}">
+
+<columns>
+<Column><Text text="Module"/></Column>
+<Column><Text text="Sub Module"/></Column>
+<Column><Text text="Type"/></Column>
+<Column><Text text="Template"/></Column>
+<Column><Text text="Count"/></Column>
+</columns>
+
+<items>
+<ColumnListItem>
+<cells>
+<Text text="{module}"/>
+<Text text="{submodule}"/>
+<Text text="{type}"/>
+<Text text="{template}"/>
+<Text text="{count}"/>
+</cells>
+</ColumnListItem>
+</items>
+
+</Table>
+
+</Panel>
+
+</VBox>
+
+</Page>
+</mvc:View>
+
+
+sap.ui.define([
+"sap/ui/core/mvc/Controller",
+"sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+"use strict";
+
+return Controller.extend("mfuanalytics.controller.mfureport", {
+
+onInit: function () {
+
+var oData = {
+
+/* MAIN BAR */
+modules: [
+{ module: "Retail", approved: 30, pending: 10 },
+{ module: "Finance", approved: 55, pending: 15 },
+{ module: "HR", approved: 20, pending: 5 },
+{ module: "IT", approved: 40, pending: 10 }
+],
+
+/* PIE */
+pie: [
+{ type: "Retail", value: 40 },
+{ type: "Finance", value: 25 },
+{ type: "HR", value: 20 },
+{ type: "IT", value: 15 }
+],
+
+/* MONTH */
+monthly: [
+{ period: "Jan", value: 20 },
+{ period: "Feb", value: 30 },
+{ period: "Mar", value: 50 }
+],
+
+/* QUARTER */
+quarter: [
+{ period: "Q1", value: 70 },
+{ period: "Q2", value: 50 },
+{ period: "Q3", value: 30 }
+],
+
+/* YEAR */
+year: [
+{ period: "2022", value: 80 },
+{ period: "2023", value: 60 },
+{ period: "2024", value: 40 }
+],
+
+/* TABLE */
+details: [
+{ module: "Retail", submodule: "Sales", type: "Upload", template: "Temp1", count: 10 },
+{ module: "Finance", submodule: "Accounts", type: "Upload", template: "Temp2", count: 25 }
+]
+
+};
+
+this.getView().setModel(new JSONModel(oData));
+
+this._setCharts();
+
+},
+
+_setCharts: function () {
+
+/* PIE */
+this._setChart("pieChart", "pie", "/pie", "type", "value");
+
+/* MONTH */
+this._setChart("monthChart", "column", "/monthly", "period", "value");
+
+/* QUARTER */
+this._setChart("quarterChart", "column", "/quarter", "period", "value");
+
+/* YEAR */
+this._setChart("yearChart", "column", "/year", "period", "value");
+
+},
+
+_setChart: function (id, type, path, dim, measure) {
+
+var oChart = this.getView().byId(id);
+
+oChart.setVizType(type);
+
+var oDataset = new sap.viz.ui5.data.FlattenedDataset({
+data: { path: path },
+dimensions: [{
+name: dim,
+value: "{" + dim + "}"
+}],
+measures: [{
+name: measure,
+value: "{" + measure + "}"
+}]
+});
+
+oChart.setDataset(oDataset);
+
+oChart.setFeeds([
+new sap.viz.ui5.controls.common.feeds.FeedItem({
+uid: "valueAxis",
+type: "Measure",
+values: [measure]
+}),
+new sap.viz.ui5.controls.common.feeds.FeedItem({
+uid: "categoryAxis",
+type: "Dimension",
+values: [dim]
+})
+]);
+
+}
+
+});
+});
+
+
+/* BACKGROUND */
 .sapMPage {
-    background-color: #f5f7fa;
+    background: #f4f7fb;
 }
 
-/* ===== TOP ALIGNMENT ===== */
-
-/* Main top HBox spacing */
-.sapMHBox {
-    width: 100%;
+/* MAIN */
+.mainContainer {
+    padding: 20px;
 }
 
-/* KPI container */
-.tile {
-    width: 48% !important;
-    margin: 5px;
+/* TOP */
+.topContainer {
+    display: flex;
+    gap: 20px;
 }
 
-/* KPI card styling */
-.sapMGT {
+/* KPI */
+.kpiSection {
+    width: 35%;
+}
+
+.kpiGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* KPI CARD */
+.kpiCard {
+    height: 120px;
     border-radius: 12px;
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    padding: 10px;
+    background: linear-gradient(135deg, #e8f5e9, #ffffff);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 }
 
-/* KPI number */
+/* NUMBER */
 .sapMNCValue {
-    font-size: 26px !important;
-    font-weight: bold;
+    font-size: 28px !important;
     color: #2e7d32 !important;
+    font-weight: bold;
 }
 
-/* KPI title */
-.sapMGTHeaderText {
-    font-size: 13px;
-    color: #555;
+/* RIGHT CHART */
+.chartSection {
+    width: 65%;
 }
 
-/* LEFT KPI section spacing */
-.sapMVBox > .sapMHBox {
-    margin-bottom: 10px;
+.chartPanel {
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 }
 
-/* ===== RIGHT CHART FIX ===== */
+/* BOTTOM */
+.bottomGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
 
+/* PANEL */
 .sapMPanel {
     border-radius: 12px;
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    padding: 10px;
-}
-
-/* Chart center fix */
-.vizFrame {
-    margin: auto;
-}
-
-/* ===== BOTTOM SECTION (NO SCROLL LOOK) ===== */
-
-/* Equal 4 boxes */
-.sapMHBox > .sapMPanel {
-    width: 24% !important;
-}
-
-/* Remove weird spacing */
-.sapMHBox {
-    gap: 10px;
-}
-
-/* Prevent overflow scroll feel */
-.sapMPanelContent {
-    overflow: hidden !important;
-}
-
-/* ===== TABLE ===== */
-
-.sapMTable {
-    border-radius: 10px;
     background: white;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-/* ===== GENERAL CLEAN ===== */
-
-/* Remove unwanted padding */
-.sapUiContentPadding {
-    padding: 10px !important;
-}
-
-/* Panel header bold */
-.sapMPanelHdr {
-    font-weight: bold;
-}
-
-/* Smooth UI */
-.sapMGT,
-.sapMPanel {
-    transition: 0.2s ease;
+/* TABLE */
+.sapMTable {
+    margin-top: 20px;
+    border-radius: 10px;
 }
