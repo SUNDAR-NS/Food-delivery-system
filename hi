@@ -1,113 +1,3 @@
-<mvc:View controllerName="mfuanalytics.controller.mfureport"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:viz="sap.viz.ui5.controls"
-    xmlns:viz.data="sap.viz.ui5.data"
-    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
-
-<Page title="MFU Dashboard">
-
-<VBox class="mainContainer">
-
-<!-- ===== TOP ===== -->
-<HBox class="topContainer">
-
-<!-- KPI -->
-<VBox class="kpiSection">
-
-<VBox class="kpiGrid">
-
-<GenericTile header="MFU Onboarded" class="kpiCard">
-<TileContent><NumericContent value="133"/></TileContent>
-</GenericTile>
-
-<GenericTile header="Total Approved" class="kpiCard">
-<TileContent><NumericContent value="61"/></TileContent>
-</GenericTile>
-
-<GenericTile header="Total Uploaded" class="kpiCard">
-<TileContent><NumericContent value="72"/></TileContent>
-</GenericTile>
-
-<GenericTile header="Rejected" class="kpiCard">
-<TileContent><NumericContent value="0"/></TileContent>
-</GenericTile>
-
-</VBox>
-</VBox>
-
-<!-- MAIN CHART -->
-<VBox class="chartSection">
-
-<Panel headerText="MFU Templates by Modules" class="chartPanel">
-
-<viz:VizFrame id="mainChart" vizType="stacked_column" height="300px">
-</viz:VizFrame>
-
-</Panel>
-
-</VBox>
-
-</HBox>
-
-<!-- ===== BOTTOM ===== -->
-<HBox class="bottomGrid">
-
-<Panel headerText="Templates by Count">
-<viz:VizFrame id="pieChart" vizType="pie"/>
-</Panel>
-
-<Panel headerText="Monthly">
-<viz:VizFrame id="monthChart" vizType="column"/>
-</Panel>
-
-<Panel headerText="Quarterly">
-<viz:VizFrame id="quarterChart" vizType="column"/>
-</Panel>
-
-<Panel headerText="Yearly">
-<viz:VizFrame id="yearChart" vizType="column"/>
-</Panel>
-
-</HBox>
-
-<!-- ===== TABLE ===== -->
-<Panel headerText="MFU Details">
-
-<Table items="{/details}">
-<columns>
-<Column><Text text="Module"/></Column>
-<Column><Text text="Sub Module"/></Column>
-<Column><Text text="Type"/></Column>
-<Column><Text text="Template"/></Column>
-<Column><Text text="Count"/></Column>
-</columns>
-
-<items>
-<ColumnListItem>
-<cells>
-<Text text="{module}"/>
-<Text text="{submodule}"/>
-<Text text="{type}"/>
-<Text text="{template}"/>
-<Text text="{count}"/>
-</cells>
-</ColumnListItem>
-</items>
-
-</Table>
-
-</Panel>
-
-</VBox>
-
-</Page>
-</mvc:View>
-
-
-
-
-
 sap.ui.define([
 "sap/ui/core/mvc/Controller",
 "sap/ui/model/json/JSONModel",
@@ -152,11 +42,6 @@ year: [
 { period: "2022", value: 80 },
 { period: "2023", value: 60 },
 { period: "2024", value: 40 }
-],
-
-details: [
-{ module: "Retail", submodule: "Sales", type: "Upload", template: "Temp1", count: 10 },
-{ module: "Finance", submodule: "Accounts", type: "Upload", template: "Temp2", count: 25 }
 ]
 
 };
@@ -166,132 +51,176 @@ this.getView().setModel(new JSONModel(oData));
 },
 
 onAfterRendering: function () {
-this._setCharts();
-},
 
-_setCharts: function () {
-
-this._createChart("mainChart", "stacked_column", "/modules", "module", ["approved","pending"]);
-this._createChart("pieChart", "pie", "/pie", "type", ["value"]);
-this._createChart("monthChart", "column", "/monthly", "period", ["value"]);
-this._createChart("quarterChart", "column", "/quarter", "period", ["value"]);
-this._createChart("yearChart", "column", "/year", "period", ["value"]);
+this._setMainChart();
+this._setPieChart();
+this._setMonthChart();
+this._setQuarterChart();
+this._setYearChart();
 
 },
 
-_createChart: function (id, type, path, dimension, measures) {
+/* ===== MAIN CHART ===== */
+_setMainChart: function () {
 
-var oChart = this.getView().byId(id);
+var oChart = this.byId("mainChart");
+
 if (!oChart) return;
 
-oChart.setVizType(type);
-
-var aMeasures = measures.map(function(m){
-return { name: m, value: "{" + m + "}" };
-});
-
-var dataset = new FlattenedDataset({
-data: { path: path },
+oChart.setDataset(new FlattenedDataset({
+data: { path: "/modules" },
 dimensions: [{
-name: dimension,
-value: "{" + dimension + "}"
+name: "Module",
+value: "{module}"
 }],
-measures: aMeasures
-});
-
-oChart.setDataset(dataset);
-
-var feeds = [];
-
-feeds.push(new FeedItem({
-uid: "categoryAxis",
-type: "Dimension",
-values: [dimension]
+measures: [
+{ name: "Approved", value: "{approved}" },
+{ name: "Pending", value: "{pending}" }
+]
 }));
 
-measures.forEach(function(m){
-feeds.push(new FeedItem({
+oChart.setFeeds([
+new FeedItem({
 uid: "valueAxis",
 type: "Measure",
-values: [m]
+values: ["Approved", "Pending"]
+}),
+new FeedItem({
+uid: "categoryAxis",
+type: "Dimension",
+values: ["Module"]
+})
+]);
+
+},
+
+/* ===== PIE ===== */
+_setPieChart: function () {
+
+var oChart = this.byId("pieChart");
+
+oChart.setDataset(new FlattenedDataset({
+data: { path: "/pie" },
+dimensions: [{
+name: "Type",
+value: "{type}"
+}],
+measures: [{
+name: "Value",
+value: "{value}"
+}]
 }));
-});
 
-oChart.setFeeds(feeds);
+oChart.setFeeds([
+new FeedItem({
+uid: "size",
+type: "Measure",
+values: ["Value"]
+}),
+new FeedItem({
+uid: "color",
+type: "Dimension",
+values: ["Type"]
+})
+]);
+
+},
+
+/* ===== MONTH ===== */
+_setMonthChart: function () {
+
+var oChart = this.byId("monthChart");
+
+oChart.setDataset(new FlattenedDataset({
+data: { path: "/monthly" },
+dimensions: [{
+name: "Month",
+value: "{period}"
+}],
+measures: [{
+name: "Value",
+value: "{value}"
+}]
+}));
+
+oChart.setFeeds([
+new FeedItem({
+uid: "valueAxis",
+type: "Measure",
+values: ["Value"]
+}),
+new FeedItem({
+uid: "categoryAxis",
+type: "Dimension",
+values: ["Month"]
+})
+]);
+
+},
+
+/* ===== QUARTER ===== */
+_setQuarterChart: function () {
+
+var oChart = this.byId("quarterChart");
+
+oChart.setDataset(new FlattenedDataset({
+data: { path: "/quarter" },
+dimensions: [{
+name: "Quarter",
+value: "{period}"
+}],
+measures: [{
+name: "Value",
+value: "{value}"
+}]
+}));
+
+oChart.setFeeds([
+new FeedItem({
+uid: "valueAxis",
+type: "Measure",
+values: ["Value"]
+}),
+new FeedItem({
+uid: "categoryAxis",
+type: "Dimension",
+values: ["Quarter"]
+})
+]);
+
+},
+
+/* ===== YEAR ===== */
+_setYearChart: function () {
+
+var oChart = this.byId("yearChart");
+
+oChart.setDataset(new FlattenedDataset({
+data: { path: "/year" },
+dimensions: [{
+name: "Year",
+value: "{period}"
+}],
+measures: [{
+name: "Value",
+value: "{value}"
+}]
+}));
+
+oChart.setFeeds([
+new FeedItem({
+uid: "valueAxis",
+type: "Measure",
+values: ["Value"]
+}),
+new FeedItem({
+uid: "categoryAxis",
+type: "Dimension",
+values: ["Year"]
+})
+]);
 
 }
 
 });
 });
-
-
-
-
-
-.sapMPage {
-    background: #f4f7fb;
-}
-
-.mainContainer {
-    padding: 20px;
-}
-
-/* TOP */
-.topContainer {
-    display: flex;
-    gap: 20px;
-}
-
-/* KPI */
-.kpiSection {
-    width: 35%;
-}
-
-.kpiGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-.kpiCard {
-    height: 120px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #e8f5e9, #ffffff);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-}
-
-.sapMNCValue {
-    font-size: 28px !important;
-    color: #2e7d32 !important;
-    font-weight: bold;
-}
-
-/* CHART */
-.chartSection {
-    width: 65%;
-}
-
-.chartPanel {
-    border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-}
-
-/* BOTTOM */
-.bottomGrid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    margin-top: 20px;
-}
-
-/* PANEL */
-.sapMPanel {
-    border-radius: 12px;
-    background: white;
-}
-
-/* TABLE */
-.sapMTable {
-    margin-top: 20px;
-    border-radius: 10px;
-}
