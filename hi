@@ -19,27 +19,27 @@
     <!-- LEFT KPI -->
     <layout:Grid defaultSpan="L6 M6 S12">
 
-        <layout:Grid defaultSpan="L6 M6 S12" hSpacing="1" vSpacing="1">
+        <layout:Grid defaultSpan="L6 M6 S12">
 
-            <GenericTile header="Total MFU Uploaded">
+            <GenericTile header="Total MFU Uploaded" class="sapUiTinyMargin">
                 <TileContent>
                     <NumericContent value="71"/>
                 </TileContent>
             </GenericTile>
 
-            <GenericTile header="Total MFU Approved">
+            <GenericTile header="Total MFU Approved" class="sapUiTinyMargin">
                 <TileContent>
                     <NumericContent value="60"/>
                 </TileContent>
             </GenericTile>
 
-            <GenericTile header="MFU Template Onboarded">
+            <GenericTile header="MFU Template Onboarded" class="sapUiTinyMargin">
                 <TileContent>
                     <NumericContent value="115"/>
                 </TileContent>
             </GenericTile>
 
-            <GenericTile header="Total MFU Rejected">
+            <GenericTile header="Total MFU Rejected" class="sapUiTinyMargin">
                 <TileContent>
                     <NumericContent value="5"/>
                 </TileContent>
@@ -54,7 +54,7 @@
 
         <Panel headerText="MFU Templates by Modules">
 
-            <viz:VizFrame vizType="column" width="100%" height="350px">
+            <viz:VizFrame vizType="column" width="100%" height="400px">
 
                 <viz:dataset>
                     <viz.data:FlattenedDataset data="{/modules}">
@@ -85,6 +85,7 @@
 
     <!-- PIE -->
     <Panel headerText="Templates by Count">
+
         <viz:VizFrame vizType="pie" height="250px">
 
             <viz:dataset>
@@ -104,17 +105,18 @@
             </viz:feeds>
 
         </viz:VizFrame>
+
     </Panel>
 
-    <Panel headerText="Top 3 Templates (Monthly)">
+    <Panel headerText="Monthly">
         <viz:VizFrame vizType="column" height="250px"/>
     </Panel>
 
-    <Panel headerText="Top 3 Templates (Quarterly)">
+    <Panel headerText="Quarterly">
         <viz:VizFrame vizType="column" height="250px"/>
     </Panel>
 
-    <Panel headerText="Top 3 Templates (Yearly)">
+    <Panel headerText="Yearly">
         <viz:VizFrame vizType="column" height="250px"/>
     </Panel>
 
@@ -153,53 +155,6 @@
 
 </Page>
 </mvc:View>
-
-
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-    "use strict";
-
-    return Controller.extend("mfuanalytics.controller.mfureport", {
-
-        onInit: function () {
-
-            var data = {
-
-                modules: [
-                    { module: "Retail", approved: 30 },
-                    { module: "Finance", approved: 55 },
-                    { module: "HR", approved: 20 },
-                    { module: "IT", approved: 40 }
-                ],
-
-                details: [
-                    {
-                        module: "Retail",
-                        submodule: "Sales",
-                        type: "Upload",
-                        template: "Temp1",
-                        count: 10
-                    },
-                    {
-                        module: "Finance",
-                        submodule: "Accounts",
-                        type: "Upload",
-                        template: "Temp2",
-                        count: 25
-                    }
-                ]
-
-            };
-
-            var oModel = new JSONModel(data);
-            this.getView().setModel(oModel);
-        }
-
-    });
-});
-
 
 
 
