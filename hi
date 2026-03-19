@@ -9,69 +9,39 @@
 
 <VBox class="mainContainer">
 
-<!-- ===== TOP SECTION ===== -->
+<!-- ===== TOP ===== -->
 <HBox class="topContainer">
 
-<!-- LEFT KPI -->
+<!-- KPI -->
 <VBox class="kpiSection">
 
 <VBox class="kpiGrid">
 
 <GenericTile header="MFU Onboarded" class="kpiCard">
-<TileContent>
-<NumericContent value="133"/>
-</TileContent>
+<TileContent><NumericContent value="133"/></TileContent>
 </GenericTile>
 
 <GenericTile header="Total Approved" class="kpiCard">
-<TileContent>
-<NumericContent value="61"/>
-</TileContent>
+<TileContent><NumericContent value="61"/></TileContent>
 </GenericTile>
 
 <GenericTile header="Total Uploaded" class="kpiCard">
-<TileContent>
-<NumericContent value="72"/>
-</TileContent>
+<TileContent><NumericContent value="72"/></TileContent>
 </GenericTile>
 
 <GenericTile header="Rejected" class="kpiCard">
-<TileContent>
-<NumericContent value="0"/>
-</TileContent>
+<TileContent><NumericContent value="0"/></TileContent>
 </GenericTile>
 
 </VBox>
-
 </VBox>
 
-<!-- RIGHT MAIN CHART -->
+<!-- MAIN CHART -->
 <VBox class="chartSection">
 
 <Panel headerText="MFU Templates by Modules" class="chartPanel">
 
-<viz:VizFrame vizType="stacked_column" id="mainChart" height="300px">
-
-<viz:dataset>
-<viz.data:FlattenedDataset data="{/modules}">
-<viz.data:dimensions>
-<viz.data:DimensionDefinition name="Module" value="{module}"/>
-</viz.data:dimensions>
-
-<viz.data:measures>
-<viz.data:MeasureDefinition name="Approved" value="{approved}"/>
-<viz.data:MeasureDefinition name="Pending" value="{pending}"/>
-</viz.data:MeasureDefinition>
-</viz.data:measures>
-
-</viz.data:FlattenedDataset>
-</viz:dataset>
-
-<viz:feeds>
-<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved,Pending"/>
-<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
-</viz:feeds>
-
+<viz:VizFrame id="mainChart" vizType="stacked_column" height="300px">
 </viz:VizFrame>
 
 </Panel>
@@ -80,7 +50,7 @@
 
 </HBox>
 
-<!-- ===== BOTTOM SECTION ===== -->
+<!-- ===== BOTTOM ===== -->
 <HBox class="bottomGrid">
 
 <Panel headerText="Templates by Count">
@@ -105,7 +75,6 @@
 <Panel headerText="MFU Details">
 
 <Table items="{/details}">
-
 <columns>
 <Column><Text text="Module"/></Column>
 <Column><Text text="Sub Module"/></Column>
@@ -136,10 +105,15 @@
 </mvc:View>
 
 
+
+
+
 sap.ui.define([
 "sap/ui/core/mvc/Controller",
-"sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
+"sap/ui/model/json/JSONModel",
+"sap/viz/ui5/data/FlattenedDataset",
+"sap/viz/ui5/controls/common/feeds/FeedItem"
+], function (Controller, JSONModel, FlattenedDataset, FeedItem) {
 "use strict";
 
 return Controller.extend("mfuanalytics.controller.mfureport", {
@@ -148,7 +122,6 @@ onInit: function () {
 
 var oData = {
 
-/* MAIN BAR */
 modules: [
 { module: "Retail", approved: 30, pending: 10 },
 { module: "Finance", approved: 55, pending: 15 },
@@ -156,7 +129,6 @@ modules: [
 { module: "IT", approved: 40, pending: 10 }
 ],
 
-/* PIE */
 pie: [
 { type: "Retail", value: 40 },
 { type: "Finance", value: 25 },
@@ -164,28 +136,24 @@ pie: [
 { type: "IT", value: 15 }
 ],
 
-/* MONTH */
 monthly: [
 { period: "Jan", value: 20 },
 { period: "Feb", value: 30 },
 { period: "Mar", value: 50 }
 ],
 
-/* QUARTER */
 quarter: [
 { period: "Q1", value: 70 },
 { period: "Q2", value: 50 },
 { period: "Q3", value: 30 }
 ],
 
-/* YEAR */
 year: [
 { period: "2022", value: 80 },
 { period: "2023", value: 60 },
 { period: "2024", value: 40 }
 ],
 
-/* TABLE */
 details: [
 { module: "Retail", submodule: "Sales", type: "Upload", template: "Temp1", count: 10 },
 { module: "Finance", submodule: "Accounts", type: "Upload", template: "Temp2", count: 25 }
@@ -195,58 +163,61 @@ details: [
 
 this.getView().setModel(new JSONModel(oData));
 
-this._setCharts();
+},
 
+onAfterRendering: function () {
+this._setCharts();
 },
 
 _setCharts: function () {
 
-/* PIE */
-this._setChart("pieChart", "pie", "/pie", "type", "value");
-
-/* MONTH */
-this._setChart("monthChart", "column", "/monthly", "period", "value");
-
-/* QUARTER */
-this._setChart("quarterChart", "column", "/quarter", "period", "value");
-
-/* YEAR */
-this._setChart("yearChart", "column", "/year", "period", "value");
+this._createChart("mainChart", "stacked_column", "/modules", "module", ["approved","pending"]);
+this._createChart("pieChart", "pie", "/pie", "type", ["value"]);
+this._createChart("monthChart", "column", "/monthly", "period", ["value"]);
+this._createChart("quarterChart", "column", "/quarter", "period", ["value"]);
+this._createChart("yearChart", "column", "/year", "period", ["value"]);
 
 },
 
-_setChart: function (id, type, path, dim, measure) {
+_createChart: function (id, type, path, dimension, measures) {
 
 var oChart = this.getView().byId(id);
+if (!oChart) return;
 
 oChart.setVizType(type);
 
-var oDataset = new sap.viz.ui5.data.FlattenedDataset({
-data: { path: path },
-dimensions: [{
-name: dim,
-value: "{" + dim + "}"
-}],
-measures: [{
-name: measure,
-value: "{" + measure + "}"
-}]
+var aMeasures = measures.map(function(m){
+return { name: m, value: "{" + m + "}" };
 });
 
-oChart.setDataset(oDataset);
+var dataset = new FlattenedDataset({
+data: { path: path },
+dimensions: [{
+name: dimension,
+value: "{" + dimension + "}"
+}],
+measures: aMeasures
+});
 
-oChart.setFeeds([
-new sap.viz.ui5.controls.common.feeds.FeedItem({
-uid: "valueAxis",
-type: "Measure",
-values: [measure]
-}),
-new sap.viz.ui5.controls.common.feeds.FeedItem({
+oChart.setDataset(dataset);
+
+var feeds = [];
+
+feeds.push(new FeedItem({
 uid: "categoryAxis",
 type: "Dimension",
-values: [dim]
-})
-]);
+values: [dimension]
+}));
+
+measures.forEach(function(m){
+feeds.push(new FeedItem({
+uid: "valueAxis",
+type: "Measure",
+values: [m]
+}));
+});
+
+oChart.setFeeds(feeds);
 
 }
 
@@ -254,12 +225,13 @@ values: [dim]
 });
 
 
-/* BACKGROUND */
+
+
+
 .sapMPage {
     background: #f4f7fb;
 }
 
-/* MAIN */
 .mainContainer {
     padding: 20px;
 }
@@ -281,7 +253,6 @@ values: [dim]
     gap: 15px;
 }
 
-/* KPI CARD */
 .kpiCard {
     height: 120px;
     border-radius: 12px;
@@ -289,14 +260,13 @@ values: [dim]
     box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 }
 
-/* NUMBER */
 .sapMNCValue {
     font-size: 28px !important;
     color: #2e7d32 !important;
     font-weight: bold;
 }
 
-/* RIGHT CHART */
+/* CHART */
 .chartSection {
     width: 65%;
 }
