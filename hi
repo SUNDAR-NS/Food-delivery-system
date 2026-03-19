@@ -1,259 +1,100 @@
-<mvc:View controllerName="mfuanalytics.controller.mfureport"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:viz="sap.viz.ui5.controls"
-    xmlns:viz.data="sap.viz.ui5.data"
-    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
-    xmlns:layout="sap.ui.layout">
-
-<Page title="MFU Dashboard">
-
-<VBox class="sapUiSmallMargin">
-
-<Title text="MFU Dashboard" level="H2"/>
-
-<!-- TOP -->
-<HBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop">
-
-    <!-- KPI LEFT -->
-    <VBox width="35%">
-
-        <HBox>
-            <GenericTile header="Total MFU Uploaded" class="tile">
-                <TileContent>
-                    <NumericContent value="71"/>
-                </TileContent>
-            </GenericTile>
-
-            <GenericTile header="Total MFU Approved" class="tile">
-                <TileContent>
-                    <NumericContent value="60"/>
-                </TileContent>
-            </GenericTile>
-        </HBox>
-
-        <HBox>
-            <GenericTile header="MFU Template Onboarded" class="tile">
-                <TileContent>
-                    <NumericContent value="115"/>
-                </TileContent>
-            </GenericTile>
-
-            <GenericTile header="Total MFU Rejected" class="tile">
-                <TileContent>
-                    <NumericContent value="5"/>
-                </TileContent>
-            </GenericTile>
-        </HBox>
-
-    </VBox>
-
-    <!-- RIGHT CHART -->
-    <Panel width="60%" headerText="MFU Templates by Modules">
-
-        <viz:VizFrame vizType="column" height="350px">
-
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
-            </viz:feeds>
-
-        </viz:VizFrame>
-
-    </Panel>
-
-</HBox>
-
-<!-- BOTTOM (NO SCROLL) -->
-<HBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop">
-
-    <!-- PIE -->
-    <Panel width="24%" headerText="Templates by Count">
-
-        <viz:VizFrame vizType="pie" height="250px">
-
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{approved}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="size" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
-            </viz:feeds>
-
-        </viz:VizFrame>
-
-    </Panel>
-
-    <!-- MONTH -->
-    <Panel width="24%" headerText="Monthly">
-
-        <viz:VizFrame vizType="column" height="250px">
-
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/monthly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
-            </viz:feeds>
-
-        </viz:VizFrame>
-
-    </Panel>
-
-    <!-- QUARTER -->
-    <Panel width="24%" headerText="Quarterly">
-
-        <viz:VizFrame vizType="column" height="250px">
-
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/quarterly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
-            </viz:feeds>
-
-        </viz:VizFrame>
-
-    </Panel>
-
-    <!-- YEAR -->
-    <Panel width="24%" headerText="Yearly">
-
-        <viz:VizFrame vizType="column" height="250px">
-
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/yearly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
-            </viz:feeds>
-
-        </viz:VizFrame>
-
-    </Panel>
-
-</HBox>
-
-<!-- TABLE -->
-<Panel headerText="MFU Details" class="sapUiMediumMarginTop">
-
-<Table items="{/details}">
-
-<columns>
-<Column><Text text="Module"/></Column>
-<Column><Text text="Sub Module"/></Column>
-<Column><Text text="Load Type"/></Column>
-<Column><Text text="Template"/></Column>
-<Column><Text text="Count"/></Column>
-</columns>
-
-<items>
-<ColumnListItem>
-<cells>
-<Text text="{module}"/>
-<Text text="{submodule}"/>
-<Text text="{type}"/>
-<Text text="{template}"/>
-<Text text="{count}"/>
-</cells>
-</ColumnListItem>
-</items>
-
-</Table>
-
-</Panel>
-
-</VBox>
-</Page>
-</mvc:View>
-
-
-
-onInit: function () {
-
-    var data = {
-
-        modules: [
-            { module: "Retail", approved: 30 },
-            { module: "Finance", approved: 55 },
-            { module: "HR", approved: 20 },
-            { module: "IT", approved: 40 }
-        ],
-
-        monthly: [
-            { month: "Jan", value: 10 },
-            { month: "Feb", value: 20 },
-            { month: "Mar", value: 15 }
-        ],
-
-        quarterly: [
-            { quarter: "Q1", value: 40 },
-            { quarter: "Q2", value: 25 },
-            { quarter: "Q3", value: 30 }
-        ],
-
-        yearly: [
-            { year: "2022", value: 50 },
-            { year: "2023", value: 70 },
-            { year: "2024", value: 60 }
-        ],
-
-        details: [
-            { module: "Retail", submodule: "Sales", type: "Upload", template: "Temp1", count: 10 },
-            { module: "Finance", submodule: "Accounts", type: "Upload", template: "Temp2", count: 25 }
-        ]
-    };
-
-    this.getView().setModel(new sap.ui.model.json.JSONModel(data));
+/* PAGE BACKGROUND */
+.sapMPage {
+    background-color: #f5f7fa;
 }
 
+/* ===== TOP ALIGNMENT ===== */
 
+/* Main top HBox spacing */
+.sapMHBox {
+    width: 100%;
+}
 
+/* KPI container */
+.tile {
+    width: 48% !important;
+    margin: 5px;
+}
 
+/* KPI card styling */
+.sapMGT {
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 10px;
+}
 
+/* KPI number */
+.sapMNCValue {
+    font-size: 26px !important;
+    font-weight: bold;
+    color: #2e7d32 !important;
+}
+
+/* KPI title */
+.sapMGTHeaderText {
+    font-size: 13px;
+    color: #555;
+}
+
+/* LEFT KPI section spacing */
+.sapMVBox > .sapMHBox {
+    margin-bottom: 10px;
+}
+
+/* ===== RIGHT CHART FIX ===== */
+
+.sapMPanel {
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 10px;
+}
+
+/* Chart center fix */
+.vizFrame {
+    margin: auto;
+}
+
+/* ===== BOTTOM SECTION (NO SCROLL LOOK) ===== */
+
+/* Equal 4 boxes */
+.sapMHBox > .sapMPanel {
+    width: 24% !important;
+}
+
+/* Remove weird spacing */
+.sapMHBox {
+    gap: 10px;
+}
+
+/* Prevent overflow scroll feel */
+.sapMPanelContent {
+    overflow: hidden !important;
+}
+
+/* ===== TABLE ===== */
+
+.sapMTable {
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* ===== GENERAL CLEAN ===== */
+
+/* Remove unwanted padding */
+.sapUiContentPadding {
+    padding: 10px !important;
+}
+
+/* Panel header bold */
+.sapMPanelHdr {
+    font-weight: bold;
+}
+
+/* Smooth UI */
+.sapMGT,
+.sapMPanel {
+    transition: 0.2s ease;
+}
