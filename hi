@@ -1,202 +1,141 @@
-import React from "react";
-import {
-  BarChart, Bar, XAxis, YAxis, ResponsiveContainer,
-  PieChart, Pie, Cell, LabelList
-} from "recharts";
+App.view.xml
 
-/* Sample Data */
-const barData = [
-  { name: "Module A", value: 30 },
-  { name: "Module B", value: 50 },
-  { name: "Module C", value: 20 }
-];
+<mvc:View controllerName="mfuanalytics.controller.App"
+    displayBlock="true"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <App id="app">
+    </App>
+</mvc:View>
 
-const pieData = [
-  { name: "A", value: 40 },
-  { name: "B", value: 30 },
-  { name: "C", value: 30 }
-];
+mfureport.view.xml
 
-const COLORS = ["#16a34a", "#22c55e", "#86efac"];
+<mvc:View controllerName="mfuanalytics.controller.mfureport"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+    xmlns:layout="sap.ui.layout">
+<Page id="page" title="MFU Dashboard">
 
-function Dashboard() {
-  return (
-    <div className="bg-gray-100 min-h-screen p-6">
+<VBox id="_IDGenVBox1" class="sapUiSmallMargin">
 
-      {/* Header */}
-      <h1 className="text-2xl font-bold text-green-700 mb-6">
-        MFU Dashboard
-      </h1>
+<!-- KPI CARDS -->
+<HBox id="_IDGenHBox" justifyContent="SpaceBetween">
 
-      {/* TOP SECTION */}
-      <div className="grid md:grid-cols-3 gap-4 mb-6">
+<GenericTile id="_IDGenGenericTile" header="Total MFU Uploaded">
+<TileContent id="_IDGenTileContent">
+<NumericContent id="_IDGenNumericContent" value="71"/>
+</TileContent>
+</GenericTile>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 gap-4">
+<GenericTile id="_IDGenGenericTile1" header="Total MFU Approved">
+<TileContent id="_IDGenTileContent1">
+<NumericContent id="_IDGenNumericContent1" value="60"/>
+</TileContent>
+</GenericTile>
 
-          <div className="bg-white p-4 rounded-xl shadow">
-            <p className="text-gray-500 text-sm">MFU Onboarded</p>
-            <h2 className="text-3xl font-bold text-green-600">133</h2>
-          </div>
+<GenericTile id="_IDGenGenericTile2" header="MFU Template Onboarded">
+<TileContent id="_IDGenTileContent2">
+<NumericContent id="_IDGenNumericContent2" value="115"/>
+</TileContent>
+</GenericTile>
 
-          <div className="bg-white p-4 rounded-xl shadow">
-            <p className="text-gray-500 text-sm">Total Approved</p>
-            <h2 className="text-3xl font-bold text-green-600">61</h2>
-          </div>
+<GenericTile id="_IDGenGenericTile3" header="Total MFU Rejected">
+<TileContent id="_IDGenTileContent3">
+<NumericContent id="_IDGenNumericContent3" value="5"/>
+</TileContent>
+</GenericTile>
 
-          <div className="bg-white p-4 rounded-xl shadow">
-            <p className="text-gray-500 text-sm">Total Uploaded</p>
-            <h2 className="text-3xl font-bold text-green-600">72</h2>
-          </div>
+</HBox>
 
-          <div className="bg-white p-4 rounded-xl shadow">
-            <p className="text-gray-500 text-sm">Rejected</p>
-            <h2 className="text-3xl font-bold text-green-600">0</h2>
-          </div>
 
-        </div>
+<!-- MAIN CHART -->
+<Panel id="_IDGenPanel" headerText="MFU Templates by Modules" class="sapUiMediumMarginTop">
 
-        {/* BAR CHART */}
-        <div className="md:col-span-2 bg-white rounded-xl shadow p-6">
+<viz:VizFrame
+    id="idBarChart"
+    vizType="stacked_column"
+    width="100%"
+    height="400px">
 
-          <h2 className="font-semibold mb-4">
-            MFU Templates by Modules
-          </h2>
+<viz:dataset>
+<viz.data:FlattenedDataset id="_IDGenFlattenedDataset" data="{/modules}">
+<viz.data:dimensions>
+<viz.data:DimensionDefinition id="_IDGenDimensionDefinition" name="Module" value="{module}"/>
+</viz.data:dimensions>
 
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={barData}>
-              <XAxis dataKey="name" />
-              <YAxis />
+<viz.data:measures>
+<viz.data:MeasureDefinition id="_IDGenMeasureDefinition" name="Approved" value="{approved}"/>
+<viz.data:MeasureDefinition id="_IDGenMeasureDefinition1" name="Pending" value="{pending}"/>
+<viz.data:MeasureDefinition id="_IDGenMeasureDefinition2" name="Uploaded" value="{uploaded}"/>
+</viz.data:measures>
 
-              <Bar dataKey="value" fill="#16a34a">
-                <LabelList dataKey="value" position="top" />
-              </Bar>
+</viz.data:FlattenedDataset>
+</viz:dataset>
 
-            </BarChart>
-          </ResponsiveContainer>
+<viz:feeds>
+<viz.feeds:FeedItem id="_IDGenFeedItem" uid="valueAxis" type="Measure" values="Approved"/>
+<viz.feeds:FeedItem id="_IDGenFeedItem1" uid="valueAxis" type="Measure" values="Pending"/>
+<viz.feeds:FeedItem id="_IDGenFeedItem2" uid="valueAxis" type="Measure" values="Uploaded"/>
+<viz.feeds:FeedItem id="_IDGenFeedItem3" uid="categoryAxis" type="Dimension" values="Module"/>
+</viz:feeds>
 
-        </div>
+</viz:VizFrame>
 
-      </div>
+</Panel>
 
-      {/* BOTTOM SECTION */}
-      <div className="grid md:grid-cols-4 gap-4 mb-6">
 
-        {/* PIE CHART */}
-        <div className="bg-white p-4 rounded-xl shadow">
+<!-- LOWER CHARTS -->
+<HBox id="_IDGenHBox1" justifyContent="SpaceBetween" class="sapUiMediumMarginTop">
 
-          <h3 className="font-semibold mb-2">
-            MFU Templates by Count
-          </h3>
+<Panel id="_IDGenPanel1" headerText="Templates by Count" width="32%">
+<viz:VizFrame id="_IDGenVizFrame" vizType="pie" height="250px"/>
+</Panel>
 
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie data={pieData} dataKey="value" outerRadius={80} label>
-                {pieData.map((entry, index) => (
-                  <Cell key={index} fill={COLORS[index]} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+<Panel id="_IDGenPanel2" headerText="Top 3 Templates (Month)" width="32%">
+<viz:VizFrame id="_IDGenVizFrame1" vizType="column" height="250px"/>
+</Panel>
 
-        </div>
+<Panel id="_IDGenPanel3" headerText="Top 3 Templates (Quarter)" width="32%">
+<viz:VizFrame id="_IDGenVizFrame2" vizType="column" height="250px"/>
+</Panel>
 
-        {/* Monthly */}
-        <div className="bg-white p-4 rounded-xl shadow">
-          <h3 className="font-semibold mb-2">Monthly</h3>
+</HBox>
 
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={barData}>
-              <XAxis dataKey="name" />
 
-              <Bar dataKey="value" fill="#22c55e">
-                <LabelList dataKey="value" position="top" />
-              </Bar>
+<!-- TABLE -->
+<Panel id="_IDGenPanel4" headerText="MFU Details" class="sapUiMediumMarginTop">
 
-            </BarChart>
-          </ResponsiveContainer>
+<Table id="_IDGenTable" items="{/details}">
 
-        </div>
+<columns>
+<Column id="_IDGenColumn"><Text id="_IDGenText" text="Module"/></Column>
+<Column id="_IDGenColumn1"><Text id="_IDGenText1" text="Sub Module"/></Column>
+<Column id="_IDGenColumn2"><Text id="_IDGenText2" text="Load Type"/></Column>
+<Column id="_IDGenColumn3"><Text id="_IDGenText3" text="Load Template"/></Column>
+<Column id="_IDGenColumn4"><Text id="_IDGenText4" text="Load Count"/></Column>
+</columns>
 
-        {/* Quarterly */}
-        <div className="bg-white p-4 rounded-xl shadow">
-          <h3 className="font-semibold mb-2">Quarterly</h3>
+<items>
+<ColumnListItem id="_IDGenColumnListItem">
+<cells>
+<Text id="_IDGenText5" text="{module}"/>
+<Text id="_IDGenText6" text="{submodule}"/>
+<Text id="_IDGenText7" text="{type}"/>
+<Text id="_IDGenText8" text="{template}"/>
+<Text id="_IDGenText9" text="{count}"/>
+</cells>
+</ColumnListItem>
+</items>
 
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={barData}>
-              <XAxis dataKey="name" />
+</Table>
 
-              <Bar dataKey="value" fill="#4ade80">
-                <LabelList dataKey="value" position="top" />
-              </Bar>
+</Panel>
 
-            </BarChart>
-          </ResponsiveContainer>
+</VBox>
 
-        </div>
+</Page>
+</mvc:View>
 
-        {/* Yearly */}
-        <div className="bg-white p-4 rounded-xl shadow">
-          <h3 className="font-semibold mb-2">Yearly</h3>
-
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={barData}>
-              <XAxis dataKey="name" />
-
-              <Bar dataKey="value" fill="#86efac">
-                <LabelList dataKey="value" position="top" />
-              </Bar>
-
-            </BarChart>
-          </ResponsiveContainer>
-
-        </div>
-
-      </div>
-
-      {/* TABLE */}
-      <div className="bg-white rounded-xl shadow p-6">
-
-        <h2 className="font-semibold mb-4">MFU Details</h2>
-
-        <table className="w-full text-sm">
-
-          <thead>
-            <tr className="text-left border-b">
-              <th className="py-2">Module</th>
-              <th>Sub Module</th>
-              <th>LOB Type</th>
-              <th>LOB Template</th>
-              <th>Count</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            <tr className="border-b">
-              <td className="py-2">Module A</td>
-              <td>Sub A</td>
-              <td>Type 1</td>
-              <td>Template 1</td>
-              <td>10</td>
-            </tr>
-
-            <tr className="border-b">
-              <td className="py-2">Module B</td>
-              <td>Sub B</td>
-              <td>Type 2</td>
-              <td>Template 2</td>
-              <td>20</td>
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-  );
-}
-
-export default Dashboard;
