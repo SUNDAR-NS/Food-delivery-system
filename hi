@@ -1,141 +1,119 @@
-<mvc:View controllerName="mfuanalytics.controller.mfureport"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:viz="sap.viz.ui5.controls"
-    xmlns:viz.data="sap.viz.ui5.data"
-    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
-    xmlns:layout="sap.ui.layout">
-
-<Page title="MFU Dashboard">
-
-<VBox class="sapUiSmallMargin">
-
-<!-- HEADER -->
-<Title text="MFU Dashboard" level="H2"/>
-
-<!-- TOP SECTION -->
-<layout:Grid defaultSpan="L4 M6 S12" class="sapUiMediumMarginTop">
-
-    <!-- LEFT KPI -->
-    <layout:Grid defaultSpan="L6 M6 S12">
-
-        <layout:Grid defaultSpan="L6 M6 S12">
-
-            <GenericTile header="Total MFU Uploaded">
-                <TileContent>
-                    <NumericContent value="71"/>
-                </TileContent>
-            </GenericTile>
-
-            <GenericTile header="Total MFU Approved">
-                <TileContent>
-                    <NumericContent value="60"/>
-                </TileContent>
-            </GenericTile>
-
-            <GenericTile header="MFU Template Onboarded">
-                <TileContent>
-                    <NumericContent value="115"/>
-                </TileContent>
-            </GenericTile>
-
-            <GenericTile header="Total MFU Rejected">
-                <TileContent>
-                    <NumericContent value="5"/>
-                </TileContent>
-            </GenericTile>
-
-        </layout:Grid>
-
-    </layout:Grid>
-
-    <!-- RIGHT CHART -->
-    <layout:Grid defaultSpan="L6 M6 S12">
-
-        <Panel headerText="MFU Templates by Modules">
-
-            <viz:VizFrame
-                id="idBarChart"
-                vizType="column"
-                width="100%"
-                height="350px">
-
-                <viz:dataset>
-                    <viz.data:FlattenedDataset data="{/modules}">
-                        <viz.data:dimensions>
-                            <viz.data:DimensionDefinition name="Module" value="{module}"/>
-                        </viz.data:dimensions>
-
-                        <viz.data:measures>
-                            <viz.data:MeasureDefinition name="Value" value="{approved}"/>
-                        </viz.data:measures>
-                    </viz.data:FlattenedDataset>
-                </viz:dataset>
-
-                <viz:feeds>
-                    <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                    <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
-                </viz:feeds>
-
-            </viz:VizFrame>
-
-        </Panel>
-
-    </layout:Grid>
-
-</layout:Grid>
-
-<!-- BOTTOM CHARTS -->
-<layout:Grid defaultSpan="L3 M6 S12" class="sapUiMediumMarginTop">
-
-    <Panel headerText="Templates by Count">
-        <viz:VizFrame vizType="pie" height="250px"/>
-    </Panel>
-
-    <Panel headerText="Top 3 Templates (Monthly)">
-        <viz:VizFrame vizType="column" height="250px"/>
-    </Panel>
-
-    <Panel headerText="Top 3 Templates (Quarterly)">
-        <viz:VizFrame vizType="column" height="250px"/>
-    </Panel>
-
-    <Panel headerText="Top 3 Templates (Yearly)">
-        <viz:VizFrame vizType="column" height="250px"/>
-    </Panel>
-
-</layout:Grid>
-
-<!-- TABLE -->
-<Panel headerText="MFU Details" class="sapUiMediumMarginTop">
-
-<Table items="{/details}">
-
-<columns>
-<Column><Text text="Module"/></Column>
-<Column><Text text="Sub Module"/></Column>
-<Column><Text text="Load Type"/></Column>
-<Column><Text text="Load Template"/></Column>
-<Column><Text text="Load Count"/></Column>
-</columns>
-
-<items>
-<ColumnListItem>
-<cells>
-<Text text="{module}"/>
-<Text text="{submodule}"/>
-<Text text="{type}"/>
-<Text text="{template}"/>
-<Text text="{count}"/>
-</cells>
-</ColumnListItem>
-</items>
-
-</Table>
-
-</Panel>
-
-</VBox>
-
-</Page>
-</mvc:View>
+{
+  "_version": "1.83.0",
+  "sap.app": {
+    "id": "mfuanalytics",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.21.0",
+      "toolsId": "1766712f-0979-40be-a69b-d9bcdfc37c41"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/service/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "4.01"
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.145.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.viz": {},
+      "sap.ui.layout": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "mfuanalytics.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "mfuanalytics.view",
+        "async": true,
+        "viewPath": "mfuanalytics.view"
+      },
+      "routes": [
+        {
+          "name": "Routemfureport",
+          "pattern": ":?query:",
+          "target": [
+            "Targetmfureport"
+          ]
+        }
+      ],
+      "targets": {
+        "Targetmfureport": {
+          "id": "mfureport",
+          "name": "mfureport"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "mfuanalytics.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  }
+}
