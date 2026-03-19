@@ -67,22 +67,98 @@
 </HBox>
 
 <!-- BOTTOM (4 IN ONE ROW) -->
-<HBox class="bottomGrid" justifyContent="SpaceBetween">
+<HBox class="bottomGrid" justifyContent="SpaceBetween" renderType="Bare">
 
+    <!-- PIE -->
     <Panel headerText="Templates by Count">
-        <viz:VizFrame vizType="pie" height="220px" id="pieChart"/>
+        <viz:VizFrame vizType="pie" height="220px">
+
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{approved}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="size" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
     </Panel>
 
+    <!-- MONTH -->
     <Panel headerText="Monthly">
-        <viz:VizFrame vizType="column" height="220px" id="monthlyChart"/>
+        <viz:VizFrame vizType="column" height="220px">
+
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/monthly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
     </Panel>
 
+    <!-- QUARTER -->
     <Panel headerText="Quarterly">
-        <viz:VizFrame vizType="column" height="220px" id="quarterChart"/>
+        <viz:VizFrame vizType="column" height="220px">
+
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/quarterly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
     </Panel>
 
+    <!-- YEAR -->
     <Panel headerText="Yearly">
-        <viz:VizFrame vizType="column" height="220px" id="yearChart"/>
+        <viz:VizFrame vizType="column" height="220px">
+
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/yearly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
     </Panel>
 
 </HBox>
@@ -121,6 +197,16 @@
 </cells>
 </ColumnListItem>
 
+<ColumnListItem>
+<cells>
+<Text text="HR"/>
+<Text text="Recruitment"/>
+<Text text="Upload"/>
+<Text text="Temp3"/>
+<Text text="15"/>
+</cells>
+</ColumnListItem>
+
 </items>
 
 </Table>
@@ -133,96 +219,41 @@
 
 
 
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/viz/ui5/data/FlattenedDataset",
-    "sap/viz/ui5/controls/common/feeds/FeedItem"
-], function (Controller, FlattenedDataset, FeedItem) {
-    "use strict";
 
-    return Controller.extend("mfuanalytics.controller.mfureport", {
 
-        onAfterRendering: function () {
 
-            this.createCharts();
-        },
+onInit: function () {
 
-        createCharts: function () {
+    var data = {
 
-            // PIE
-            var pieData = [
-                { module: "Retail", value: 30 },
-                { module: "Finance", value: 55 },
-                { module: "HR", value: 20 },
-                { module: "IT", value: 40 }
-            ];
+        modules: [
+            { module: "Retail", approved: 30 },
+            { module: "Finance", approved: 55 },
+            { module: "HR", approved: 20 },
+            { module: "IT", approved: 40 }
+        ],
 
-            this._setChart("pieChart", pieData, "module", "value", "pie");
+        monthly: [
+            { month: "Jan", value: 10 },
+            { month: "Feb", value: 20 },
+            { month: "Mar", value: 15 }
+        ],
 
-            // MONTHLY
-            var monthly = [
-                { label: "Jan", value: 10 },
-                { label: "Feb", value: 20 },
-                { label: "Mar", value: 15 }
-            ];
+        quarterly: [
+            { quarter: "Q1", value: 40 },
+            { quarter: "Q2", value: 25 },
+            { quarter: "Q3", value: 30 }
+        ],
 
-            this._setChart("monthlyChart", monthly, "label", "value", "column");
+        yearly: [
+            { year: "2022", value: 50 },
+            { year: "2023", value: 70 },
+            { year: "2024", value: 60 }
+        ]
+    };
 
-            // QUARTER
-            var quarter = [
-                { label: "Q1", value: 40 },
-                { label: "Q2", value: 25 },
-                { label: "Q3", value: 30 }
-            ];
-
-            this._setChart("quarterChart", quarter, "label", "value", "column");
-
-            // YEAR
-            var year = [
-                { label: "2022", value: 50 },
-                { label: "2023", value: 70 },
-                { label: "2024", value: 60 }
-            ];
-
-            this._setChart("yearChart", year, "label", "value", "column");
-        },
-
-        _setChart: function (id, data, dim, measure, type) {
-
-            var oChart = this.getView().byId(id);
-
-            oChart.setVizType(type);
-
-            var dataset = new FlattenedDataset({
-                dimensions: [{
-                    name: dim,
-                    value: "{" + dim + "}"
-                }],
-                measures: [{
-                    name: measure,
-                    value: "{" + measure + "}"
-                }],
-                data: { path: "/" }
-            });
-
-            var model = new sap.ui.model.json.JSONModel(data);
-
-            oChart.setDataset(dataset);
-            oChart.setModel(model);
-
-            oChart.removeAllFeeds();
-
-            if (type === "pie") {
-                oChart.addFeed(new FeedItem({ uid: "size", type: "Measure", values: [measure] }));
-                oChart.addFeed(new FeedItem({ uid: "color", type: "Dimension", values: [dim] }));
-            } else {
-                oChart.addFeed(new FeedItem({ uid: "valueAxis", type: "Measure", values: [measure] }));
-                oChart.addFeed(new FeedItem({ uid: "categoryAxis", type: "Dimension", values: [dim] }));
-            }
-        }
-
-    });
-});
+    this.getView().setModel(new sap.ui.model.json.JSONModel(data));
+}
 
 
 .sapMPage {
@@ -253,7 +284,7 @@ sap.ui.define([
     flex: 1;
     height: 120px;
     border-radius: 14px;
-    background: linear-gradient(135deg, #e8f5e9, #ffffff);
+    background: #ffffff;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
@@ -269,22 +300,32 @@ sap.ui.define([
     border-radius: 14px;
 }
 
-/* BOTTOM - ONE ROW */
+/* BOTTOM - FORCE ONE ROW */
 .bottomGrid {
     display: flex;
     flex-wrap: nowrap;
-    gap: 15px;
-    margin-top: 25px;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
 }
 
-.bottomGrid .sapMPanel {
-    width: 24% !important;
-    border-radius: 14px;
+.bottomGrid > * {
+    flex: 1;
+    min-width: 0;
+}
+
+/* FIX CHART */
+.sapVizFrame {
+    width: 100% !important;
+}
+
+/* REMOVE SCROLL */
+.sapMPanelContent {
+    overflow: hidden !important;
 }
 
 /* TABLE */
 .sapMTable {
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border-radius: 10px;
 }
