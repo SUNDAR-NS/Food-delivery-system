@@ -1,33 +1,15 @@
-MFUAnalytics/app/services.cds
+using com.scb.fileupload as db from '../db/schema';
 
+service CatalogService {
 
-using from './mfuanalytics/annotations';
+    entity MFUDetails as projection on db.ReportFileStorage {
+        ID,
+        MODULE_NAME,
+        SUB_MODULE_NAME,
+        LOAD_TYPE,
+        LOAD_TEMPLATE,
+        FILE_NAME,
+        STATUS
+    };
 
-
-
-MFUAnalytics/db/schema.cds
-
-namespace com.scb.fileupload;
-
-using {
-  cuid,
-  managed
-} from '@sap/cds/common';
-
-entity ReportFileStorage @(odata.stream) : cuid,managed {
-  MODULE_NAME     : String(100);
-  SUB_MODULE_NAME : String(100);
-  LOAD_TEMPLATE   : String(100);
-  FILE_NAME       : String(255);
-  FILE_MIME_TYPE  : String(100);
-  FILE_SIZE       : Integer;
-  @Core.MediaType: 'FILE_MIME_TYPE'
-  FILE_CONTENT    : LargeBinary;
-  STATUS          : String(50);
-  COMMENTS        : String(1000);
-  JSON_DATA       : LargeString;
-  LOAD_STATUS     : Boolean;
-  LOAD_TYPE       : String(50);
-  EXPIRY_DATE     : Date;
-  ACTION_BY       : String(100);
 }
