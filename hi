@@ -1,235 +1,3 @@
-<mvc:View controllerName="mfuanalytics.controller.mfureport"  
-    xmlns:mvc="sap.ui.core.mvc"  
-    xmlns="sap.m"  
-    xmlns:core="sap.ui.core"
-    xmlns:viz="sap.viz.ui5.controls"  
-    xmlns:viz.data="sap.viz.ui5.data"  
-    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
-
-<Page title="MFU Dashboard" class="sapBlueHeader">  
-
-<VBox class="mainContainer">  
-
-<!-- 🔥 FILTER SECTION (LEFT + RIGHT) -->
-<HBox justifyContent="SpaceBetween" class="filterBar">
-
-    <!-- LEFT FILTER -->
-    <HBox alignItems="Center" class="leftFilter">
-        <Text text="Module" class="filterLabel"/>
-        <MultiComboBox
-            width="250px"
-            selectionChange="onFilterChange"
-            valueHelpOnly="true"
-            items="{/modules}">
-            <core:Item key="{module}" text="{module}" />
-        </MultiComboBox>
-    </HBox>
-
-    <!-- RIGHT FILTER (FOR FUTURE USE) -->
-    <HBox class="rightFilter">
-        <!-- You can add another filter here later -->
-    </HBox>
-
-</HBox>
-
-<!-- 🔥 TOP SECTION -->
-<HBox class="topContainer">  
-
-    <!-- KPI -->
-    <VBox width="35%">  
-
-        <HBox class="kpiRow">  
-            <GenericTile header="Total Uploaded" class="tile">  
-                <TileContent>
-                    <NumericContent value="{/totalUploaded}"/>
-                </TileContent>  
-            </GenericTile>  
-
-            <GenericTile header="Total Approved" class="tile">  
-                <TileContent>
-                    <NumericContent value="{/totalApproved}"/>
-                </TileContent>  
-            </GenericTile>  
-        </HBox>  
-
-        <HBox class="kpiRow">  
-            <GenericTile header="Total Pending" class="tile">  
-                <TileContent>
-                    <NumericContent value="{/totalPending}"/>
-                </TileContent>  
-            </GenericTile>  
-
-            <GenericTile header="Total Templates" class="tile">  
-                <TileContent>
-                    <NumericContent value="{/totalTemplates}"/>
-                </TileContent>  
-            </GenericTile>  
-        </HBox>  
-
-    </VBox>  
-
-    <!-- 🔥 STACKED CHART (700px FIXED) -->
-    <Panel width="700px" headerText="MFU Templates by Modules">
-
-        <viz:VizFrame vizType="stacked_column" height="320px" width="100%"
-            vizProperties='{
-                "title": { "visible": false },
-                "legend": { "visible": true },
-                "plotArea": {
-                    "dataLabel": { "visible": true }
-                }
-            }'>
-
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}" />
-                    </viz.data:dimensions>
-
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
-                        <viz.data:MeasureDefinition name="Approved" value="{approved}" />
-                        <viz.data:MeasureDefinition name="Pending" value="{pending}" />
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure"
-                    values="Uploaded,Approved,Pending"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
-                    values="Module"/>
-            </viz:feeds>
-
-        </viz:VizFrame>
-
-    </Panel>  
-
-</HBox>  
-
-<!-- 🔥 CHART ROW -->
-<HBox class="chartRow">
-
-    <!-- PIE (NOT FILTERED) -->
-    <VBox class="chartBox">
-        <Text text="Templates by Count" class="panelTitle"/>
-        <viz:VizFrame vizType="pie" height="200px" width="100%"
-            vizProperties='{"title":{"visible":false}}'>
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/pieModules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="size" type="Measure" values="Approved"/>
-                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </VBox>
-
-    <!-- MONTHLY -->
-    <VBox class="chartBox">
-        <Text text="Monthly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px" width="100%"
-            vizProperties='{"title":{"visible":false}}'>
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/monthly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </VBox>
-
-    <!-- QUARTERLY -->
-    <VBox class="chartBox">
-        <Text text="Quarterly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px" width="100%"
-            vizProperties='{"title":{"visible":false}}'>
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/quarterly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </VBox>
-
-    <!-- YEARLY -->
-    <VBox class="chartBox">
-        <Text text="Yearly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px" width="100%"
-            vizProperties='{"title":{"visible":false}}'>
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/yearly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </VBox>
-
-</HBox>
-
-<!-- TABLE -->
-<Panel headerText="MFU Details" class="sapUiMediumMarginTop">
-    <Table items="{/tableData}">
-        <columns>
-            <Column><Text text="Module"/></Column>
-            <Column><Text text="Sub Module"/></Column>
-            <Column><Text text="Load Type"/></Column>
-            <Column><Text text="Template"/></Column>
-            <Column><Text text="Count"/></Column>
-        </columns>
-        <items>
-            <ColumnListItem>
-                <cells>
-                    <Text text="{module}"/>
-                    <Text text="{subModule}"/>
-                    <Text text="{loadType}"/>
-                    <Text text="{template}"/>
-                    <Text text="{count}"/>
-                </cells>
-            </ColumnListItem>
-        </items>
-    </Table>
-</Panel>
-
-</VBox>  
-</Page>  
-</mvc:View>
-
-
-
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -272,12 +40,17 @@ sap.ui.define([
                 tableData: [
                     { module: "Retail", subModule: "Sales", loadType: "Upload", template: "Temp1", count: 10 },
                     { module: "Finance", subModule: "Accounts", loadType: "Upload", template: "Temp2", count: 25 }
-                ]
+                ],
+
+                totalUploaded: 190,
+                totalApproved: 130,
+                totalPending: 37,
+                totalTemplates: 4
             };
 
             data.pieModules = data.modules;
 
-            this._fullData = data;
+            this._fullModules = data.modules;
 
             this.getView().setModel(new JSONModel(data));
         },
@@ -285,17 +58,27 @@ sap.ui.define([
         onFilterChange: function (oEvent) {
 
             var selectedKeys = oEvent.getSource().getSelectedKeys();
-            var data = this._fullData;
+            var oModel = this.getView().getModel();
 
+            // 👉 If nothing selected
             if (selectedKeys.length === 0) {
-                this.getView().getModel().setData(data);
+
+                oModel.setProperty("/modules", this._fullModules);
+
+                oModel.setProperty("/totalUploaded", 190);
+                oModel.setProperty("/totalApproved", 130);
+                oModel.setProperty("/totalPending", 37);
+                oModel.setProperty("/totalTemplates", 4);
+
                 return;
             }
 
-            var filtered = data.modules.filter(item =>
+            // 👉 Filter logic
+            var filtered = this._fullModules.filter(item =>
                 selectedKeys.includes(item.module)
             );
 
+            // 👉 Calculate totals
             var totalUploaded = 0,
                 totalApproved = 0,
                 totalPending = 0;
@@ -306,19 +89,12 @@ sap.ui.define([
                 totalPending += item.pending;
             });
 
-            this.getView().getModel().setData({
-                modules: filtered,
-                pieModules: data.modules, // NOT FILTERED
-                monthly: data.monthly,
-                quarterly: data.quarterly,
-                yearly: data.yearly,
-                tableData: data.tableData,
-
-                totalUploaded: totalUploaded,
-                totalApproved: totalApproved,
-                totalPending: totalPending,
-                totalTemplates: filtered.length
-            });
+            // 🔥 IMPORTANT: ONLY update properties (NOT full model)
+            oModel.setProperty("/modules", filtered);
+            oModel.setProperty("/totalUploaded", totalUploaded);
+            oModel.setProperty("/totalApproved", totalApproved);
+            oModel.setProperty("/totalPending", totalPending);
+            oModel.setProperty("/totalTemplates", filtered.length);
         }
 
     });
