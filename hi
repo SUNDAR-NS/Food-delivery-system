@@ -1,257 +1,92 @@
-<mvc:View controllerName="mfuanalytics.controller.mfureport"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:f="sap.f"
-    xmlns:layout="sap.ui.layout"
-    xmlns:viz="sap.viz.ui5.controls"
-    xmlns:viz.data="sap.viz.ui5.data"
-    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
+/* PAGE BACKGROUND */
+.sapMPage {
+    background-color: #f5f7fa;
+}
 
-<Page title="MFU Dashboard">
+/* MAIN CONTAINER */
+.mainContainer {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: auto;
+}
 
-<VBox class="mainContainer">
+/* GRID SPACING */
+.sapUiLayoutGrid {
+    gap: 1rem !important;
+}
 
-<Title text="MFU Analytics Dashboard" level="H2"/>
+/* CARD DESIGN */
+.sapFCard {
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    background: white;
+    transition: all 0.2s ease-in-out;
+}
 
-<!-- KPI CARDS -->
-<layout:Grid defaultSpan="L3 M6 S12" class="sapUiMediumMarginTop">
+/* CARD HOVER (OPTIONAL PROFESSIONAL TOUCH) */
+.sapFCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
 
-<f:Card>
-<f:content>
-<VBox class="sapUiSmallMargin">
-<NumericContent value="71" valueColor="Good" indicator="Up"/>
-<Text text="Total Uploaded"/>
-</VBox>
-</f:content>
-</f:Card>
+/* CARD CONTENT SPACING */
+.sapFCard .sapUiSmallMargin {
+    padding: 10px;
+}
 
-<f:Card>
-<f:content>
-<VBox class="sapUiSmallMargin">
-<NumericContent value="60" valueColor="Good"/>
-<Text text="Approved"/>
-</VBox>
-</f:content>
-</f:Card>
+/* KPI CARDS */
+.sapMNC {
+    text-align: center;
+}
 
-<f:Card>
-<f:content>
-<VBox class="sapUiSmallMargin">
-<NumericContent value="115" valueColor="Neutral"/>
-<Text text="Templates"/>
-</VBox>
-</f:content>
-</f:Card>
+/* TITLE STYLING */
+.sapMTitle {
+    font-weight: 600;
+    color: #2c3e50;
+}
 
-<f:Card>
-<f:content>
-<VBox class="sapUiSmallMargin">
-<NumericContent value="5" valueColor="Error"/>
-<Text text="Rejected"/>
-</VBox>
-</f:content>
-</f:Card>
+/* CHART FIX (VERY IMPORTANT) */
+.sapVizFrame {
+    width: 100% !important;
+    height: 100% !important;
+}
 
-</layout:Grid>
+/* FIX CHART INSIDE CARD */
+.sapFCard .sapVizFrame {
+    min-height: 220px;
+}
 
+/* MAIN CHART BIG SIZE */
+#idMainChart {
+    min-height: 350px !important;
+}
 
-<!-- MAIN CHART -->
-<f:Card class="sapUiMediumMarginTop">
-<f:content>
+/* SMALL CHARTS */
+#idPie,
+#idMonthly,
+#idQuarterly,
+#idYearly {
+    min-height: 220px !important;
+}
 
-<VBox class="sapUiSmallMargin">
-<Title text="MFU Templates by Module" level="H5"/>
+/* TABLE CARD */
+.sapMTable {
+    border-radius: 10px;
+}
 
-<viz:VizFrame id="idMainChart" vizType="column" height="350px">
+/* TOOLBAR */
+.sapMTB {
+    border-radius: 8px;
+}
 
-<viz:dataset>
-<viz.data:FlattenedDataset data="{/modules}">
-<viz.data:dimensions>
-<viz.data:DimensionDefinition name="Module" value="{module}"/>
-</viz.data:dimensions>
-<viz.data:measures>
-<viz.data:MeasureDefinition name="Approved" value="{approved}"/>
-</viz.data:measures>
-</viz.data:FlattenedDataset>
-</viz:dataset>
+/* SEARCH FIELD */
+.sapMSF {
+    border-radius: 6px;
+}
 
-<viz:feeds>
-<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved"/>
-<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
-</viz:feeds>
-
-</viz:VizFrame>
-
-</VBox>
-
-</f:content>
-</f:Card>
-
-
-<!-- BOTTOM CHARTS -->
-<layout:Grid defaultSpan="L3 M6 S12" class="sapUiMediumMarginTop">
-
-<!-- PIE -->
-<f:Card>
-<f:content>
-<VBox class="sapUiSmallMargin">
-<Title text="Distribution" level="H6"/>
-
-<viz:VizFrame id="idPie" vizType="donut" height="220px">
-
-<viz:dataset>
-<viz.data:FlattenedDataset data="{/modules}">
-<viz.data:dimensions>
-<viz.data:DimensionDefinition name="Module" value="{module}"/>
-</viz.data:dimensions>
-<viz.data:measures>
-<viz.data:MeasureDefinition name="Value" value="{approved}"/>
-</viz.data:measures>
-</viz.data:FlattenedDataset>
-</viz:dataset>
-
-<viz:feeds>
-<viz.feeds:FeedItem uid="size" type="Measure" values="Value"/>
-<viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
-</viz:feeds>
-
-</viz:VizFrame>
-</VBox>
-</f:content>
-</f:Card>
-
-<!-- MONTHLY -->
-<f:Card>
-<f:content>
-<VBox class="sapUiSmallMargin">
-<Title text="Monthly Trend" level="H6"/>
-
-<viz:VizFrame id="idMonthly" vizType="column" height="220px">
-
-<viz:dataset>
-<viz.data:FlattenedDataset data="{/monthly}">
-<viz.data:dimensions>
-<viz.data:DimensionDefinition name="Month" value="{month}"/>
-</viz.data:dimensions>
-<viz.data:measures>
-<viz.data:MeasureDefinition name="Value" value="{value}"/>
-</viz.data:FlattenedDataset>
-</viz:dataset>
-
-<viz:feeds>
-<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
-</viz:feeds>
-
-</viz:VizFrame>
-</VBox>
-</f:content>
-</f:Card>
-
-<!-- QUARTERLY -->
-<f:Card>
-<f:content>
-<VBox class="sapUiSmallMargin">
-<Title text="Quarterly" level="H6"/>
-
-<viz:VizFrame id="idQuarterly" vizType="column" height="220px">
-
-<viz:dataset>
-<viz.data:FlattenedDataset data="{/quarterly}">
-<viz.data:dimensions>
-<viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
-</viz.data:dimensions>
-<viz.data:measures>
-<viz.data:MeasureDefinition name="Value" value="{value}"/>
-</viz.data:FlattenedDataset>
-</viz:dataset>
-
-<viz:feeds>
-<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
-</viz:feeds>
-
-</viz:VizFrame>
-</VBox>
-</f:content>
-</f:Card>
-
-<!-- YEARLY -->
-<f:Card>
-<f:content>
-<VBox class="sapUiSmallMargin">
-<Title text="Yearly" level="H6"/>
-
-<viz:VizFrame id="idYearly" vizType="column" height="220px">
-
-<viz:dataset>
-<viz.data:FlattenedDataset data="{/yearly}">
-<viz.data:dimensions>
-<viz.data:DimensionDefinition name="Year" value="{year}"/>
-</viz.data:dimensions>
-<viz.data:measures>
-<viz.data:MeasureDefinition name="Value" value="{value}"/>
-</viz.data:FlattenedDataset>
-</viz:dataset>
-
-<viz:feeds>
-<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
-</viz:feeds>
-
-</viz:VizFrame>
-</VBox>
-</f:content>
-</f:Card>
-
-</layout:Grid>
-
-
-<!-- TABLE -->
-<f:Card class="sapUiMediumMarginTop">
-
-<f:content>
-
-<VBox class="sapUiSmallMargin">
-<Title text="MFU Details" level="H5"/>
-
-<Table growing="true" items="{/tableData}">
-
-<headerToolbar>
-<Toolbar>
-<Title text="Detailed View"/>
-<ToolbarSpacer/>
-<SearchField width="200px"/>
-</Toolbar>
-</headerToolbar>
-
-<columns>
-<Column><Text text="Module"/></Column>
-<Column><Text text="Sub Module"/></Column>
-<Column><Text text="Load Type"/></Column>
-<Column><Text text="Template"/></Column>
-<Column><Text text="Count"/></Column>
-</columns>
-
-<items>
-<ColumnListItem>
-<cells>
-<Text text="{module}"/>
-<Text text="{submodule}"/>
-<Text text="{load}"/>
-<Text text="{template}"/>
-<Text text="{count}"/>
-</cells>
-</ColumnListItem>
-</items>
-
-</Table>
-
-</VBox>
-
-</f:content>
-</f:Card>
-
-</VBox>
-</Page>
-</mvc:View>
+/* RESPONSIVE FIX */
+@media (max-width: 768px) {
+    .mainContainer {
+        padding: 1rem;
+    }
+}
