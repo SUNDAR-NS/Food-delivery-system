@@ -1,3 +1,62 @@
+.sapMPage {
+    background-color: #f5f7fa;
+}
+
+/* HEADER */
+.sapBlueHeader .sapMBar {
+    background-color: #0a6ed1 !important;
+    color: white !important;
+}
+
+/* FILTER */
+.filterBar {
+    margin: 15px 0;
+    gap: 10px;
+}
+
+/* TOP */
+.topContainer {
+    gap: 20px;
+}
+
+/* KPI */
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* 🔥 PERFECT ALIGNMENT */
+.chartRow {
+    margin-top: 25px;
+    gap: 15px;
+}
+
+.chartBox {
+    flex: 1;              /* 🔥 equal width */
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* TITLE */
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+
+
+
 <mvc:View controllerName="mfuanalytics.controller.mfureport"  
     xmlns:mvc="sap.ui.core.mvc"  
     xmlns="sap.m"  
@@ -8,20 +67,17 @@
 
 <Page title="MFU Dashboard" class="sapBlueHeader">  
 
-<VBox class="mainContainer">  
+<VBox class="mainContainer" fitContainer="true">  
 
-<!-- FILTER -->
+<!-- 🔥 FILTER -->
 <HBox alignItems="Center" class="filterBar">
     <Text text="Module" class="filterLabel"/>
-    <MultiComboBox
-        width="250px"
-        selectionChange="onFilterChange"
-        items="{/modules}">
+    <MultiComboBox width="250px" selectionChange="onFilterChange" items="{/modules}">
         <core:Item key="{module}" text="{module}" />
     </MultiComboBox>
 </HBox>
 
-<!-- TOP SECTION -->
+<!-- 🔥 TOP SECTION -->
 <HBox class="topContainer">  
 
     <!-- KPI -->
@@ -29,21 +85,29 @@
 
         <HBox class="kpiRow">  
             <GenericTile header="Total Uploaded" class="tile">  
-                <TileContent><NumericContent value="{/totalUploaded}"/></TileContent>  
+                <TileContent>
+                    <NumericContent value="{/totalUploaded}"/>
+                </TileContent>  
             </GenericTile>  
 
             <GenericTile header="Total Approved" class="tile">  
-                <TileContent><NumericContent value="{/totalApproved}"/></TileContent>  
+                <TileContent>
+                    <NumericContent value="{/totalApproved}"/>
+                </TileContent>  
             </GenericTile>  
         </HBox>  
 
         <HBox class="kpiRow">  
             <GenericTile header="Total Pending" class="tile">  
-                <TileContent><NumericContent value="{/totalPending}"/></TileContent>  
+                <TileContent>
+                    <NumericContent value="{/totalPending}"/>
+                </TileContent>  
             </GenericTile>  
 
             <GenericTile header="Total Templates" class="tile">  
-                <TileContent><NumericContent value="{/totalTemplates}"/></TileContent>  
+                <TileContent>
+                    <NumericContent value="{/totalTemplates}"/>
+                </TileContent>  
             </GenericTile>  
         </HBox>  
 
@@ -52,7 +116,7 @@
     <!-- STACKED CHART -->
     <Panel width="65%" headerText="MFU Templates by Modules">
 
-        <viz:VizFrame vizType="stacked_column" height="320px">
+        <viz:VizFrame vizType="stacked_column" height="320px" width="100%">
 
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/modules}">
@@ -83,13 +147,13 @@
 
 </HBox>  
 
-<!-- 🔥 BOTTOM SECTION -->
-<HBox class="bottomGrid" justifyContent="SpaceBetween">
+<!-- 🔥 PERFECT 4 CHART ALIGNMENT -->
+<HBox class="chartRow" fitContainer="true">
 
-    <Panel width="24%">
+    <!-- PIE -->
+    <VBox class="chartBox">
         <Text text="Templates by Count" class="panelTitle"/>
-        <viz:VizFrame vizType="pie" height="200px">
-
+        <viz:VizFrame vizType="pie" height="200px" width="100%">
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/modules}">
                     <viz.data:dimensions>
@@ -100,19 +164,17 @@
                     </viz.data:measures>
                 </viz.data:FlattenedDataset>
             </viz:dataset>
-
             <viz:feeds>
                 <viz.feeds:FeedItem uid="size" type="Measure" values="Approved"/>
                 <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
             </viz:feeds>
-
         </viz:VizFrame>
-    </Panel>
+    </VBox>
 
-    <Panel width="24%">
+    <!-- MONTHLY -->
+    <VBox class="chartBox">
         <Text text="Monthly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px">
-
+        <viz:VizFrame vizType="column" height="200px" width="100%">
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/monthly}">
                     <viz.data:dimensions>
@@ -123,19 +185,17 @@
                     </viz.data:measures>
                 </viz.data:FlattenedDataset>
             </viz:dataset>
-
             <viz:feeds>
                 <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
                 <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
             </viz:feeds>
-
         </viz:VizFrame>
-    </Panel>
+    </VBox>
 
-    <Panel width="24%">
+    <!-- QUARTERLY -->
+    <VBox class="chartBox">
         <Text text="Quarterly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px">
-
+        <viz:VizFrame vizType="column" height="200px" width="100%">
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/quarterly}">
                     <viz.data:dimensions>
@@ -146,19 +206,17 @@
                     </viz.data:measures>
                 </viz.data:FlattenedDataset>
             </viz:dataset>
-
             <viz:feeds>
                 <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
                 <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
             </viz:feeds>
-
         </viz:VizFrame>
-    </Panel>
+    </VBox>
 
-    <Panel width="24%">
+    <!-- YEARLY -->
+    <VBox class="chartBox">
         <Text text="Yearly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px">
-
+        <viz:VizFrame vizType="column" height="200px" width="100%">
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/yearly}">
                     <viz.data:dimensions>
@@ -169,99 +227,44 @@
                     </viz.data:measures>
                 </viz.data:FlattenedDataset>
             </viz:dataset>
-
             <viz:feeds>
                 <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
                 <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
             </viz:feeds>
-
         </viz:VizFrame>
-    </Panel>
+    </VBox>
 
 </HBox>
 
-<!-- TABLE -->
+<!-- 🔥 MFU DETAILS TABLE -->
 <Panel headerText="MFU Details" class="sapUiMediumMarginTop">
 
-<Table>
-<columns>
-<Column><Text text="Module"/></Column>
-<Column><Text text="Sub Module"/></Column>
-<Column><Text text="Load Type"/></Column>
-<Column><Text text="Template"/></Column>
-<Column><Text text="Count"/></Column>
-</columns>
+    <Table items="{/tableData}">
 
-<items>
-<ColumnListItem>
-<cells>
-<Text text="Retail"/>
-<Text text="Sales"/>
-<Text text="Upload"/>
-<Text text="Temp1"/>
-<Text text="10"/>
-</cells>
-</ColumnListItem>
-</items>
+        <columns>
+            <Column><Text text="Module"/></Column>
+            <Column><Text text="Sub Module"/></Column>
+            <Column><Text text="Load Type"/></Column>
+            <Column><Text text="Template"/></Column>
+            <Column><Text text="Count"/></Column>
+        </columns>
 
-</Table>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Text text="{module}"/>
+                    <Text text="{subModule}"/>
+                    <Text text="{loadType}"/>
+                    <Text text="{template}"/>
+                    <Text text="{count}"/>
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
 
 </Panel>
 
 </VBox>  
 </Page>  
 </mvc:View>
-
-
-
-.sapMPage {
-    background-color: #f5f7fa;
-}
-
-/* 🔥 SAP BLUE HEADER */
-.sapBlueHeader .sapMBar {
-    background-color: #0a6ed1 !important;
-    color: white !important;
-}
-
-/* FILTER */
-.filterBar {
-    margin: 15px 0;
-    gap: 10px;
-}
-
-.filterLabel {
-    font-weight: bold;
-}
-
-/* TOP */
-.topContainer {
-    gap: 20px;
-}
-
-/* KPI */
-.kpiRow {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.tile {
-    flex: 1;
-    height: 130px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-/* BOTTOM */
-.bottomGrid {
-    margin-top: 25px;
-    gap: 15px;
-}
-
-.panelTitle {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
