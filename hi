@@ -1,42 +1,301 @@
-.sapMPage {
-    background-color: #f5f7fa;
+<mvc:View controllerName="mfuanalytics.controller.mfureport"  
+    xmlns:mvc="sap.ui.core.mvc"  
+    xmlns="sap.m"  
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"  
+    xmlns:viz.data="sap.viz.ui5.data"  
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
+
+<Page title="MFU Dashboard">  
+
+<VBox class="mainContainer">  
+
+<Title text="MFU Dashboard" level="H2"/>  
+
+<!-- FILTER -->
+<MultiComboBox
+    width="300px"
+    selectionChange="onFilterChange"
+    items="{/modules}">
+    <core:Item key="{module}" text="{module}" />
+</MultiComboBox>
+
+<!-- TOP -->
+<HBox renderType="Bare">  
+
+    <!-- KPI -->
+    <VBox width="35%">  
+
+        <HBox class="kpiRow">  
+            <GenericTile header="Total Uploaded" class="tile">  
+                <TileContent><NumericContent value="{/totalUploaded}"/></TileContent>  
+            </GenericTile>  
+
+            <GenericTile header="Total Approved" class="tile">  
+                <TileContent><NumericContent value="{/totalApproved}"/></TileContent>  
+            </GenericTile>  
+        </HBox>  
+
+        <HBox class="kpiRow">  
+            <GenericTile header="Total Pending" class="tile">  
+                <TileContent><NumericContent value="{/totalPending}"/></TileContent>  
+            </GenericTile>  
+
+            <GenericTile header="Total Templates" class="tile">  
+                <TileContent><NumericContent value="{/totalTemplates}"/></TileContent>  
+            </GenericTile>  
+        </HBox>  
+
+    </VBox>  
+
+    <!-- STACKED CHART -->
+    <Panel width="65%" headerText="MFU Templates by Modules">
+
+        <viz:VizFrame vizType="stacked_column" height="320px">
+
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}" />
+                    </viz.data:dimensions>
+
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}" />
+                        <viz.data:MeasureDefinition name="Pending" value="{pending}" />
+                    </viz.data:measures>
+
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure"
+                    values="Uploaded,Approved,Pending"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
+                    values="Module"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
+
+    </Panel>  
+
+</HBox>  
+
+<!-- BOTTOM -->
+<HBox class="bottomGrid">  
+
+    <!-- PIE -->
+    <Panel>  
+        <Text text="Templates by Count" class="panelTitle"/>  
+        <viz:VizFrame vizType="pie" height="220px">  
+            <viz:dataset>  
+                <viz.data:FlattenedDataset data="{/modules}">  
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="size" type="Measure" values="Approved"/>
+                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
+            </viz:feeds>
+        </viz:VizFrame>  
+    </Panel>  
+
+    <!-- MONTHLY -->
+    <Panel>  
+        <Text text="Monthly" class="panelTitle"/>  
+        <viz:VizFrame vizType="column" height="220px">  
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/monthly}">
+                    
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
+                    </viz.data:dimensions>
+
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
+            </viz:feeds>
+        </viz:VizFrame>  
+    </Panel>  
+
+    <!-- QUARTERLY -->
+    <Panel>  
+        <Text text="Quarterly" class="panelTitle"/>  
+        <viz:VizFrame vizType="column" height="220px">  
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/quarterly}">
+                    
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
+                    </viz.data:dimensions>
+
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
+            </viz:feeds>
+        </viz:VizFrame>  
+    </Panel>  
+
+    <!-- ✅ FIXED YEARLY -->
+    <Panel>  
+        <Text text="Yearly" class="panelTitle"/>  
+        <viz:VizFrame vizType="column" height="220px">  
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/yearly}">
+                    
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
+                    </viz.data:dimensions>
+
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
+            </viz:feeds>
+        </viz:VizFrame>  
+    </Panel>  
+
+</HBox>  
+
+<!-- TABLE -->
+<Panel headerText="MFU Details">  
+
+<Table>  
+<columns>  
+<Column><Text text="Module"/></Column>  
+<Column><Text text="Sub Module"/></Column>  
+<Column><Text text="Load Type"/></Column>  
+<Column><Text text="Template"/></Column>  
+<Column><Text text="Count"/></Column>  
+</columns>  
+
+<items>  
+<ColumnListItem>  
+<cells>  
+<Text text="Retail"/>  
+<Text text="Sales"/>  
+<Text text="Upload"/>  
+<Text text="Temp1"/>  
+<Text text="10"/>  
+</cells>  
+</ColumnListItem>  
+</items>  
+
+</Table>  
+
+</Panel>  
+
+</VBox>  
+</Page>  
+</mvc:View>
+
+
+
+sap.ui.define([
+"sap/ui/core/mvc/Controller",
+"sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+"use strict";
+
+return Controller.extend("mfuanalytics.controller.mfureport", {
+
+onInit: function () {
+
+    this.originalModules = [
+        { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
+        { module: "SCBI", uploaded: 70, approved: 55, pending: 12 },
+        { module: "ESG", uploaded: 28, approved: 20, pending: 6 },
+        { module: "ICON", uploaded: 55, approved: 40, pending: 9 }
+    ];
+
+    var data = {
+        modules: this.originalModules,
+
+        monthly: [
+            { month: "Jan", value: 10 },
+            { month: "Feb", value: 20 },
+            { month: "Mar", value: 15 }
+        ],
+
+        quarterly: [
+            { quarter: "Q1", value: 40 },
+            { quarter: "Q2", value: 25 },
+            { quarter: "Q3", value: 30 }
+        ],
+
+        yearly: [
+            { year: "2022", value: 50 },
+            { year: "2023", value: 70 },
+            { year: "2024", value: 60 }
+        ]
+    };
+
+    this.getView().setModel(new JSONModel(data));
+    this.updateKPIs(this.originalModules);
+},
+
+updateKPIs: function (data) {
+
+    let totalUploaded = 0;
+    let totalApproved = 0;
+    let totalPending = 0;
+
+    data.forEach(function (item) {
+        totalUploaded += item.uploaded;
+        totalApproved += item.approved;
+        totalPending += item.pending;
+    });
+
+    var model = this.getView().getModel();
+
+    model.setProperty("/totalUploaded", totalUploaded);
+    model.setProperty("/totalApproved", totalApproved);
+    model.setProperty("/totalPending", totalPending);
+    model.setProperty("/totalTemplates", data.length);
+},
+
+onFilterChange: function (oEvent) {
+
+    var selectedKeys = oEvent.getSource().getSelectedKeys();
+
+    if (selectedKeys.length === 0) {
+        this.getView().getModel().setProperty("/modules", this.originalModules);
+        this.updateKPIs(this.originalModules);
+        return;
+    }
+
+    var filtered = this.originalModules.filter(function (item) {
+        return selectedKeys.includes(item.module);
+    });
+
+    this.getView().getModel().setProperty("/modules", filtered);
+    this.updateKPIs(filtered);
 }
 
-.mainContainer {
-    padding: 20px;
-}
+});
+});
 
-.kpiRow {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-}
 
-.tile {
-    flex: 1;
-    height: 130px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-.bottomGrid {
-    display: flex;
-    gap: 15px;
-    margin-top: 25px;
-}
-
-.bottomGrid > * {
-    flex: 1;
-    min-width: 0;
-}
-
-.sapVizFrame {
-    width: 100% !important;
-}
-
-.panelTitle {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
