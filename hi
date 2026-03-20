@@ -1,101 +1,220 @@
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-    "use strict";
+    <Panel id="_IDGenPanel" width="65%" headerText="MFU Templates by Modules">
 
-    return Controller.extend("mfuanalytics.controller.mfureport", {
-
-        onInit: function () {
-
-            var data = {
-
-                modules: [
-                    { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
-                    { module: "SCBI", uploaded: 70, approved: 50, pending: 15 },
-                    { module: "ESG", uploaded: 25, approved: 15, pending: 5 },
-                    { module: "ICON", uploaded: 50, approved: 35, pending: 7 }
-                ],
-
-                pieModules: [],
-
-                monthly: [
-                    { month: "Jan", value: 10 },
-                    { month: "Feb", value: 20 },
-                    { month: "Mar", value: 15 }
-                ],
-
-                quarterly: [
-                    { quarter: "Q1", value: 40 },
-                    { quarter: "Q2", value: 25 },
-                    { quarter: "Q3", value: 30 }
-                ],
-
-                yearly: [
-                    { year: "2022", value: 50 },
-                    { year: "2023", value: 70 },
-                    { year: "2024", value: 60 }
-                ],
-
-                tableData: [
-                    { module: "Retail", subModule: "Sales", loadType: "Upload", template: "Temp1", count: 10 },
-                    { module: "Finance", subModule: "Accounts", loadType: "Upload", template: "Temp2", count: 25 }
-                ],
-
-                totalUploaded: 190,
-                totalApproved: 130,
-                totalPending: 37,
-                totalTemplates: 4
-            };
-
-            data.pieModules = data.modules;
-
-            this._fullModules = data.modules;
-
-            this.getView().setModel(new JSONModel(data));
+   <viz:VizFrame
+    id="idVizFrame"
+    vizType="stacked_column"
+    width="100%"
+    height="320px"
+    vizProperties='{
+  "plotArea": {
+    "dataLabel": {
+      "visible": true
+    },
+    "dataPointStyle": {
+      "rules": [
+        {
+          "dataContext": { "measureNames": "Approved" },
+          "properties": { "color": "#0070F2" }
         },
-
-        onFilterChange: function (oEvent) {
-
-            var selectedKeys = oEvent.getSource().getSelectedKeys();
-            var oModel = this.getView().getModel();
-
-            // 👉 If nothing selected
-            if (selectedKeys.length === 0) {
-
-                oModel.setProperty("/modules", this._fullModules);
-
-                oModel.setProperty("/totalUploaded", 190);
-                oModel.setProperty("/totalApproved", 130);
-                oModel.setProperty("/totalPending", 37);
-                oModel.setProperty("/totalTemplates", 4);
-
-                return;
-            }
-
-            // 👉 Filter logic
-            var filtered = this._fullModules.filter(item =>
-                selectedKeys.includes(item.module)
-            );
-
-            // 👉 Calculate totals
-            var totalUploaded = 0,
-                totalApproved = 0,
-                totalPending = 0;
-
-            filtered.forEach(item => {
-                totalUploaded += item.uploaded;
-                totalApproved += item.approved;
-                totalPending += item.pending;
-            });
-
-            // 🔥 IMPORTANT: ONLY update properties (NOT full model)
-            oModel.setProperty("/modules", filtered);
-            oModel.setProperty("/totalUploaded", totalUploaded);
-            oModel.setProperty("/totalApproved", totalApproved);
-            oModel.setProperty("/totalPending", totalPending);
-            oModel.setProperty("/totalTemplates", filtered.length);
+        {
+          "dataContext": { "measureNames": "Rejected" },
+          "properties": { "color": "#E9730C" }
+        },
+        {
+          "dataContext": { "measureNames": "Pending" },
+          "properties": { "color": "#107E3E" }
         }
+      ]
+    }
+  }
+}'>
 
-    });
-});
+    <viz:dataset>
+        <viz.data:FlattenedDataset id="_IDGenFlattenedDataset" data="{/modules}">
+
+            <viz.data:dimensions>
+                <viz.data:DimensionDefinition id="_IDGenDimensionDefinition"
+                    name="Module"
+                    value="{module}" />
+            </viz.data:dimensions>
+
+            <viz.data:measures>
+                <viz.data:MeasureDefinition id="_IDGenMeasureDefinition"
+                    name="Approved"
+                    value="{approved}" />
+
+                <viz.data:MeasureDefinition id="_IDGenMeasureDefinition5"
+                    name="Rejected"
+                    value="{rejected}" />
+
+                <viz.data:MeasureDefinition id="_IDGenMeasureDefinition6"
+                    name="Pending"
+                    value="{pending}" />
+            </viz.data:measures>
+
+        </viz.data:FlattenedDataset>
+    </viz:dataset>
+
+    <viz:feeds>
+
+        <viz.feeds:FeedItem id="_IDGenFeedItem1"
+            uid="valueAxis"
+            type="Measure"
+            values="Approved,Rejected,Pending"/>
+
+        <viz.feeds:FeedItem id="_IDGenFeedItem10"
+            uid="categoryAxis"
+            type="Dimension"
+            values="Module"/>
+
+    </viz:feeds>
+
+</viz:VizFrame>
+    </Panel>
+
+
+
+
+
+
+       onInit: function () {
+
+   var oData = {
+    data: [
+
+     {
+      module: "NFRP",
+      submodule: "Credit Risk",
+      template: "Exposure_Load",
+      status: "Approved",
+      uploader: "John",
+      approver: "Manager A",
+      value: 1
+     },
+
+     {
+      module: "NFRP",
+      submodule: "Credit Risk",
+      template: "Exposure_Load",
+      status: "Pending",
+      uploader: "John",
+      approver: "Manager B",
+      value: 1
+     },
+
+     {
+      module: "NFRP",
+      submodule: "Liquidity",
+      template: "Liquidity_Load",
+      status: "Rejected",
+      uploader: "Mike",
+      approver: "Manager A",
+      value: 1
+     },
+
+     {
+      module: "SCBI",
+      submodule: "Insurance",
+      template: "Policy_Load",
+      status: "Approved",
+      uploader: "Sara",
+      approver: "Manager C",
+      value: 1
+     },
+
+     {
+      module: "TREASURY",
+      submodule: "Assets",
+      template: "Asset_Load",
+      status: "Uploaded",
+      uploader: "David",
+      approver: "Manager B",
+      value: 1
+     },
+
+     {
+      module: "ICON",
+      submodule: "Capital",
+      template: "Capital_Load",
+      status: "Pending",
+      uploader: "Emma",
+      approver: "Manager C",
+      value: 1
+     }
+
+    ]
+   };
+
+   var oModel = new JSONModel(oData);
+   this.getView().setModel(oModel);
+
+  }
+
+
+
+
+<viz:VizFrame
+    id="mfuTreemap"
+    vizType="treemap"
+    width="100%"
+    height="500px"
+    vizProperties='{
+        "title": {
+            "visible": true,
+            "text": "MFU Upload Analytics"
+        },
+        "plotArea": {
+            "dataLabel": {
+                "visible": true
+            }
+        }
+    }'>
+
+    <viz:dataset>
+
+        <viz.data:FlattenedDataset id="_IDGenFlattenedDataset" data="{/data}">
+
+            <viz.data:dimensions>
+
+                <viz.data:DimensionDefinition id="_IDGenDimensionDefinition" name="Module" value="{module}"/>
+                <viz.data:DimensionDefinition id="_IDGenDimensionDefinition5" name="Submodule" value="{submodule}"/>
+                <viz.data:DimensionDefinition id="_IDGenDimensionDefinition6" name="Template" value="{template}"/>
+                <viz.data:DimensionDefinition id="_IDGenDimensionDefinition7" name="Status" value="{status}"/>
+
+            </viz.data:dimensions>
+
+            <viz.data:measures>
+
+                <viz.data:MeasureDefinition id="_IDGenMeasureDefinition" name="MFU Count" value="{value}"/>
+
+            </viz.data:measures>
+
+        </viz.data:FlattenedDataset>
+
+    </viz:dataset>
+
+    <viz:feeds>
+
+        <!-- hierarchy -->
+        <viz.feeds:FeedItem id="_IDGenFeedItem1"
+            uid="categoryAxis"
+            type="Dimension"
+            values="Module,Submodule,Template,Status"/>
+
+        <!-- rectangle size -->
+        <viz.feeds:FeedItem id="_IDGenFeedItem10"
+            uid="size"
+            type="Measure"
+            values="MFU Count"/>
+
+        <!-- color by status -->
+        <viz.feeds:FeedItem id="_IDGenFeedItem11"
+            uid="color"
+            type="Dimension"
+            values="Status"/>
+
+    </viz:feeds>
+
+</viz:VizFrame>
+
+
