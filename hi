@@ -1,224 +1,10 @@
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-    "use strict";
-
-    return Controller.extend("mfuanalytics.controller.mfureport", {
-
-        onInit: function () {
-
-            var data = {
-
-                modules: [
-                    { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
-                    { module: "SCBI", uploaded: 70, approved: 50, pending: 15 },
-                    { module: "ESG", uploaded: 25, approved: 15, pending: 5 },
-                    { module: "ICON", uploaded: 50, approved: 35, pending: 7 }
-                ],
-
-                pieModules: [],
-
-                monthly: [
-                    { month: "Jan", value: 10 },
-                    { month: "Feb", value: 20 },
-                    { month: "Mar", value: 15 }
-                ],
-
-                quarterly: [
-                    { quarter: "Q1", value: 40 },
-                    { quarter: "Q2", value: 25 },
-                    { quarter: "Q3", value: 30 }
-                ],
-
-                yearly: [
-                    { year: "2022", value: 50 },
-                    { year: "2023", value: 70 },
-                    { year: "2024", value: 60 }
-                ],
-
-                tableData: [
-                    { module: "Retail", subModule: "Sales", loadType: "Upload", template: "Temp1", count: 10 },
-                    { module: "Finance", subModule: "Accounts", loadType: "Upload", template: "Temp2", count: 25 }
-                ],
-
-                // 🔥 RAW DATA FOR DRILL
-                treeRaw: [
-                    { module: "NFRP", submodule: "Credit Risk", template: "Exposure_Load", value: 10 },
-                    { module: "NFRP", submodule: "Liquidity", template: "Liquidity_Load", value: 5 },
-                    { module: "SCBI", submodule: "Insurance", template: "Policy_Load", value: 7 },
-                    { module: "ICON", submodule: "Capital", template: "Capital_Load", value: 6 }
-                ],
-
-                treeData: [],
-
-                totalUploaded: 190,
-                totalApproved: 130,
-                totalPending: 37,
-                totalTemplates: 4
-            };
-
-            data.pieModules = data.modules;
-
-            this._fullModules = data.modules;
-
-            // 🔥 STORE RAW TREE DATA
-            this._rawTree = data.treeRaw;
-
-            this._level = "module";
-            this._currentModule = null;
-            this._currentSubmodule = null;
-
-            var oModel = new JSONModel(data);
-            this.getView().setModel(oModel);
-
-            // 🔥 INITIAL LOAD
-            this._setModuleLevel();
-        },
-
-        // =========================
-        // 🔥 FILTER (UNCHANGED)
-        // =========================
-        onFilterChange: function (oEvent) {
-
-            var selectedKeys = oEvent.getSource().getSelectedKeys();
-            var oModel = this.getView().getModel();
-
-            if (selectedKeys.length === 0) {
-
-                oModel.setProperty("/modules", this._fullModules);
-
-                oModel.setProperty("/totalUploaded", 190);
-                oModel.setProperty("/totalApproved", 130);
-                oModel.setProperty("/totalPending", 37);
-                oModel.setProperty("/totalTemplates", 4);
-
-                return;
-            }
-
-            var filtered = this._fullModules.filter(item =>
-                selectedKeys.includes(item.module)
-            );
-
-            var totalUploaded = 0,
-                totalApproved = 0,
-                totalPending = 0;
-
-            filtered.forEach(item => {
-                totalUploaded += item.uploaded;
-                totalApproved += item.approved;
-                totalPending += item.pending;
-            });
-
-            oModel.setProperty("/modules", filtered);
-            oModel.setProperty("/totalUploaded", totalUploaded);
-            oModel.setProperty("/totalApproved", totalApproved);
-            oModel.setProperty("/totalPending", totalPending);
-            oModel.setProperty("/totalTemplates", filtered.length);
-        },
-
-        // =========================
-        // 🔥 ADVANCED DRILL LOGIC
-        // =========================
-
-        _setModuleLevel: function () {
-
-            var map = {};
-
-            this._rawTree.forEach(d => {
-                if (!map[d.module]) map[d.module] = 0;
-                map[d.module] += d.value;
-            });
-
-            var result = Object.keys(map).map(k => ({
-                name: k,
-                value: map[k]
-            }));
-
-            this.getView().getModel().setProperty("/treeData", result);
-            this._level = "module";
-        },
-
-        _setSubmoduleLevel: function (module) {
-
-            var map = {};
-
-            this._rawTree
-                .filter(d => d.module === module)
-                .forEach(d => {
-                    if (!map[d.submodule]) map[d.submodule] = 0;
-                    map[d.submodule] += d.value;
-                });
-
-            var result = Object.keys(map).map(k => ({
-                name: k,
-                value: map[k]
-            }));
-
-            this.getView().getModel().setProperty("/treeData", result);
-
-            this._level = "submodule";
-            this._currentModule = module;
-        },
-
-        _setTemplateLevel: function (submodule) {
-
-            var result = this._rawTree
-                .filter(d => d.submodule === submodule)
-                .map(d => ({
-                    name: d.template,
-                    value: d.value
-                }));
-
-            this.getView().getModel().setProperty("/treeData", result);
-
-            this._level = "template";
-            this._currentSubmodule = submodule;
-        },
-
-        // 🔥 CLICK EVENT
-        onTreemapSelect: function (oEvent) {
-
-            var data = oEvent.getParameter("data")[0].data;
-
-            if (this._level === "module") {
-                this._setSubmoduleLevel(data.Name);
-            } else if (this._level === "submodule") {
-                this._setTemplateLevel(data.Name);
-            }
-        },
-
-        // 🔥 BACK
-        onBackDrill: function () {
-
-            if (this._level === "template") {
-                this._setSubmoduleLevel(this._currentModule);
-            } else if (this._level === "submodule") {
-                this._setModuleLevel();
-            }
-        },
-
-        // 🔥 RESET
-        onResetTreemap: function () {
-            this._setModuleLevel();
-        }
-
-    });
-});
-
-
-
-
-
-
-
 <Panel headerText="MFU Drill Down">
 
 <viz:VizFrame
     id="idTreemap"
     vizType="treemap"
     height="400px"
-    selectData="onTreemapClick"
+    selectData="onTreemapSelect"
     vizProperties='{
         "title":{"visible":false},
         "plotArea":{"dataLabel":{"visible":true}}
@@ -226,6 +12,7 @@ sap.ui.define([
 
     <viz:dataset>
         <viz.data:FlattenedDataset data="{/treeData}">
+
             <viz.data:dimensions>
                 <viz.data:DimensionDefinition name="Name" value="{name}"/>
             </viz.data:dimensions>
@@ -233,21 +20,35 @@ sap.ui.define([
             <viz.data:measures>
                 <viz.data:MeasureDefinition name="Count" value="{value}"/>
             </viz.data:measures>
+
         </viz.data:FlattenedDataset>
     </viz:dataset>
 
     <viz:feeds>
+
+        <!-- REQUIRED -->
         <viz.feeds:FeedItem uid="categoryAxis"
             type="Dimension"
             values="Name"/>
+
+        <!-- REQUIRED -->
         <viz.feeds:FeedItem uid="size"
             type="Measure"
             values="Count"/>
+
+        <!-- 🔥 THIS FIXES YOUR ERROR -->
+        <viz.feeds:FeedItem uid="color"
+            type="Dimension"
+            values="Name"/>
+
     </viz:feeds>
 
 </viz:VizFrame>
 
-<Button text="⬅ Back" press="onBackDrill"/>
-<Button text="Reset" press="onResetDrill"/>
+<!-- BUTTONS -->
+<HBox>
+    <Button text="⬅ Back" press="onBackDrill"/>
+    <Button text="Reset" press="onResetTreemap"/>
+</HBox>
 
 </Panel>
