@@ -11,6 +11,7 @@
 
 <Title text="MFU Dashboard" level="H2"/>  
 
+<!-- TOP -->
 <HBox renderType="Bare">  
 
     <!-- KPI -->
@@ -38,7 +39,7 @@
 
     </VBox>  
 
-    <!-- ✅ STACKED CHART -->
+    <!-- STACKED CHART -->
     <Panel width="65%" headerText="MFU Templates by Modules">
 
         <viz:VizFrame
@@ -51,18 +52,9 @@
                     "dataLabel": { "visible": true },
                     "dataPointStyle": {
                         "rules": [
-                            {
-                                "dataContext": { "measureNames": "Uploaded" },
-                                "properties": { "color": "#5CBAE6" }
-                            },
-                            {
-                                "dataContext": { "measureNames": "Approved" },
-                                "properties": { "color": "#107E3E" }
-                            },
-                            {
-                                "dataContext": { "measureNames": "Pending" },
-                                "properties": { "color": "#E9730C" }
-                            }
+                            { "dataContext": { "measureNames": "Uploaded" }, "properties": { "color": "#5CBAE6" } },
+                            { "dataContext": { "measureNames": "Approved" }, "properties": { "color": "#107E3E" } },
+                            { "dataContext": { "measureNames": "Pending" }, "properties": { "color": "#E9730C" } }
                         ]
                     }
                 }
@@ -71,9 +63,7 @@
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/modules}">
                     <viz.data:dimensions>
-                        <viz.data:DimensionDefinition
-                            name="Module"
-                            value="{module}" />
+                        <viz.data:DimensionDefinition name="Module" value="{module}" />
                     </viz.data:dimensions>
 
                     <viz.data:measures>
@@ -85,14 +75,9 @@
             </viz:dataset>
 
             <viz:feeds>
-                <viz.feeds:FeedItem
-                    uid="valueAxis"
-                    type="Measure"
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure"
                     values="Uploaded,Approved,Pending"/>
-
-                <viz.feeds:FeedItem
-                    uid="categoryAxis"
-                    type="Dimension"
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
                     values="Module"/>
             </viz:feeds>
 
@@ -101,6 +86,124 @@
     </Panel>  
 
 </HBox>  
+
+<!-- BOTTOM -->
+<HBox class="bottomGrid" renderType="Bare">  
+
+    <!-- PIE -->
+    <Panel>  
+        <Text text="Templates by Count" class="panelTitle"/>  
+        <viz:VizFrame vizType="pie" height="220px">  
+            <viz:dataset>  
+                <viz.data:FlattenedDataset data="{/modules}">  
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="size" type="Measure" values="Approved"/>
+                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
+            </viz:feeds>
+        </viz:VizFrame>  
+    </Panel>  
+
+    <!-- MONTHLY -->
+    <Panel>  
+        <Text text="Monthly" class="panelTitle"/>  
+        <viz:VizFrame vizType="column" height="220px">  
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/monthly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
+            </viz:feeds>
+        </viz:VizFrame>  
+    </Panel>  
+
+    <!-- QUARTERLY -->
+    <Panel>  
+        <Text text="Quarterly" class="panelTitle"/>  
+        <viz:VizFrame vizType="column" height="220px">  
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/quarterly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
+            </viz:feeds>
+        </viz:VizFrame>  
+    </Panel>  
+
+    <!-- YEARLY -->
+    <Panel>  
+        <Text text="Yearly" class="panelTitle"/>  
+        <viz:VizFrame vizType="column" height="220px">  
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/yearly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
+            </viz:feeds>
+        </viz:VizFrame>  
+    </Panel>  
+
+</HBox>  
+
+<!-- TABLE -->
+<Panel headerText="MFU Details" class="sapUiMediumMarginTop">  
+
+<Table items="{/tableData}">  
+
+<columns>  
+<Column><Text text="Module"/></Column>  
+<Column><Text text="Sub Module"/></Column>  
+<Column><Text text="Load Type"/></Column>  
+<Column><Text text="Template"/></Column>  
+<Column><Text text="Count"/></Column>  
+</columns>  
+
+<items>  
+<ColumnListItem>  
+<cells>  
+<Text text="{module}"/>  
+<Text text="{subModule}"/>  
+<Text text="{loadType}"/>  
+<Text text="{template}"/>  
+<Text text="{count}"/>  
+</cells>  
+</ColumnListItem>  
+</items>  
+
+</Table>  
+
+</Panel>  
 
 </VBox>  
 </Page>  
@@ -125,8 +228,30 @@ onInit: function () {
             { module: "SCBI", uploaded: 70, approved: 55, pending: 12 },
             { module: "ESG", uploaded: 28, approved: 20, pending: 6 },
             { module: "ICON", uploaded: 55, approved: 40, pending: 9 }
-        ]
+        ],
 
+        monthly: [
+            { month: "Jan", value: 10 },
+            { month: "Feb", value: 20 },
+            { month: "Mar", value: 15 }
+        ],
+
+        quarterly: [
+            { quarter: "Q1", value: 40 },
+            { quarter: "Q2", value: 25 },
+            { quarter: "Q3", value: 30 }
+        ],
+
+        yearly: [
+            { year: "2022", value: 50 },
+            { year: "2023", value: 70 },
+            { year: "2024", value: 60 }
+        ],
+
+        tableData: [
+            { module: "Retail", subModule: "Sales", loadType: "Upload", template: "Temp1", count: 10 },
+            { module: "Finance", subModule: "Accounts", loadType: "Upload", template: "Temp2", count: 25 }
+        ]
     };
 
     this.getView().setModel(new JSONModel(data));
@@ -157,4 +282,19 @@ onInit: function () {
     border-radius: 12px;
     background: white;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.bottomGrid {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.bottomGrid > * {
+    flex: 1;
+}
+
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
 }
