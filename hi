@@ -1,7 +1,11 @@
+/* ===== GLOBAL FONT (ENTERPRISE SAP STYLE) ===== */
+* {
+    font-family: "72", "Segoe UI", Arial, sans-serif !important;
+}
+
 /* ===== PAGE ===== */
 .sapMPage {
-    background: #f7f9fb;
-    font-family: "72", "Segoe UI", sans-serif;
+    background: #f2f4f7;   /* light grey */
 }
 
 /* MAIN CONTAINER */
@@ -11,9 +15,10 @@
 
 /* ===== TITLE ===== */
 .sapMTitle {
-    font-size: 18px;
-    font-weight: 600;
-    color: #2c3e50;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #1f2937;
+    margin-bottom: 10px;
 }
 
 /* ===== TOP SECTION ===== */
@@ -28,33 +33,34 @@
     width: 35%;
 }
 
+/* KPI ROW */
 .kpiRow {
     display: flex;
     gap: 10px;
     margin-bottom: 10px;
 }
 
-/* KPI TILE (PROFESSIONAL STYLE) */
+/* KPI TILE */
 .tile {
     flex: 1;
     height: 100px;
     background: #ffffff;
     border-radius: 6px;
     border: 1px solid #e0e6ed;
-    box-shadow: none; /* ❗ remove heavy shadow */
+}
+
+/* KPI HEADER */
+.sapMGTHeaderText {
+    font-size: 12px !important;
+    font-weight: 500;
+    color: #6b7280;
 }
 
 /* KPI VALUE */
 .sapMNCValue {
     font-size: 24px !important;
-    font-weight: 600;
+    font-weight: 700 !important;
     color: #0a6ed1 !important; /* SAP blue */
-}
-
-/* KPI HEADER */
-.sapMGTHeaderText {
-    font-size: 12px;
-    color: #6a6d70;
 }
 
 /* ===== MAIN CHART PANEL ===== */
@@ -68,10 +74,9 @@
 
 /* PANEL HEADER */
 .sapMPanelHdr {
-    font-size: 13px;
-    font-weight: 600;
-    color: #32363a;
-    text-align: left;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #374151;
 }
 
 /* ===== CHART ===== */
@@ -80,14 +85,14 @@
     height: 260px !important;
 }
 
-/* ===== BOTTOM SECTION ===== */
+/* ===== BOTTOM GRID ===== */
 .bottomGrid {
     display: flex;
     gap: 15px;
     margin-top: 20px;
 }
 
-/* SMALL PANELS */
+/* BOTTOM PANELS */
 .bottomGrid .sapMPanel {
     flex: 1;
     background: #ffffff;
@@ -102,19 +107,21 @@
     background: #ffffff;
     border: 1px solid #e0e6ed;
     border-radius: 6px;
+    font-size: 12px;
 }
 
 /* TABLE HEADER */
 .sapMListTblHeaderCell {
-    font-size: 12px;
-    font-weight: 600;
-    color: #32363a;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #111827;
     background: #f4f6f8;
 }
 
 /* TABLE ROW */
 .sapMListTblRow {
     font-size: 12px;
+    color: #374151;
 }
 
 /* ROW HOVER */
@@ -122,12 +129,11 @@
     background: #f0f4f9;
 }
 
-/* ===== REMOVE EXTRA EFFECTS ===== */
+/* ===== CLEAN ===== */
 .sapMPanelContent {
     overflow: hidden !important;
 }
 
-/* ===== CLEAN LOOK ===== */
 .sapMGT,
 .sapMPanel {
     transition: none;
