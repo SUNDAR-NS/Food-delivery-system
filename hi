@@ -1,70 +1,3 @@
-{
-  "_version": "1.83.0",
-  "sap.app": {
-    "id": "mfuanalytics",
-    "type": "application",
-    "i18n": "i18n/i18n.properties",
-    "applicationVersion": {
-      "version": "0.0.1"
-    },
-    "title": "MFU Analytics",
-    "description": "Dashboard"
-  },
-
-  "sap.ui": {
-    "technology": "UI5",
-    "deviceTypes": {
-      "desktop": true,
-      "tablet": true,
-      "phone": true
-    }
-  },
-
-  "sap.ui5": {
-    "dependencies": {
-      "minUI5Version": "1.145.0",
-      "libs": {
-        "sap.m": {},
-        "sap.ui.core": {},
-        "sap.viz": {}
-      }
-    },
-
-    "rootView": {
-      "viewName": "mfuanalytics.view.App",
-      "type": "XML",
-      "id": "App"
-    },
-
-    "resources": {
-      "css": [
-        {
-          "uri": "css/style.css"
-        }
-      ]
-    }
-  }
-}
-
-
-
-<mvc:View
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-
-<App id="app">
-    <pages>
-        <Page title="MFU Dashboard">
-            <content>
-                <mvc:XMLView viewName="mfuanalytics.view.mfureport"/>
-            </content>
-        </Page>
-    </pages>
-</App>
-
-</mvc:View>
-
-
 <mvc:View controllerName="mfuanalytics.controller.mfureport"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
@@ -72,15 +5,18 @@
     xmlns:viz.data="sap.viz.ui5.data"
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
 
+<Page title="MFU Dashboard">
+
 <VBox class="mainContainer">
 
 <Title text="MFU Dashboard" level="H2"/>
 
 <!-- TOP -->
-<HBox class="topContainer" justifyContent="SpaceBetween">
+<HBox class="topContainer" renderType="Bare">
 
     <!-- KPI -->
     <VBox width="35%">
+
         <HBox class="kpiRow">
             <GenericTile header="Total MFU Uploaded" class="tile">
                 <TileContent><NumericContent value="71"/></TileContent>
@@ -100,12 +36,13 @@
                 <TileContent><NumericContent value="5"/></TileContent>
             </GenericTile>
         </HBox>
+
     </VBox>
 
     <!-- MAIN CHART -->
     <Panel width="65%" headerText="MFU Templates by Modules">
 
-        <viz:VizFrame vizType="column" height="320px">
+        <viz:VizFrame vizType="column" height="320px" width="100%">
 
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/modules}">
@@ -130,10 +67,11 @@
 </HBox>
 
 <!-- BOTTOM -->
-<HBox class="bottomGrid" justifyContent="SpaceBetween">
+<HBox class="bottomGrid" justifyContent="SpaceBetween" renderType="Bare">
 
-    <Panel headerText="Templates by Count">
-        <viz:VizFrame vizType="pie" height="220px">
+    <Panel>
+        <Text text="Templates by Count" class="panelTitle"/>
+        <viz:VizFrame vizType="pie" height="220px" width="100%">
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/modules}">
                     <viz.data:dimensions>
@@ -151,8 +89,9 @@
         </viz:VizFrame>
     </Panel>
 
-    <Panel headerText="Monthly">
-        <viz:VizFrame vizType="column" height="220px">
+    <Panel>
+        <Text text="Monthly" class="panelTitle"/>
+        <viz:VizFrame vizType="column" height="220px" width="100%">
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/monthly}">
                     <viz.data:dimensions>
@@ -170,8 +109,9 @@
         </viz:VizFrame>
     </Panel>
 
-    <Panel headerText="Quarterly">
-        <viz:VizFrame vizType="column" height="220px">
+    <Panel>
+        <Text text="Quarterly" class="panelTitle"/>
+        <viz:VizFrame vizType="column" height="220px" width="100%">
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/quarterly}">
                     <viz.data:dimensions>
@@ -189,8 +129,9 @@
         </viz:VizFrame>
     </Panel>
 
-    <Panel headerText="Yearly">
-        <viz:VizFrame vizType="column" height="220px">
+    <Panel>
+        <Text text="Yearly" class="panelTitle"/>
+        <viz:VizFrame vizType="column" height="220px" width="100%">
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/yearly}">
                     <viz.data:dimensions>
@@ -211,9 +152,10 @@
 </HBox>
 
 <!-- TABLE -->
-<Panel headerText="MFU Details">
+<Panel headerText="MFU Details" class="sapUiMediumMarginTop">
 
 <Table>
+
 <columns>
 <Column><Text text="Module"/></Column>
 <Column><Text text="Sub Module"/></Column>
@@ -249,14 +191,17 @@
 </Panel>
 
 </VBox>
+</Page>
 </mvc:View>
 
 
 
 sap.ui.define([
 "sap/ui/core/mvc/Controller",
-"sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
+"sap/ui/model/json/JSONModel",
+"sap/viz/ui5/data/FlattenedDataset",
+"sap/viz/ui5/controls/common/feeds/FeedItem"
+], function (Controller, JSONModel, FlattenedDataset, FeedItem) {
 "use strict";
 
 return Controller.extend("mfuanalytics.controller.mfureport", {
@@ -264,11 +209,12 @@ return Controller.extend("mfuanalytics.controller.mfureport", {
 onInit: function () {
 
     var data = {
+
         modules: [
-            { module: "Retail", approved: 30 },
-            { module: "Finance", approved: 55 },
-            { module: "HR", approved: 20 },
-            { module: "IT", approved: 40 }
+            { module: "NFRP", approved: 30 },
+            { module: "SCBI", approved: 55 },
+            { module: "ESG", approved: 20 },
+            { module: "ICON", approved: 40 }
         ],
 
         monthly: [
@@ -290,10 +236,58 @@ onInit: function () {
         ]
     };
 
-    this.getView().setModel(new JSONModel(data));
+    this.getView().setModel(new sap.ui.model.json.JSONModel(data));
 }
 
 });
 });
+
+
+.sapMPage {
+    background-color: #f5f7fa;
+}
+
+.mainContainer {
+    padding: 20px;
+}
+
+/* KPI */
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* BOTTOM */
+.bottomGrid {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.bottomGrid > * {
+    flex: 1;
+    min-width: 0;
+}
+
+/* CHART */
+.sapVizFrame {
+    width: 100% !important;
+}
+
+/* TITLE */
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
 
 
