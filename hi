@@ -58,7 +58,7 @@
 <!-- MAIN CHART -->
 <f:Card class="sapUiMediumMarginTop">
 <f:header>
-<CardHeader title="MFU Templates by Module"/>
+<f:CardHeader title="MFU Templates by Module"/>
 </f:header>
 
 <f:content>
@@ -90,7 +90,7 @@
 
 <!-- PIE -->
 <f:Card>
-<f:header><CardHeader title="Distribution"/></f:header>
+<f:header><f:CardHeader title="Distribution"/></f:header>
 <f:content>
 <viz:VizFrame id="idPie" vizType="donut" height="220px">
 
@@ -116,7 +116,7 @@
 
 <!-- MONTHLY -->
 <f:Card>
-<f:header><CardHeader title="Monthly Trend"/></f:header>
+<f:header><f:CardHeader title="Monthly Trend"/></f:header>
 <f:content>
 <viz:VizFrame id="idMonthly" vizType="column" height="220px">
 
@@ -142,7 +142,7 @@
 
 <!-- QUARTERLY -->
 <f:Card>
-<f:header><CardHeader title="Quarterly"/></f:header>
+<f:header><f:CardHeader title="Quarterly"/></f:header>
 <f:content>
 <viz:VizFrame id="idQuarterly" vizType="column" height="220px">
 
@@ -168,7 +168,7 @@
 
 <!-- YEARLY -->
 <f:Card>
-<f:header><CardHeader title="Yearly"/></f:header>
+<f:header><f:CardHeader title="Yearly"/></f:header>
 <f:content>
 <viz:VizFrame id="idYearly" vizType="column" height="220px">
 
@@ -199,7 +199,7 @@
 <f:Card class="sapUiMediumMarginTop">
 
 <f:header>
-<CardHeader title="MFU Details"/>
+<f:CardHeader title="MFU Details"/>
 </f:header>
 
 <f:content>
@@ -245,130 +245,15 @@
 
 
 
-
-
-sap.ui.define([
-"sap/ui/core/mvc/Controller",
-"sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-"use strict";
-
-return Controller.extend("mfuanalytics.controller.mfureport", {
-
-onInit: function () {
-
-    var data = {
-
-        modules: [
-            { module: "NFRP", approved: 30 },
-            { module: "SCBI", approved: 55 },
-            { module: "ESG", approved: 20 },
-            { module: "ICON", approved: 40 }
-        ],
-
-        monthly: [
-            { month: "Jan", value: 10 },
-            { month: "Feb", value: 20 },
-            { month: "Mar", value: 15 }
-        ],
-
-        quarterly: [
-            { quarter: "Q1", value: 40 },
-            { quarter: "Q2", value: 25 },
-            { quarter: "Q3", value: 30 }
-        ],
-
-        yearly: [
-            { year: "2022", value: 50 },
-            { year: "2023", value: 70 },
-            { year: "2024", value: 60 }
-        ],
-
-        tableData: [
-            {
-                module: "Retail",
-                submodule: "Sales",
-                load: "Upload",
-                template: "Temp1",
-                count: 10
-            },
-            {
-                module: "Finance",
-                submodule: "Accounts",
-                load: "Upload",
-                template: "Temp2",
-                count: 25
-            }
-        ]
-    };
-
-    this.getView().setModel(new JSONModel(data));
-
-    // Professional chart settings
-    this._setChartStyle("idMainChart");
-    this._setChartStyle("idPie");
-    this._setChartStyle("idMonthly");
-    this._setChartStyle("idQuarterly");
-    this._setChartStyle("idYearly");
-},
-
-_setChartStyle: function (id) {
-    var oChart = this.byId(id);
-    if (oChart) {
-        oChart.setVizProperties({
-            plotArea: {
-                dataLabel: {
-                    visible: true
-                }
-            },
-            valueAxis: {
-                title: {
-                    visible: false
-                }
-            },
-            categoryAxis: {
-                title: {
-                    visible: false
-                }
-            },
-            legend: {
-                visible: true
-            }
-        });
+{
+  "sap.ui5": {
+    "dependencies": {
+      "libs": {
+        "sap.m": {},
+        "sap.f": {},
+        "sap.viz": {},
+        "sap.ui.layout": {}
+      }
     }
-}
-
-});
-});
-
-
-
-
-.sapMPage {
-    background-color: #f7f9fb;
-}
-
-.mainContainer {
-    padding: 1.5rem;
-}
-
-/* Cards */
-.sapFCard {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-/* Titles */
-.sapMTitle {
-    font-weight: 600;
-}
-
-/* Charts */
-.sapVizFrame {
-    padding: 10px;
-}
-
-/* Table */
-.sapMTable {
-    border-radius: 10px;
+  }
 }
