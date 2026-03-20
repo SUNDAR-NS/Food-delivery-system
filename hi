@@ -14,7 +14,8 @@
         <viz.data:FlattenedDataset data="{/treeData}">
 
             <viz.data:dimensions>
-                <viz.data:DimensionDefinition name="Name" value="{name}"/>
+                <viz.data:DimensionDefinition name="Level1" value="{level1}"/>
+                <viz.data:DimensionDefinition name="Level2" value="{level2}"/>
             </viz.data:dimensions>
 
             <viz.data:measures>
@@ -25,30 +26,123 @@
     </viz:dataset>
 
     <viz:feeds>
-
-        <!-- REQUIRED -->
         <viz.feeds:FeedItem uid="categoryAxis"
             type="Dimension"
-            values="Name"/>
+            values="Level1,Level2"/>
 
-        <!-- REQUIRED -->
         <viz.feeds:FeedItem uid="size"
             type="Measure"
             values="Count"/>
 
-        <!-- 🔥 THIS FIXES YOUR ERROR -->
         <viz.feeds:FeedItem uid="color"
             type="Dimension"
-            values="Name"/>
-
+            values="Level1"/>
     </viz:feeds>
 
 </viz:VizFrame>
 
-<!-- BUTTONS -->
 <HBox>
     <Button text="⬅ Back" press="onBackDrill"/>
     <Button text="Reset" press="onResetTreemap"/>
 </HBox>
 
 </Panel>
+
+
+
+// 🔥 INIT ADDITION
+this._drillLevel = "module";
+this._rawTree = [
+    { module: "NFRP", submodule: "Credit Risk", template: "Exposure_Load", value: 10 },
+    { module: "NFRP", submodule: "Liquidity", template: "Liquidity_Load", value: 5 },
+    { module: "SCBI", submodule: "Insurance", template: "Policy_Load", value: 7 },
+    { module: "ICON", submodule: "Capital", template: "Capital_Load", value: 6 }
+];
+
+this._setTreemapModule();
+
+// 🔥 LEVEL 1
+_setTreemapModule: function () {
+
+    var map = {};
+
+    this._rawTree.forEach(d => {
+        if (!map[d.module]) map[d.module] = 0;
+        map[d.module] += d.value;
+    });
+
+    var result = Object.keys(map).map(k => ({
+        level1: k,
+        level2: k,
+        value: map[k]
+    }));
+
+    this.getView().getModel().setProperty("/treeData", result);
+    this._drillLevel = "module";
+},
+
+// 🔥 LEVEL 2
+_setTreemapSubmodule: function (module) {
+
+    var map = {};
+
+    this._rawTree
+        .filter(d => d.module === module)
+        .forEach(d => {
+            if (!map[d.submodule]) map[d.submodule] = 0;
+            map[d.submodule] += d.value;
+        });
+
+    var result = Object.keys(map).map(k => ({
+        level1: module,
+        level2: k,
+        value: map[k]
+    }));
+
+    this.getView().getModel().setProperty("/treeData", result);
+    this._drillLevel = "submodule";
+    this._currentModule = module;
+},
+
+// 🔥 LEVEL 3
+_setTreemapTemplate: function (submodule) {
+
+    var result = this._rawTree
+        .filter(d => d.submodule === submodule)
+        .map(d => ({
+            level1: submodule,
+            level2: d.template,
+            value: d.value
+        }));
+
+    this.getView().getModel().setProperty("/treeData", result);
+    this._drillLevel = "template";
+    this._currentSubmodule = submodule;
+},
+
+// 🔥 CLICK
+onTreemapSelect: function (oEvent) {
+
+    var data = oEvent.getParameter("data")[0].data;
+
+    if (this._drillLevel === "module") {
+        this._setTreemapSubmodule(data.Level1);
+    } else if (this._drillLevel === "submodule") {
+        this._setTreemapTemplate(data.Level2);
+    }
+},
+
+// 🔥 BACK
+onBackDrill: function () {
+
+    if (this._drillLevel === "template") {
+        this._setTreemapSubmodule(this._currentModule);
+    } else if (this._drillLevel === "submodule") {
+        this._setTreemapModule();
+    }
+},
+
+// 🔥 RESET
+onResetTreemap: function () {
+    this._setTreemapModule();
+}
