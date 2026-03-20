@@ -10,14 +10,10 @@
     "title": "{{appTitle}}",
     "description": "{{appDescription}}",
     "resources": "resources.json",
-    "sourceTemplate": {
-      "id": "@sap/generator-fiori:basic",
-      "version": "1.21.0",
-      "toolsId": "1766712f-0979-40be-a69b-d9bcdfc37c41"
-    },
+
     "dataSources": {
       "mainService": {
-        "uri": "/service/",
+        "uri": "/odata/v4/catalog-service/",
         "type": "OData",
         "settings": {
           "annotations": [],
@@ -29,14 +25,6 @@
 
   "sap.ui": {
     "technology": "UI5",
-    "icons": {
-      "icon": "",
-      "favIcon": "",
-      "phone": "",
-      "phone@2": "",
-      "tablet": "",
-      "tablet@2": ""
-    },
     "deviceTypes": {
       "desktop": true,
       "tablet": true,
@@ -73,10 +61,12 @@
           "bundleName": "mfuanalytics.i18n.i18n"
         }
       },
+
       "": {
         "dataSource": "mainService",
-        "preload": true,
+        "type": "sap.ui.model.odata.v4.ODataModel",
         "settings": {
+          "synchronizationMode": "None",
           "operationMode": "Server",
           "autoExpandSelect": true,
           "earlyRequests": true
@@ -101,18 +91,17 @@
         "type": "View",
         "viewType": "XML",
         "path": "mfuanalytics.view",
-        "async": true,
-        "viewPath": "mfuanalytics.view"
+        "async": true
       },
+
       "routes": [
         {
           "name": "Routemfureport",
-          "pattern": ":?query:",
-          "target": [
-            "Targetmfureport"
-          ]
+          "pattern": "",
+          "target": ["Targetmfureport"]
         }
       ],
+
       "targets": {
         "Targetmfureport": {
           "id": "mfureport",
