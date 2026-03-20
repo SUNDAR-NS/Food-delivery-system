@@ -42,12 +42,15 @@ sap.ui.define([
                     { module: "Finance", subModule: "Accounts", loadType: "Upload", template: "Temp2", count: 25 }
                 ],
 
-                treeData: [
-{ module: "NFRP", submodule: "Credit Risk", value: 1 },
-{ module: "NFRP", submodule: "Liquidity", value: 5 },
-{ module: "SCBI", submodule: "Insurance", value: 7 },
-{ module: "ICON", submodule: "Capital", value: 1 }
-],
+                // 🔥 RAW DATA FOR DRILL
+                treeRaw: [
+                    { module: "NFRP", submodule: "Credit Risk", template: "Exposure_Load", value: 10 },
+                    { module: "NFRP", submodule: "Liquidity", template: "Liquidity_Load", value: 5 },
+                    { module: "SCBI", submodule: "Insurance", template: "Policy_Load", value: 7 },
+                    { module: "ICON", submodule: "Capital", template: "Capital_Load", value: 6 }
+                ],
+
+                treeData: [],
 
                 totalUploaded: 190,
                 totalApproved: 130,
@@ -58,11 +61,24 @@ sap.ui.define([
             data.pieModules = data.modules;
 
             this._fullModules = data.modules;
-            this._fullTreeData = data.treeData;
 
-            this.getView().setModel(new JSONModel(data));
+            // 🔥 STORE RAW TREE DATA
+            this._rawTree = data.treeRaw;
+
+            this._level = "module";
+            this._currentModule = null;
+            this._currentSubmodule = null;
+
+            var oModel = new JSONModel(data);
+            this.getView().setModel(oModel);
+
+            // 🔥 INITIAL LOAD
+            this._setModuleLevel();
         },
 
+        // =========================
+        // 🔥 FILTER (UNCHANGED)
+        // =========================
         onFilterChange: function (oEvent) {
 
             var selectedKeys = oEvent.getSource().getSelectedKeys();
@@ -101,28 +117,137 @@ sap.ui.define([
             oModel.setProperty("/totalTemplates", filtered.length);
         },
 
+        // =========================
+        // 🔥 ADVANCED DRILL LOGIC
+        // =========================
+
+        _setModuleLevel: function () {
+
+            var map = {};
+
+            this._rawTree.forEach(d => {
+                if (!map[d.module]) map[d.module] = 0;
+                map[d.module] += d.value;
+            });
+
+            var result = Object.keys(map).map(k => ({
+                name: k,
+                value: map[k]
+            }));
+
+            this.getView().getModel().setProperty("/treeData", result);
+            this._level = "module";
+        },
+
+        _setSubmoduleLevel: function (module) {
+
+            var map = {};
+
+            this._rawTree
+                .filter(d => d.module === module)
+                .forEach(d => {
+                    if (!map[d.submodule]) map[d.submodule] = 0;
+                    map[d.submodule] += d.value;
+                });
+
+            var result = Object.keys(map).map(k => ({
+                name: k,
+                value: map[k]
+            }));
+
+            this.getView().getModel().setProperty("/treeData", result);
+
+            this._level = "submodule";
+            this._currentModule = module;
+        },
+
+        _setTemplateLevel: function (submodule) {
+
+            var result = this._rawTree
+                .filter(d => d.submodule === submodule)
+                .map(d => ({
+                    name: d.template,
+                    value: d.value
+                }));
+
+            this.getView().getModel().setProperty("/treeData", result);
+
+            this._level = "template";
+            this._currentSubmodule = submodule;
+        },
+
+        // 🔥 CLICK EVENT
         onTreemapSelect: function (oEvent) {
 
             var data = oEvent.getParameter("data")[0].data;
-            var full = this._fullTreeData;
-            var oModel = this.getView().getModel();
 
-            var filtered = [];
-
-            if (data.Module && !data.Submodule) {
-                filtered = full.filter(d => d.module === data.Module);
-            } else if (data.Submodule) {
-                filtered = full.filter(d => d.submodule === data.Submodule);
-            } else {
-                filtered = full;
+            if (this._level === "module") {
+                this._setSubmoduleLevel(data.Name);
+            } else if (this._level === "submodule") {
+                this._setTemplateLevel(data.Name);
             }
-
-            oModel.setProperty("/treeData", filtered);
         },
 
+        // 🔥 BACK
+        onBackDrill: function () {
+
+            if (this._level === "template") {
+                this._setSubmoduleLevel(this._currentModule);
+            } else if (this._level === "submodule") {
+                this._setModuleLevel();
+            }
+        },
+
+        // 🔥 RESET
         onResetTreemap: function () {
-            this.getView().getModel().setProperty("/treeData", this._fullTreeData);
+            this._setModuleLevel();
         }
 
     });
 });
+
+
+
+
+
+
+
+<Panel headerText="MFU Drill Down">
+
+<viz:VizFrame
+    id="idTreemap"
+    vizType="treemap"
+    height="400px"
+    selectData="onTreemapClick"
+    vizProperties='{
+        "title":{"visible":false},
+        "plotArea":{"dataLabel":{"visible":true}}
+    }'>
+
+    <viz:dataset>
+        <viz.data:FlattenedDataset data="{/treeData}">
+            <viz.data:dimensions>
+                <viz.data:DimensionDefinition name="Name" value="{name}"/>
+            </viz.data:dimensions>
+
+            <viz.data:measures>
+                <viz.data:MeasureDefinition name="Count" value="{value}"/>
+            </viz.data:measures>
+        </viz.data:FlattenedDataset>
+    </viz:dataset>
+
+    <viz:feeds>
+        <viz.feeds:FeedItem uid="categoryAxis"
+            type="Dimension"
+            values="Name"/>
+        <viz.feeds:FeedItem uid="size"
+            type="Measure"
+            values="Count"/>
+    </viz:feeds>
+
+</viz:VizFrame>
+
+<Button text="⬅ Back" press="onBackDrill"/>
+<Button text="Reset" press="onResetDrill"/>
+
+</Panel>
