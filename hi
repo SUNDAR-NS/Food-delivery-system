@@ -2,14 +2,6 @@ using com.scb.fileupload as db from '../db/schema';
 
 service CatalogService {
 
-    entity MFUDetails as projection on db.ReportFileStorage {
-        ID,
-        MODULE_NAME,
-        SUB_MODULE_NAME,
-        LOAD_TYPE,
-        LOAD_TEMPLATE,
-        FILE_NAME,
-        STATUS
-    };
+    entity MFUDetails as projection on db.ReportFileStorage;
 
 }
