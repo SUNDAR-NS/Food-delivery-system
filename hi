@@ -11,29 +11,28 @@
 
 <Title text="MFU Dashboard" level="H2"/>  
 
-<!-- TOP -->  
-<HBox class="topContainer" renderType="Bare">  
+<HBox renderType="Bare">  
 
-    <!-- KPI -->  
+    <!-- KPI -->
     <VBox width="35%">  
 
         <HBox class="kpiRow">  
-            <GenericTile header="Total MFU Uploaded" class="tile">  
+            <GenericTile header="Total Uploaded" class="tile">  
                 <TileContent><NumericContent value="71"/></TileContent>  
             </GenericTile>  
 
-            <GenericTile header="Total MFU Approved" class="tile">  
+            <GenericTile header="Total Approved" class="tile">  
                 <TileContent><NumericContent value="60"/></TileContent>  
             </GenericTile>  
         </HBox>  
 
         <HBox class="kpiRow">  
-            <GenericTile header="MFU Template Onboarded" class="tile">  
-                <TileContent><NumericContent value="115"/></TileContent>  
+            <GenericTile header="Total Pending" class="tile">  
+                <TileContent><NumericContent value="20"/></TileContent>  
             </GenericTile>  
 
-            <GenericTile header="Total MFU Rejected" class="tile">  
-                <TileContent><NumericContent value="5"/></TileContent>  
+            <GenericTile header="Total Templates" class="tile">  
+                <TileContent><NumericContent value="115"/></TileContent>  
             </GenericTile>  
         </HBox>  
 
@@ -47,21 +46,22 @@
             height="320px"
             width="100%"
             vizProperties='{
+                "legend": { "visible": true },
                 "plotArea": {
                     "dataLabel": { "visible": true },
                     "dataPointStyle": {
                         "rules": [
                             {
-                                "dataContext": { "measureNames": "Approved" },
-                                "properties": { "color": "#0070F2" }
+                                "dataContext": { "measureNames": "Uploaded" },
+                                "properties": { "color": "#5CBAE6" }
                             },
                             {
-                                "dataContext": { "measureNames": "Rejected" },
-                                "properties": { "color": "#E9730C" }
+                                "dataContext": { "measureNames": "Approved" },
+                                "properties": { "color": "#107E3E" }
                             },
                             {
                                 "dataContext": { "measureNames": "Pending" },
-                                "properties": { "color": "#107E3E" }
+                                "properties": { "color": "#E9730C" }
                             }
                         ]
                     }
@@ -70,7 +70,6 @@
 
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/modules}">
-
                     <viz.data:dimensions>
                         <viz.data:DimensionDefinition
                             name="Module"
@@ -78,11 +77,10 @@
                     </viz.data:dimensions>
 
                     <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
                         <viz.data:MeasureDefinition name="Approved" value="{approved}" />
-                        <viz.data:MeasureDefinition name="Rejected" value="{rejected}" />
                         <viz.data:MeasureDefinition name="Pending" value="{pending}" />
                     </viz.data:measures>
-
                 </viz.data:FlattenedDataset>
             </viz:dataset>
 
@@ -90,7 +88,7 @@
                 <viz.feeds:FeedItem
                     uid="valueAxis"
                     type="Measure"
-                    values="Approved,Rejected,Pending"/>
+                    values="Uploaded,Approved,Pending"/>
 
                 <viz.feeds:FeedItem
                     uid="categoryAxis"
@@ -104,95 +102,9 @@
 
 </HBox>  
 
-<!-- BOTTOM -->  
-<HBox class="bottomGrid" justifyContent="SpaceBetween" renderType="Bare">  
-
-    <Panel>  
-        <Text text="Templates by Count" class="panelTitle"/>  
-        <viz:VizFrame vizType="pie" height="220px" width="100%">  
-            <viz:dataset>  
-                <viz.data:FlattenedDataset data="{/modules}">  
-                    <viz.data:dimensions>  
-                        <viz.data:DimensionDefinition name="Module" value="{module}"/>  
-                    </viz.data:dimensions>  
-                    <viz.data:measures>  
-                        <viz.data:MeasureDefinition name="Value" value="{approved}"/>  
-                    </viz.data:measures>  
-                </viz.data:FlattenedDataset>  
-            </viz:dataset>  
-            <viz:feeds>  
-                <viz.feeds:FeedItem uid="size" type="Measure" values="Value"/>  
-                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>  
-            </viz:feeds>  
-        </viz:VizFrame>  
-    </Panel>  
-
-    <Panel>  
-        <Text text="Monthly" class="panelTitle"/>  
-        <viz:VizFrame vizType="column" height="220px" width="100%">  
-            <viz:dataset>  
-                <viz.data:FlattenedDataset data="{/monthly}">  
-                    <viz.data:dimensions>  
-                        <viz.data:DimensionDefinition name="Month" value="{month}"/>  
-                    </viz.data:dimensions>  
-                    <viz.data:measures>  
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>  
-                    </viz.data:measures>  
-                </viz.data:FlattenedDataset>  
-            </viz:dataset>  
-            <viz:feeds>  
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>  
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>  
-            </viz:feeds>  
-        </viz:VizFrame>  
-    </Panel>  
-
-    <Panel>  
-        <Text text="Quarterly" class="panelTitle"/>  
-        <viz:VizFrame vizType="column" height="220px" width="100%">  
-            <viz:dataset>  
-                <viz.data:FlattenedDataset data="{/quarterly}">  
-                    <viz.data:dimensions>  
-                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>  
-                    </viz.data:dimensions>  
-                    <viz.data:measures>  
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>  
-                    </viz.data:measures>  
-                </viz.data:FlattenedDataset>  
-            </viz:dataset>  
-            <viz:feeds>  
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>  
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>  
-            </viz:feeds>  
-        </viz:VizFrame>  
-    </Panel>  
-
-    <Panel>  
-        <Text text="Yearly" class="panelTitle"/>  
-        <viz:VizFrame vizType="column" height="220px" width="100%">  
-            <viz:dataset>  
-                <viz.data:FlattenedDataset data="{/yearly}">  
-                    <viz.data:dimensions>  
-                        <viz.data:DimensionDefinition name="Year" value="{year}"/>  
-                    </viz.data:dimensions>  
-                    <viz.data:measures>  
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>  
-                    </viz.data:measures>  
-                </viz.data:FlattenedDataset>  
-            </viz:dataset>  
-            <viz:feeds>  
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>  
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>  
-            </viz:feeds>  
-        </viz:VizFrame>  
-    </Panel>  
-
-</HBox>  
-
 </VBox>  
 </Page>  
 </mvc:View>
-
 
 
 
@@ -209,29 +121,12 @@ onInit: function () {
     var data = {
 
         modules: [
-            { module: "NFRP", approved: 30, rejected: 5, pending: 10 },
-            { module: "SCBI", approved: 55, rejected: 8, pending: 12 },
-            { module: "ESG", approved: 20, rejected: 3, pending: 6 },
-            { module: "ICON", approved: 40, rejected: 6, pending: 9 }
-        ],
-
-        monthly: [
-            { month: "Jan", value: 10 },
-            { month: "Feb", value: 20 },
-            { month: "Mar", value: 15 }
-        ],
-
-        quarterly: [
-            { quarter: "Q1", value: 40 },
-            { quarter: "Q2", value: 25 },
-            { quarter: "Q3", value: 30 }
-        ],
-
-        yearly: [
-            { year: "2022", value: 50 },
-            { year: "2023", value: 70 },
-            { year: "2024", value: 60 }
+            { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
+            { module: "SCBI", uploaded: 70, approved: 55, pending: 12 },
+            { module: "ESG", uploaded: 28, approved: 20, pending: 6 },
+            { module: "ICON", uploaded: 55, approved: 40, pending: 9 }
         ]
+
     };
 
     this.getView().setModel(new JSONModel(data));
@@ -239,8 +134,6 @@ onInit: function () {
 
 });
 });
-
-
 
 
 
@@ -264,25 +157,4 @@ onInit: function () {
     border-radius: 12px;
     background: white;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-.bottomGrid {
-    display: flex;
-    gap: 15px;
-    margin-top: 25px;
-}
-
-.bottomGrid > * {
-    flex: 1;
-    min-width: 0;
-}
-
-.sapVizFrame {
-    width: 100% !important;
-}
-
-.panelTitle {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
 }
