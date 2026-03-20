@@ -6,9 +6,7 @@
     height="450px"
     vizProperties='{
         "title":{"visible":false},
-        "plotArea":{
-            "dataLabel":{"visible":true}
-        }
+        "plotArea":{"dataLabel":{"visible":true}}
     }'>
 
     <viz:dataset>
@@ -21,7 +19,8 @@
             </viz.data:dimensions>
 
             <viz.data:measures>
-                <viz.data:MeasureDefinition name="Count" value="{value}"/>
+                <!-- 🔥 NAME MUST MATCH FEED -->
+                <viz.data:MeasureDefinition name="Value" value="{value}"/>
             </viz.data:measures>
 
         </viz.data:FlattenedDataset>
@@ -29,19 +28,19 @@
 
     <viz:feeds>
 
-        <!-- HIERARCHY -->
+        <!-- 🔥 MUST MATCH DIMENSION NAMES EXACTLY -->
         <viz.feeds:FeedItem
             uid="categoryAxis"
             type="Dimension"
             values="Module,Submodule,Template"/>
 
-        <!-- SIZE -->
+        <!-- 🔥 MUST MATCH MEASURE NAME -->
         <viz.feeds:FeedItem
             uid="size"
             type="Measure"
-            values="Count"/>
+            values="Value"/>
 
-        <!-- COLOR -->
+        <!-- 🔥 COLOR MUST ALSO MATCH DIMENSION -->
         <viz.feeds:FeedItem
             uid="color"
             type="Dimension"
@@ -52,6 +51,8 @@
 </viz:VizFrame>
 
 </Panel>
+
+
 
 
 sap.ui.define([
@@ -66,7 +67,7 @@ sap.ui.define([
 
             var data = {
 
-                // 🔹 KPI + Bar Chart
+                // 🔹 KPI + STACKED CHART
                 modules: [
                     { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
                     { module: "SCBI", uploaded: 70, approved: 50, pending: 15 },
@@ -76,32 +77,34 @@ sap.ui.define([
 
                 pieModules: [],
 
-                // 🔹 Charts
+                // 🔹 MONTHLY
                 monthly: [
                     { month: "Jan", value: 10 },
                     { month: "Feb", value: 20 },
                     { month: "Mar", value: 15 }
                 ],
 
+                // 🔹 QUARTERLY
                 quarterly: [
                     { quarter: "Q1", value: 40 },
                     { quarter: "Q2", value: 25 },
                     { quarter: "Q3", value: 30 }
                 ],
 
+                // 🔹 YEARLY
                 yearly: [
                     { year: "2022", value: 50 },
                     { year: "2023", value: 70 },
                     { year: "2024", value: 60 }
                 ],
 
-                // 🔹 Table
+                // 🔹 TABLE
                 tableData: [
                     { module: "Retail", subModule: "Sales", loadType: "Upload", template: "Temp1", count: 10 },
                     { module: "Finance", subModule: "Accounts", loadType: "Upload", template: "Temp2", count: 25 }
                 ],
 
-                // 🔥 TREEMAP FULL HIERARCHY DATA (IMPORTANT)
+                // 🔥 TREEMAP DATA (SAP CORRECT FORMAT)
                 treeData: [
 
                     { module: "NFRP", submodule: "Credit Risk", template: "Exposure_Load", value: 10 },
@@ -119,20 +122,22 @@ sap.ui.define([
 
                 ],
 
-                // 🔹 KPI values
+                // 🔹 KPI TOTALS
                 totalUploaded: 190,
                 totalApproved: 130,
                 totalPending: 37,
                 totalTemplates: 4
             };
 
-            // Pie uses same modules
+            // 🔥 PIE SAME AS MODULES
             data.pieModules = data.modules;
 
-            // Backup for filter
+            // 🔥 BACKUP FOR FILTER
             this._fullModules = data.modules;
 
-            this.getView().setModel(new JSONModel(data));
+            // 🔥 SET MODEL
+            var oModel = new JSONModel(data);
+            this.getView().setModel(oModel);
         },
 
         // =========================
@@ -143,7 +148,7 @@ sap.ui.define([
             var selectedKeys = oEvent.getSource().getSelectedKeys();
             var oModel = this.getView().getModel();
 
-            // No selection → reset
+            // 👉 RESET
             if (selectedKeys.length === 0) {
 
                 oModel.setProperty("/modules", this._fullModules);
@@ -156,12 +161,12 @@ sap.ui.define([
                 return;
             }
 
-            // Filter
+            // 👉 FILTER
             var filtered = this._fullModules.filter(item =>
                 selectedKeys.includes(item.module)
             );
 
-            // Calculate totals
+            // 👉 CALCULATE
             var totalUploaded = 0,
                 totalApproved = 0,
                 totalPending = 0;
@@ -172,7 +177,7 @@ sap.ui.define([
                 totalPending += item.pending;
             });
 
-            // Update UI
+            // 👉 UPDATE
             oModel.setProperty("/modules", filtered);
             oModel.setProperty("/totalUploaded", totalUploaded);
             oModel.setProperty("/totalApproved", totalApproved);
@@ -181,7 +186,7 @@ sap.ui.define([
         },
 
         // =========================
-        // 🔥 OPTIONAL TREEMAP CLICK
+        // 🔥 TREEMAP CLICK (OPTIONAL)
         // =========================
         onTreemapClick: function (oEvent) {
             var data = oEvent.getParameter("data")[0].data;
