@@ -9,12 +9,6 @@
     },
     "title": "{{appTitle}}",
     "description": "{{appDescription}}",
-    "resources": "resources.json",
-    "sourceTemplate": {
-      "id": "@sap/generator-fiori:basic",
-      "version": "1.21.0",
-      "toolsId": "1766712f-0979-40be-a69b-d9bcdfc37c41"
-    },
     "dataSources": {
       "mainService": {
         "uri": "/service/",
@@ -29,14 +23,6 @@
 
   "sap.ui": {
     "technology": "UI5",
-    "icons": {
-      "icon": "",
-      "favIcon": "",
-      "phone": "",
-      "phone@2": "",
-      "tablet": "",
-      "tablet@2": ""
-    },
     "deviceTypes": {
       "desktop": true,
       "tablet": true,
@@ -52,6 +38,7 @@
       "libs": {
         "sap.m": {},
         "sap.ui.core": {},
+        "sap.f": {},
         "sap.viz": {},
         "sap.ui.layout": {}
       }
@@ -101,16 +88,13 @@
         "type": "View",
         "viewType": "XML",
         "path": "mfuanalytics.view",
-        "async": true,
-        "viewPath": "mfuanalytics.view"
+        "async": true
       },
       "routes": [
         {
           "name": "Routemfureport",
           "pattern": ":?query:",
-          "target": [
-            "Targetmfureport"
-          ]
+          "target": ["Targetmfureport"]
         }
       ],
       "targets": {
@@ -126,17 +110,6 @@
       "type": "XML",
       "id": "App",
       "async": true
-    },
-  "sap.ui5": {
-    "dependencies": {
-      "libs": {
-        "sap.m": {},
-        "sap.f": {},
-        "sap.viz": {},
-        "sap.ui.layout": {}
-      }
     }
-  }
-
   }
 }
