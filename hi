@@ -1,3 +1,60 @@
+.sapMPage {
+    background-color: #f5f7fa;
+}
+
+/* HEADER */
+.sapBlueHeader .sapMBar {
+    background-color: #0a6ed1 !important;
+    color: white !important;
+}
+
+/* FILTER */
+.filterBar {
+    margin: 15px 0;
+    gap: 10px;
+}
+
+/* TOP */
+.topContainer {
+    gap: 20px;
+}
+
+/* KPI */
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* 🔥 PERFECT ALIGNMENT */
+.chartRow {
+    margin-top: 25px;
+    gap: 15px;
+}
+
+.chartBox {
+    flex: 1;              /* 🔥 equal width */
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* TITLE */
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+
 <mvc:View controllerName="mfuanalytics.controller.mfureport"  
     xmlns:mvc="sap.ui.core.mvc"  
     xmlns="sap.m"  
@@ -210,59 +267,3 @@
 </Page>  
 </mvc:View>
 
-
-.sapMPage {
-    background-color: #f5f7fa;
-}
-
-/* HEADER */
-.sapBlueHeader .sapMBar {
-    background-color: #0a6ed1 !important;
-    color: white !important;
-}
-
-/* FILTER */
-.filterBar {
-    margin: 15px 0;
-    gap: 10px;
-}
-
-/* TOP */
-.topContainer {
-    gap: 20px;
-}
-
-/* KPI */
-.kpiRow {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.tile {
-    flex: 1;
-    height: 130px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-/* 🔥 PERFECT ALIGNMENT */
-.chartRow {
-    margin-top: 25px;
-    gap: 15px;
-}
-
-.chartBox {
-    flex: 1;              /* 🔥 equal width */
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-}
-
-/* TITLE */
-.panelTitle {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
