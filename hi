@@ -8,17 +8,31 @@
 
 <Page title="MFU Dashboard" class="sapBlueHeader">  
 
-<VBox class="mainContainer" fitContainer="true">  
+<VBox class="mainContainer">  
 
-<!-- FILTER -->
-<HBox alignItems="Center" class="filterBar">
-    <Text text="Module" class="filterLabel"/>
-    <MultiComboBox width="250px" selectionChange="onFilterChange" items="{/modules}">
-        <core:Item key="{module}" text="{module}" />
-    </MultiComboBox>
+<!-- 🔥 FILTER SECTION (LEFT + RIGHT) -->
+<HBox justifyContent="SpaceBetween" class="filterBar">
+
+    <!-- LEFT FILTER -->
+    <HBox alignItems="Center" class="leftFilter">
+        <Text text="Module" class="filterLabel"/>
+        <MultiComboBox
+            width="250px"
+            selectionChange="onFilterChange"
+            valueHelpOnly="true"
+            items="{/modules}">
+            <core:Item key="{module}" text="{module}" />
+        </MultiComboBox>
+    </HBox>
+
+    <!-- RIGHT FILTER (FOR FUTURE USE) -->
+    <HBox class="rightFilter">
+        <!-- You can add another filter here later -->
+    </HBox>
+
 </HBox>
 
-<!-- TOP -->
+<!-- 🔥 TOP SECTION -->
 <HBox class="topContainer">  
 
     <!-- KPI -->
@@ -54,8 +68,8 @@
 
     </VBox>  
 
-    <!-- STACKED CHART -->
-    <Panel width="65%" headerText="MFU Templates by Modules">
+    <!-- 🔥 STACKED CHART (700px FIXED) -->
+    <Panel width="700px" headerText="MFU Templates by Modules">
 
         <viz:VizFrame vizType="stacked_column" height="320px" width="100%"
             vizProperties='{
@@ -93,15 +107,16 @@
 
 </HBox>  
 
-<!-- 4 CHART ROW -->
+<!-- 🔥 CHART ROW -->
 <HBox class="chartRow">
 
+    <!-- PIE (NOT FILTERED) -->
     <VBox class="chartBox">
         <Text text="Templates by Count" class="panelTitle"/>
         <viz:VizFrame vizType="pie" height="200px" width="100%"
             vizProperties='{"title":{"visible":false}}'>
             <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
+                <viz.data:FlattenedDataset data="{/pieModules}">
                     <viz.data:dimensions>
                         <viz.data:DimensionDefinition name="Module" value="{module}"/>
                     </viz.data:dimensions>
@@ -117,6 +132,7 @@
         </viz:VizFrame>
     </VBox>
 
+    <!-- MONTHLY -->
     <VBox class="chartBox">
         <Text text="Monthly" class="panelTitle"/>
         <viz:VizFrame vizType="column" height="200px" width="100%"
@@ -138,6 +154,7 @@
         </viz:VizFrame>
     </VBox>
 
+    <!-- QUARTERLY -->
     <VBox class="chartBox">
         <Text text="Quarterly" class="panelTitle"/>
         <viz:VizFrame vizType="column" height="200px" width="100%"
@@ -159,6 +176,7 @@
         </viz:VizFrame>
     </VBox>
 
+    <!-- YEARLY -->
     <VBox class="chartBox">
         <Text text="Yearly" class="panelTitle"/>
         <viz:VizFrame vizType="column" height="200px" width="100%"
@@ -212,67 +230,96 @@
 
 
 
-.sapMPage {
-    background-color: #f5f7fa;
-}
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+    "use strict";
 
-/* HEADER */
-.sapBlueHeader .sapMBar {
-    background-color: #0a6ed1 !important;
-    color: white !important;
-}
+    return Controller.extend("mfuanalytics.controller.mfureport", {
 
-/* 🔥 FIX LEFT SPACE */
-.mainContainer {
-    padding: 20px 30px;
-}
+        onInit: function () {
 
-/* FILTER */
-.filterBar {
-    margin: 15px 0;
-    gap: 10px;
-}
+            var data = {
 
-.filterLabel {
-    font-weight: bold;
-}
+                modules: [
+                    { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
+                    { module: "SCBI", uploaded: 70, approved: 50, pending: 15 },
+                    { module: "ESG", uploaded: 25, approved: 15, pending: 5 },
+                    { module: "ICON", uploaded: 50, approved: 35, pending: 7 }
+                ],
 
-/* TOP */
-.topContainer {
-    gap: 20px;
-}
+                pieModules: [],
 
-/* KPI */
-.kpiRow {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-}
+                monthly: [
+                    { month: "Jan", value: 10 },
+                    { month: "Feb", value: 20 },
+                    { month: "Mar", value: 15 }
+                ],
 
-.tile {
-    flex: 1;
-    height: 130px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
+                quarterly: [
+                    { quarter: "Q1", value: 40 },
+                    { quarter: "Q2", value: 25 },
+                    { quarter: "Q3", value: 30 }
+                ],
 
-/* CHART ROW */
-.chartRow {
-    margin-top: 25px;
-    gap: 15px;
-}
+                yearly: [
+                    { year: "2022", value: 50 },
+                    { year: "2023", value: 70 },
+                    { year: "2024", value: 60 }
+                ],
 
-.chartBox {
-    flex: 1;
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-}
+                tableData: [
+                    { module: "Retail", subModule: "Sales", loadType: "Upload", template: "Temp1", count: 10 },
+                    { module: "Finance", subModule: "Accounts", loadType: "Upload", template: "Temp2", count: 25 }
+                ]
+            };
 
-/* TITLE */
-.panelTitle {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
+            data.pieModules = data.modules;
+
+            this._fullData = data;
+
+            this.getView().setModel(new JSONModel(data));
+        },
+
+        onFilterChange: function (oEvent) {
+
+            var selectedKeys = oEvent.getSource().getSelectedKeys();
+            var data = this._fullData;
+
+            if (selectedKeys.length === 0) {
+                this.getView().getModel().setData(data);
+                return;
+            }
+
+            var filtered = data.modules.filter(item =>
+                selectedKeys.includes(item.module)
+            );
+
+            var totalUploaded = 0,
+                totalApproved = 0,
+                totalPending = 0;
+
+            filtered.forEach(item => {
+                totalUploaded += item.uploaded;
+                totalApproved += item.approved;
+                totalPending += item.pending;
+            });
+
+            this.getView().getModel().setData({
+                modules: filtered,
+                pieModules: data.modules, // NOT FILTERED
+                monthly: data.monthly,
+                quarterly: data.quarterly,
+                yearly: data.yearly,
+                tableData: data.tableData,
+
+                totalUploaded: totalUploaded,
+                totalApproved: totalApproved,
+                totalPending: totalPending,
+                totalTemplates: filtered.length
+            });
+        }
+
+    });
+});
