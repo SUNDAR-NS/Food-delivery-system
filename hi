@@ -1,60 +1,3 @@
-.sapMPage {
-    background-color: #f5f7fa;
-}
-
-/* HEADER */
-.sapBlueHeader .sapMBar {
-    background-color: #0a6ed1 !important;
-    color: white !important;
-}
-
-/* FILTER */
-.filterBar {
-    margin: 15px 0;
-    gap: 10px;
-}
-
-/* TOP */
-.topContainer {
-    gap: 20px;
-}
-
-/* KPI */
-.kpiRow {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.tile {
-    flex: 1;
-    height: 130px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-/* 🔥 PERFECT ALIGNMENT */
-.chartRow {
-    margin-top: 25px;
-    gap: 15px;
-}
-
-.chartBox {
-    flex: 1;              /* 🔥 equal width */
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-}
-
-/* TITLE */
-.panelTitle {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-
 <mvc:View controllerName="mfuanalytics.controller.mfureport"  
     xmlns:mvc="sap.ui.core.mvc"  
     xmlns="sap.m"  
@@ -67,7 +10,7 @@
 
 <VBox class="mainContainer" fitContainer="true">  
 
-<!-- 🔥 FILTER -->
+<!-- FILTER -->
 <HBox alignItems="Center" class="filterBar">
     <Text text="Module" class="filterLabel"/>
     <MultiComboBox width="250px" selectionChange="onFilterChange" items="{/modules}">
@@ -75,7 +18,7 @@
     </MultiComboBox>
 </HBox>
 
-<!-- 🔥 TOP SECTION -->
+<!-- TOP -->
 <HBox class="topContainer">  
 
     <!-- KPI -->
@@ -112,13 +55,19 @@
     </VBox>  
 
     <!-- STACKED CHART -->
-    <Panel width="750px" headerText="MFU Templates by Modules">
+    <Panel width="65%" headerText="MFU Templates by Modules">
 
-        <viz:VizFrame vizType="stacked_column" height="320px" width="100%">
+        <viz:VizFrame vizType="stacked_column" height="320px" width="100%"
+            vizProperties='{
+                "title": { "visible": false },
+                "legend": { "visible": true },
+                "plotArea": {
+                    "dataLabel": { "visible": true }
+                }
+            }'>
 
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/modules}">
-                    
                     <viz.data:dimensions>
                         <viz.data:DimensionDefinition name="Module" value="{module}" />
                     </viz.data:dimensions>
@@ -128,7 +77,6 @@
                         <viz.data:MeasureDefinition name="Approved" value="{approved}" />
                         <viz.data:MeasureDefinition name="Pending" value="{pending}" />
                     </viz.data:measures>
-
                 </viz.data:FlattenedDataset>
             </viz:dataset>
 
@@ -145,13 +93,13 @@
 
 </HBox>  
 
-<!-- 🔥 PERFECT 4 CHART ALIGNMENT -->
-<HBox class="chartRow" fitContainer="true">
+<!-- 4 CHART ROW -->
+<HBox class="chartRow">
 
-    <!-- PIE -->
     <VBox class="chartBox">
         <Text text="Templates by Count" class="panelTitle"/>
-        <viz:VizFrame vizType="pie" height="200px" width="100%">
+        <viz:VizFrame vizType="pie" height="200px" width="100%"
+            vizProperties='{"title":{"visible":false}}'>
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/modules}">
                     <viz.data:dimensions>
@@ -169,10 +117,10 @@
         </viz:VizFrame>
     </VBox>
 
-    <!-- MONTHLY -->
     <VBox class="chartBox">
         <Text text="Monthly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px" width="100%">
+        <viz:VizFrame vizType="column" height="200px" width="100%"
+            vizProperties='{"title":{"visible":false}}'>
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/monthly}">
                     <viz.data:dimensions>
@@ -190,10 +138,10 @@
         </viz:VizFrame>
     </VBox>
 
-    <!-- QUARTERLY -->
     <VBox class="chartBox">
         <Text text="Quarterly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px" width="100%">
+        <viz:VizFrame vizType="column" height="200px" width="100%"
+            vizProperties='{"title":{"visible":false}}'>
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/quarterly}">
                     <viz.data:dimensions>
@@ -211,10 +159,10 @@
         </viz:VizFrame>
     </VBox>
 
-    <!-- YEARLY -->
     <VBox class="chartBox">
         <Text text="Yearly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px" width="100%">
+        <viz:VizFrame vizType="column" height="200px" width="100%"
+            vizProperties='{"title":{"visible":false}}'>
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/yearly}">
                     <viz.data:dimensions>
@@ -234,11 +182,9 @@
 
 </HBox>
 
-<!-- 🔥 MFU DETAILS TABLE -->
+<!-- TABLE -->
 <Panel headerText="MFU Details" class="sapUiMediumMarginTop">
-
     <Table items="{/tableData}">
-
         <columns>
             <Column><Text text="Module"/></Column>
             <Column><Text text="Sub Module"/></Column>
@@ -246,7 +192,6 @@
             <Column><Text text="Template"/></Column>
             <Column><Text text="Count"/></Column>
         </columns>
-
         <items>
             <ColumnListItem>
                 <cells>
@@ -258,12 +203,76 @@
                 </cells>
             </ColumnListItem>
         </items>
-
     </Table>
-
 </Panel>
 
 </VBox>  
 </Page>  
 </mvc:View>
 
+
+
+.sapMPage {
+    background-color: #f5f7fa;
+}
+
+/* HEADER */
+.sapBlueHeader .sapMBar {
+    background-color: #0a6ed1 !important;
+    color: white !important;
+}
+
+/* 🔥 FIX LEFT SPACE */
+.mainContainer {
+    padding: 20px 30px;
+}
+
+/* FILTER */
+.filterBar {
+    margin: 15px 0;
+    gap: 10px;
+}
+
+.filterLabel {
+    font-weight: bold;
+}
+
+/* TOP */
+.topContainer {
+    gap: 20px;
+}
+
+/* KPI */
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* CHART ROW */
+.chartRow {
+    margin-top: 25px;
+    gap: 15px;
+}
+
+.chartBox {
+    flex: 1;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* TITLE */
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
