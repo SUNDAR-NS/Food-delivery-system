@@ -3,8 +3,7 @@
     xmlns="sap.m"
     xmlns:f="sap.f"
     xmlns:viz="sap.viz.ui5.controls"
-    xmlns:viz.data="sap.viz.ui5.data"
-    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
+    xmlns:viz.data="sap.viz.ui5.data">
 
 <Page title="MFU Dashboard">
 
@@ -13,16 +12,16 @@
 <Title text="MFU Analytics Dashboard" level="H2"/>
 
 <!-- TOP SECTION -->
-<HBox class="topSection" renderType="Bare">
+<HBox class="topSection">
 
-    <!-- LEFT KPI -->
+    <!-- KPI LEFT -->
     <VBox class="kpiContainer">
 
         <HBox class="kpiRow">
             <f:Card class="kpiCard">
                 <f:content>
                     <VBox class="centerBox">
-                        <NumericContent value="71" valueColor="Good"/>
+                        <NumericContent value="71"/>
                         <Text text="Total Uploaded"/>
                     </VBox>
                 </f:content>
@@ -31,7 +30,7 @@
             <f:Card class="kpiCard">
                 <f:content>
                     <VBox class="centerBox">
-                        <NumericContent value="60" valueColor="Good"/>
+                        <NumericContent value="60"/>
                         <Text text="Approved"/>
                     </VBox>
                 </f:content>
@@ -51,7 +50,7 @@
             <f:Card class="kpiCard">
                 <f:content>
                     <VBox class="centerBox">
-                        <NumericContent value="5" valueColor="Error"/>
+                        <NumericContent value="5"/>
                         <Text text="Rejected"/>
                     </VBox>
                 </f:content>
@@ -60,14 +59,14 @@
 
     </VBox>
 
-    <!-- RIGHT MAIN CHART -->
+    <!-- MAIN CHART RIGHT -->
     <f:Card class="mainChartCard">
         <f:content>
             <VBox class="chartBox">
 
-                <Title text="MFU Templates by Module" level="H5"/>
+                <Title text="MFU Templates by Module"/>
 
-                <viz:VizFrame vizType="column" height="100%">
+                <viz:VizFrame id="idMainChart" vizType="column" height="100%">
 
                     <viz:dataset>
                         <viz.data:FlattenedDataset data="{/modules}">
@@ -80,11 +79,6 @@
                         </viz.data:FlattenedDataset>
                     </viz:dataset>
 
-                    <viz:feeds>
-                        <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved"/>
-                        <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
-                    </viz:feeds>
-
                 </viz:VizFrame>
 
             </VBox>
@@ -93,16 +87,15 @@
 
 </HBox>
 
-
-<!-- BOTTOM CHARTS -->
-<HBox class="bottomSection" renderType="Bare">
+<!-- BOTTOM -->
+<HBox class="bottomSection">
 
 <f:Card class="smallCard">
 <f:content>
 <VBox class="chartBox">
 <Title text="Distribution"/>
 
-<viz:VizFrame vizType="donut" height="100%">
+<viz:VizFrame id="idPie" vizType="donut" height="100%">
 <viz:dataset>
 <viz.data:FlattenedDataset data="{/modules}">
 <viz.data:dimensions>
@@ -113,10 +106,6 @@
 </viz.data:measures>
 </viz.data:FlattenedDataset>
 </viz:dataset>
-<viz:feeds>
-<viz.feeds:FeedItem uid="size" type="Measure" values="Value"/>
-<viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
-</viz:feeds>
 </viz:VizFrame>
 
 </VBox>
@@ -128,7 +117,7 @@
 <VBox class="chartBox">
 <Title text="Monthly"/>
 
-<viz:VizFrame vizType="column" height="100%">
+<viz:VizFrame id="idMonthly" vizType="column" height="100%">
 <viz:dataset>
 <viz.data:FlattenedDataset data="{/monthly}">
 <viz.data:dimensions>
@@ -139,10 +128,6 @@
 </viz.data:measures>
 </viz.data:FlattenedDataset>
 </viz:dataset>
-<viz:feeds>
-<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
-</viz:feeds>
 </viz:VizFrame>
 
 </VBox>
@@ -154,7 +139,7 @@
 <VBox class="chartBox">
 <Title text="Quarterly"/>
 
-<viz:VizFrame vizType="column" height="100%">
+<viz:VizFrame id="idQuarterly" vizType="column" height="100%">
 <viz:dataset>
 <viz.data:FlattenedDataset data="{/quarterly}">
 <viz.data:dimensions>
@@ -165,10 +150,6 @@
 </viz.data:measures>
 </viz.data:FlattenedDataset>
 </viz:dataset>
-<viz:feeds>
-<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-<viz:feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
-</viz:feeds>
 </viz:VizFrame>
 
 </VBox>
@@ -180,7 +161,7 @@
 <VBox class="chartBox">
 <Title text="Yearly"/>
 
-<viz:VizFrame vizType="column" height="100%">
+<viz:VizFrame id="idYearly" vizType="column" height="100%">
 <viz:dataset>
 <viz.data:FlattenedDataset data="{/yearly}">
 <viz.data:dimensions>
@@ -191,10 +172,6 @@
 </viz.data:measures>
 </viz.data:FlattenedDataset>
 </viz:dataset>
-<viz:feeds>
-<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
-</viz:feeds>
 </viz:VizFrame>
 
 </VBox>
@@ -209,36 +186,98 @@
 
 
 
+sap.ui.define([
+"sap/ui/core/mvc/Controller",
+"sap/ui/model/json/JSONModel",
+"sap/viz/ui5/controls/common/feeds/FeedItem"
+], function (Controller, JSONModel, FeedItem) {
+"use strict";
+
+return Controller.extend("mfuanalytics.controller.mfureport", {
+
+onInit: function () {
+
+    var data = {
+        modules: [
+            { module: "NFRP", approved: 30 },
+            { module: "SCBI", approved: 55 },
+            { module: "ESG", approved: 20 },
+            { module: "ICON", approved: 40 }
+        ],
+        monthly: [
+            { month: "Jan", value: 10 },
+            { month: "Feb", value: 20 },
+            { month: "Mar", value: 15 }
+        ],
+        quarterly: [
+            { quarter: "Q1", value: 40 },
+            { quarter: "Q2", value: 25 },
+            { quarter: "Q3", value: 30 }
+        ],
+        yearly: [
+            { year: "2022", value: 50 },
+            { year: "2023", value: 70 },
+            { year: "2024", value: 60 }
+        ]
+    };
+
+    this.getView().setModel(new JSONModel(data));
+
+    this._addFeeds("idMainChart", "Module", "Approved");
+    this._addFeeds("idMonthly", "Month", "Value");
+    this._addFeeds("idQuarterly", "Quarter", "Value");
+    this._addFeeds("idYearly", "Year", "Value");
+    this._addFeeds("idPie", "Module", "Value");
+},
+
+_addFeeds: function (id, dim, meas) {
+
+    var chart = this.byId(id);
+    if (!chart) return;
+
+    chart.removeAllFeeds();
+
+    if (id === "idPie") {
+        chart.addFeed(new FeedItem({ uid: "size", type: "Measure", values: [meas] }));
+        chart.addFeed(new FeedItem({ uid: "color", type: "Dimension", values: [dim] }));
+    } else {
+        chart.addFeed(new FeedItem({ uid: "valueAxis", type: "Measure", values: [meas] }));
+        chart.addFeed(new FeedItem({ uid: "categoryAxis", type: "Dimension", values: [dim] }));
+    }
+}
+
+});
+});
+
+
+
 .mainContainer {
     padding: 20px;
 }
 
-/* TOP LAYOUT */
+/* TOP */
 .topSection {
     display: flex;
     gap: 20px;
     margin-top: 20px;
 }
 
-/* KPI SIDE */
+/* KPI */
 .kpiContainer {
     width: 35%;
 }
 
-/* KPI ROW */
 .kpiRow {
     display: flex;
     gap: 15px;
     margin-bottom: 15px;
 }
 
-/* KPI CARD */
 .kpiCard {
     flex: 1;
     height: 120px;
 }
 
-/* CENTER CONTENT */
 .centerBox {
     height: 100%;
     justify-content: center;
@@ -251,25 +290,19 @@
     height: 260px;
 }
 
-/* CHART BOX */
-.chartBox {
-    height: 100%;
-}
-
-/* BOTTOM SECTION */
+/* BOTTOM */
 .bottomSection {
     display: flex;
     gap: 15px;
     margin-top: 20px;
 }
 
-/* SMALL CARDS */
 .smallCard {
     flex: 1;
     height: 220px;
 }
 
-/* CHART FULL */
+/* CHART */
 .sapVizFrame {
     width: 100% !important;
     height: 100% !important;
