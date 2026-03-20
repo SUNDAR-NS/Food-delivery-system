@@ -1,3 +1,258 @@
+<mvc:View controllerName="mfuanalytics.controller.mfureport"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
+
+<Page title="MFU Dashboard">
+
+<VBox class="mainContainer">
+
+<Title text="MFU Dashboard" level="H2"/>
+
+<!-- TOP -->
+<HBox class="topContainer" renderType="Bare">
+
+    <!-- KPI -->
+    <VBox width="35%">
+
+        <HBox class="kpiRow">
+            <GenericTile header="Total MFU Uploaded" class="tile">
+                <TileContent><NumericContent value="71"/></TileContent>
+            </GenericTile>
+
+            <GenericTile header="Total MFU Approved" class="tile">
+                <TileContent><NumericContent value="60"/></TileContent>
+            </GenericTile>
+        </HBox>
+
+        <HBox class="kpiRow">
+            <GenericTile header="MFU Template Onboarded" class="tile">
+                <TileContent><NumericContent value="115"/></TileContent>
+            </GenericTile>
+
+            <GenericTile header="Total MFU Rejected" class="tile">
+                <TileContent><NumericContent value="5"/></TileContent>
+            </GenericTile>
+        </HBox>
+
+    </VBox>
+
+    <!-- MAIN CHART -->
+    <Panel width="65%" headerText="MFU Templates by Modules">
+
+        <viz:VizFrame vizType="column" height="320px" width="100%">
+
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
+
+    </Panel>
+
+</HBox>
+
+<!-- BOTTOM -->
+<HBox class="bottomGrid" justifyContent="SpaceBetween" renderType="Bare">
+
+    <Panel>
+        <Text text="Templates by Count" class="panelTitle"/>
+        <viz:VizFrame vizType="pie" height="220px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{approved}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="size" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </Panel>
+
+    <Panel>
+        <Text text="Monthly" class="panelTitle"/>
+        <viz:VizFrame vizType="column" height="220px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/monthly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </Panel>
+
+    <Panel>
+        <Text text="Quarterly" class="panelTitle"/>
+        <viz:VizFrame vizType="column" height="220px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/quarterly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </Panel>
+
+    <Panel>
+        <Text text="Yearly" class="panelTitle"/>
+        <viz:VizFrame vizType="column" height="220px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/yearly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </Panel>
+
+</HBox>
+
+<!-- TABLE -->
+<Panel headerText="MFU Details" class="sapUiMediumMarginTop">
+
+<Table>
+
+<columns>
+<Column><Text text="Module"/></Column>
+<Column><Text text="Sub Module"/></Column>
+<Column><Text text="Load Type"/></Column>
+<Column><Text text="Template"/></Column>
+<Column><Text text="Count"/></Column>
+</columns>
+
+<items>
+<ColumnListItem>
+<cells>
+<Text text="Retail"/>
+<Text text="Sales"/>
+<Text text="Upload"/>
+<Text text="Temp1"/>
+<Text text="10"/>
+</cells>
+</ColumnListItem>
+
+<ColumnListItem>
+<cells>
+<Text text="Finance"/>
+<Text text="Accounts"/>
+<Text text="Upload"/>
+<Text text="Temp2"/>
+<Text text="25"/>
+</cells>
+</ColumnListItem>
+</items>
+
+</Table>
+
+</Panel>
+
+</VBox>
+</Page>
+</mvc:View>
+
+
+
+controller
+
+sap.ui.define([
+"sap/ui/core/mvc/Controller",
+"sap/ui/model/json/JSONModel",
+"sap/viz/ui5/data/FlattenedDataset",
+"sap/viz/ui5/controls/common/feeds/FeedItem"
+], function (Controller, JSONModel, FlattenedDataset, FeedItem) {
+"use strict";
+
+return Controller.extend("mfuanalytics.controller.mfureport", {
+
+onInit: function () {
+
+    var data = {
+
+        modules: [
+            { module: "Retail", approved: 30 },
+            { module: "Finance", approved: 55 },
+            { module: "HR", approved: 20 },
+            { module: "IT", approved: 40 }
+        ],
+
+        monthly: [
+            { month: "Jan", value: 10 },
+            { month: "Feb", value: 20 },
+            { month: "Mar", value: 15 }
+        ],
+
+        quarterly: [
+            { quarter: "Q1", value: 40 },
+            { quarter: "Q2", value: 25 },
+            { quarter: "Q3", value: 30 }
+        ],
+
+        yearly: [
+            { year: "2022", value: 50 },
+            { year: "2023", value: 70 },
+            { year: "2024", value: 60 }
+        ]
+    };
+
+    this.getView().setModel(new sap.ui.model.json.JSONModel(data));
+}
+
+});
+});
+
+
+service.cds
+
+
+using from './mfuanalytics/annotations';
+
+
+schema.cds
+
 namespace com.scb.fileupload;
 
 using {
@@ -22,3 +277,5 @@ entity ReportFileStorage @(odata.stream) : cuid,managed {
   EXPIRY_DATE     : Date;
   ACTION_BY       : String(100);
 }
+
+This is my all codes help for MFU details section , it wants to take data dynamically from the ReportFileStorage
