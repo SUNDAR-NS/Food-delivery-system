@@ -1,243 +1,137 @@
-<mvc:View controllerName="mfuanalytics.controller.mfureport"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:viz="sap.viz.ui5.controls"
-    xmlns:viz.data="sap.viz.ui5.data"
-    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
-
-<Page title="MFU Dashboard">
-
-<VBox class="mainContainer">
-
-<Title text="MFU Dashboard" level="H2"/>
-
-<!-- TOP -->
-<HBox class="topContainer" renderType="Bare">
-
-    <!-- KPI -->
-    <VBox width="35%">
-
-        <HBox class="kpiRow">
-            <GenericTile header="Total MFU Uploaded" class="tile">
-                <TileContent><NumericContent value="71"/></TileContent>
-            </GenericTile>
-
-            <GenericTile header="Total MFU Approved" class="tile">
-                <TileContent><NumericContent value="60"/></TileContent>
-            </GenericTile>
-        </HBox>
-
-        <HBox class="kpiRow">
-            <GenericTile header="MFU Template Onboarded" class="tile">
-                <TileContent><NumericContent value="115"/></TileContent>
-            </GenericTile>
-
-            <GenericTile header="Total MFU Rejected" class="tile">
-                <TileContent><NumericContent value="5"/></TileContent>
-            </GenericTile>
-        </HBox>
-
-    </VBox>
-
-    <!-- MAIN CHART -->
-    <Panel width="65%" headerText="MFU Templates by Modules">
-
-        <viz:VizFrame vizType="column" height="320px" width="100%">
-
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
-            </viz:feeds>
-
-        </viz:VizFrame>
-
-    </Panel>
-
-</HBox>
-
-<!-- BOTTOM -->
-<HBox class="bottomGrid" justifyContent="SpaceBetween" renderType="Bare">
-
-    <Panel>
-        <Text text="Templates by Count" class="panelTitle"/>
-        <viz:VizFrame vizType="pie" height="220px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{approved}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="size" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </Panel>
-
-    <Panel>
-        <Text text="Monthly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="220px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/monthly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </Panel>
-
-    <Panel>
-        <Text text="Quarterly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="220px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/quarterly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </Panel>
-
-    <Panel>
-        <Text text="Yearly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="220px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/yearly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </Panel>
-
-</HBox>
-
-<!-- TABLE -->
-<Panel headerText="MFU Details" class="sapUiMediumMarginTop">
-
-<Table>
-
-<columns>
-<Column><Text text="Module"/></Column>
-<Column><Text text="Sub Module"/></Column>
-<Column><Text text="Load Type"/></Column>
-<Column><Text text="Template"/></Column>
-<Column><Text text="Count"/></Column>
-</columns>
-
-<items>
-<ColumnListItem>
-<cells>
-<Text text="Retail"/>
-<Text text="Sales"/>
-<Text text="Upload"/>
-<Text text="Temp1"/>
-<Text text="10"/>
-</cells>
-</ColumnListItem>
-
-<ColumnListItem>
-<cells>
-<Text text="Finance"/>
-<Text text="Accounts"/>
-<Text text="Upload"/>
-<Text text="Temp2"/>
-<Text text="25"/>
-</cells>
-</ColumnListItem>
-</items>
-
-</Table>
-
-</Panel>
-
-</VBox>
-</Page>
-</mvc:View>
-
-
+/* ===== PAGE ===== */
 .sapMPage {
-    background-color: #f5f7fa;
+    background: #f4f6f9;
+    font-family: "Segoe UI", sans-serif;
 }
 
 .mainContainer {
-    padding: 20px;
+    padding: 25px;
 }
 
-/* KPI */
+/* ===== TITLE ===== */
+.sapMTitle {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+/* ===== TOP SECTION ===== */
+.topContainer {
+    display: flex;
+    gap: 25px;
+    margin-top: 10px;
+}
+
+/* ===== KPI SECTION ===== */
+.kpiSection {
+    width: 35%;
+}
+
+/* KPI ROW */
 .kpiRow {
     display: flex;
     gap: 15px;
     margin-bottom: 15px;
 }
 
+/* KPI CARD */
 .tile {
     flex: 1;
-    height: 130px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    height: 120px;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    padding: 10px;
+    transition: all 0.2s ease;
 }
 
-/* BOTTOM */
+/* Hover effect */
+.tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* KPI VALUE */
+.sapMNCValue {
+    font-size: 30px !important;
+    font-weight: bold;
+    color: #1e8449 !important;
+}
+
+/* KPI TEXT */
+.sapMGTHeaderText {
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+/* ===== MAIN CHART ===== */
+.chartPanel {
+    width: 65%;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    padding: 10px;
+}
+
+/* ===== BOTTOM GRID ===== */
 .bottomGrid {
     display: flex;
-    gap: 15px;
-    margin-top: 25px;
+    gap: 20px;
+    margin-top: 30px;
 }
 
-.bottomGrid > * {
+/* EACH CHART CARD */
+.bottomGrid .sapMPanel {
     flex: 1;
-    min-width: 0;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    padding: 10px;
+    transition: all 0.2s ease;
+}
+
+/* Hover */
+.bottomGrid .sapMPanel:hover {
+    transform: translateY(-2px);
+}
+
+/* PANEL TITLE */
+.sapMPanelHdr {
+    font-weight: 600;
+    text-align: center;
+    color: #34495e;
 }
 
 /* CHART */
 .sapVizFrame {
     width: 100% !important;
+    height: 240px !important;
 }
 
-/* TITLE */
-.panelTitle {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
+/* ===== TABLE ===== */
+.sapMTable {
+    margin-top: 25px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* TABLE HEADER */
+.sapMListTblHeaderCell {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* TABLE ROW */
+.sapMListTblRow {
+    transition: 0.2s;
+}
+
+.sapMListTblRow:hover {
+    background: #f2f7f5;
+}
+
+/* ===== GLOBAL CLEAN ===== */
+.sapMPanelContent {
+    overflow: hidden !important;
 }
