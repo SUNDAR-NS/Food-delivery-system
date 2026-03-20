@@ -1,6 +1,8 @@
 <mvc:View controllerName="mfuanalytics.controller.mfureport"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:layout="sap.ui.layout"
     xmlns:viz="sap.viz.ui5.controls"
     xmlns:viz.data="sap.viz.ui5.data"
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
@@ -9,152 +11,207 @@
 
 <VBox class="mainContainer">
 
-<Title text="MFU Dashboard" level="H2"/>
+<Title text="MFU Analytics Dashboard" level="H2"/>
 
-<!-- TOP -->
-<HBox class="topContainer" renderType="Bare">
+<!-- KPI CARDS -->
+<layout:Grid defaultSpan="L3 M6 S12" class="sapUiMediumMarginTop">
 
-    <!-- KPI -->
-    <VBox width="35%">
+<f:Card>
+<f:content>
+<VBox class="sapUiSmallMargin">
+<NumericContent value="71" valueColor="Good" indicator="Up"/>
+<Text text="Total Uploaded"/>
+</VBox>
+</f:content>
+</f:Card>
 
-        <HBox class="kpiRow">
-            <GenericTile header="Total MFU Uploaded" class="tile">
-                <TileContent><NumericContent value="71"/></TileContent>
-            </GenericTile>
+<f:Card>
+<f:content>
+<VBox class="sapUiSmallMargin">
+<NumericContent value="60" valueColor="Good"/>
+<Text text="Approved"/>
+</VBox>
+</f:content>
+</f:Card>
 
-            <GenericTile header="Total MFU Approved" class="tile">
-                <TileContent><NumericContent value="60"/></TileContent>
-            </GenericTile>
-        </HBox>
+<f:Card>
+<f:content>
+<VBox class="sapUiSmallMargin">
+<NumericContent value="115" valueColor="Neutral"/>
+<Text text="Templates"/>
+</VBox>
+</f:content>
+</f:Card>
 
-        <HBox class="kpiRow">
-            <GenericTile header="MFU Template Onboarded" class="tile">
-                <TileContent><NumericContent value="115"/></TileContent>
-            </GenericTile>
+<f:Card>
+<f:content>
+<VBox class="sapUiSmallMargin">
+<NumericContent value="5" valueColor="Error"/>
+<Text text="Rejected"/>
+</VBox>
+</f:content>
+</f:Card>
 
-            <GenericTile header="Total MFU Rejected" class="tile">
-                <TileContent><NumericContent value="5"/></TileContent>
-            </GenericTile>
-        </HBox>
+</layout:Grid>
 
-    </VBox>
 
-    <!-- MAIN CHART -->
-    <Panel width="65%" headerText="MFU Templates by Modules">
+<!-- MAIN CHART -->
+<f:Card class="sapUiMediumMarginTop">
+<f:header>
+<CardHeader title="MFU Templates by Module"/>
+</f:header>
 
-        <viz:VizFrame vizType="column" height="320px" width="100%">
+<f:content>
+<viz:VizFrame id="idMainChart" vizType="column" height="350px">
 
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
+<viz:dataset>
+<viz.data:FlattenedDataset data="{/modules}">
+<viz.data:dimensions>
+<viz.data:DimensionDefinition name="Module" value="{module}"/>
+</viz.data:dimensions>
+<viz.data:measures>
+<viz.data:MeasureDefinition name="Approved" value="{approved}"/>
+</viz.data:measures>
+</viz.data:FlattenedDataset>
+</viz:dataset>
 
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
-            </viz:feeds>
+<viz:feeds>
+<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved"/>
+<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
+</viz:feeds>
 
-        </viz:VizFrame>
+</viz:VizFrame>
+</f:content>
+</f:Card>
 
-    </Panel>
 
-</HBox>
+<!-- BOTTOM CHARTS -->
+<layout:Grid defaultSpan="L3 M6 S12" class="sapUiMediumMarginTop">
 
-<!-- BOTTOM -->
-<HBox class="bottomGrid" justifyContent="SpaceBetween" renderType="Bare">
+<!-- PIE -->
+<f:Card>
+<f:header><CardHeader title="Distribution"/></f:header>
+<f:content>
+<viz:VizFrame id="idPie" vizType="donut" height="220px">
 
-    <Panel>
-        <Text text="Templates by Count" class="panelTitle"/>
-        <viz:VizFrame vizType="pie" height="220px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{approved}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="size" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </Panel>
+<viz:dataset>
+<viz.data:FlattenedDataset data="{/modules}">
+<viz.data:dimensions>
+<viz.data:DimensionDefinition name="Module" value="{module}"/>
+</viz.data:dimensions>
+<viz.data:measures>
+<viz.data:MeasureDefinition name="Value" value="{approved}"/>
+</viz.data:measures>
+</viz.data:FlattenedDataset>
+</viz:dataset>
 
-    <Panel>
-        <Text text="Monthly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="220px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/monthly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </Panel>
+<viz:feeds>
+<viz.feeds:FeedItem uid="size" type="Measure" values="Value"/>
+<viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
+</viz:feeds>
 
-    <Panel>
-        <Text text="Quarterly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="220px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/quarterly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </Panel>
+</viz:VizFrame>
+</f:content>
+</f:Card>
 
-    <Panel>
-        <Text text="Yearly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="220px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/yearly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </Panel>
+<!-- MONTHLY -->
+<f:Card>
+<f:header><CardHeader title="Monthly Trend"/></f:header>
+<f:content>
+<viz:VizFrame id="idMonthly" vizType="column" height="220px">
 
-</HBox>
+<viz:dataset>
+<viz.data:FlattenedDataset data="{/monthly}">
+<viz.data:dimensions>
+<viz.data:DimensionDefinition name="Month" value="{month}"/>
+</viz.data:dimensions>
+<viz.data:measures>
+<viz.data:MeasureDefinition name="Value" value="{value}"/>
+</viz.data:measures>
+</viz.data:FlattenedDataset>
+</viz:dataset>
+
+<viz:feeds>
+<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
+</viz:feeds>
+
+</viz:VizFrame>
+</f:content>
+</f:Card>
+
+<!-- QUARTERLY -->
+<f:Card>
+<f:header><CardHeader title="Quarterly"/></f:header>
+<f:content>
+<viz:VizFrame id="idQuarterly" vizType="column" height="220px">
+
+<viz:dataset>
+<viz.data:FlattenedDataset data="{/quarterly}">
+<viz.data:dimensions>
+<viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
+</viz.data:dimensions>
+<viz.data:measures>
+<viz.data:MeasureDefinition name="Value" value="{value}"/>
+</viz.data:measures>
+</viz.data:FlattenedDataset>
+</viz:dataset>
+
+<viz:feeds>
+<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
+</viz:feeds>
+
+</viz:VizFrame>
+</f:content>
+</f:Card>
+
+<!-- YEARLY -->
+<f:Card>
+<f:header><CardHeader title="Yearly"/></f:header>
+<f:content>
+<viz:VizFrame id="idYearly" vizType="column" height="220px">
+
+<viz:dataset>
+<viz.data:FlattenedDataset data="{/yearly}">
+<viz.data:dimensions>
+<viz.data:DimensionDefinition name="Year" value="{year}"/>
+</viz.data:dimensions>
+<viz.data:measures>
+<viz.data:MeasureDefinition name="Value" value="{value}"/>
+</viz.data:measures>
+</viz.data:FlattenedDataset>
+</viz:dataset>
+
+<viz:feeds>
+<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
+</viz:feeds>
+
+</viz:VizFrame>
+</f:content>
+</f:Card>
+
+</layout:Grid>
+
 
 <!-- TABLE -->
-<Panel headerText="MFU Details" class="sapUiMediumMarginTop">
+<f:Card class="sapUiMediumMarginTop">
 
-<Table>
+<f:header>
+<CardHeader title="MFU Details"/>
+</f:header>
+
+<f:content>
+<Table growing="true" items="{/tableData}">
+
+<headerToolbar>
+<Toolbar>
+<Title text="Detailed View"/>
+<ToolbarSpacer/>
+<SearchField width="200px"/>
+</Toolbar>
+</headerToolbar>
 
 <columns>
 <Column><Text text="Module"/></Column>
@@ -167,28 +224,19 @@
 <items>
 <ColumnListItem>
 <cells>
-<Text text="Retail"/>
-<Text text="Sales"/>
-<Text text="Upload"/>
-<Text text="Temp1"/>
-<Text text="10"/>
-</cells>
-</ColumnListItem>
-
-<ColumnListItem>
-<cells>
-<Text text="Finance"/>
-<Text text="Accounts"/>
-<Text text="Upload"/>
-<Text text="Temp2"/>
-<Text text="25"/>
+<Text text="{module}"/>
+<Text text="{submodule}"/>
+<Text text="{load}"/>
+<Text text="{template}"/>
+<Text text="{count}"/>
 </cells>
 </ColumnListItem>
 </items>
 
 </Table>
+</f:content>
 
-</Panel>
+</f:Card>
 
 </VBox>
 </Page>
@@ -196,12 +244,13 @@
 
 
 
+
+
+
 sap.ui.define([
 "sap/ui/core/mvc/Controller",
-"sap/ui/model/json/JSONModel",
-"sap/viz/ui5/data/FlattenedDataset",
-"sap/viz/ui5/controls/common/feeds/FeedItem"
-], function (Controller, JSONModel, FlattenedDataset, FeedItem) {
+"sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
 "use strict";
 
 return Controller.extend("mfuanalytics.controller.mfureport", {
@@ -233,61 +282,93 @@ onInit: function () {
             { year: "2022", value: 50 },
             { year: "2023", value: 70 },
             { year: "2024", value: 60 }
+        ],
+
+        tableData: [
+            {
+                module: "Retail",
+                submodule: "Sales",
+                load: "Upload",
+                template: "Temp1",
+                count: 10
+            },
+            {
+                module: "Finance",
+                submodule: "Accounts",
+                load: "Upload",
+                template: "Temp2",
+                count: 25
+            }
         ]
     };
 
-    this.getView().setModel(new sap.ui.model.json.JSONModel(data));
+    this.getView().setModel(new JSONModel(data));
+
+    // Professional chart settings
+    this._setChartStyle("idMainChart");
+    this._setChartStyle("idPie");
+    this._setChartStyle("idMonthly");
+    this._setChartStyle("idQuarterly");
+    this._setChartStyle("idYearly");
+},
+
+_setChartStyle: function (id) {
+    var oChart = this.byId(id);
+    if (oChart) {
+        oChart.setVizProperties({
+            plotArea: {
+                dataLabel: {
+                    visible: true
+                }
+            },
+            valueAxis: {
+                title: {
+                    visible: false
+                }
+            },
+            categoryAxis: {
+                title: {
+                    visible: false
+                }
+            },
+            legend: {
+                visible: true
+            }
+        });
+    }
 }
 
 });
 });
+
+
 
 
 .sapMPage {
-    background-color: #f5f7fa;
+    background-color: #f7f9fb;
 }
 
 .mainContainer {
-    padding: 20px;
+    padding: 1.5rem;
 }
 
-/* KPI */
-.kpiRow {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.tile {
-    flex: 1;
-    height: 130px;
+/* Cards */
+.sapFCard {
     border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-/* BOTTOM */
-.bottomGrid {
-    display: flex;
-    gap: 15px;
-    margin-top: 25px;
+/* Titles */
+.sapMTitle {
+    font-weight: 600;
 }
 
-.bottomGrid > * {
-    flex: 1;
-    min-width: 0;
-}
-
-/* CHART */
+/* Charts */
 .sapVizFrame {
-    width: 100% !important;
+    padding: 10px;
 }
 
-/* TITLE */
-.panelTitle {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
+/* Table */
+.sapMTable {
+    border-radius: 10px;
 }
-
-
