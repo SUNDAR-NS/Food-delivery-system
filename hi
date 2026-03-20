@@ -6,22 +6,26 @@
     xmlns:viz.data="sap.viz.ui5.data"  
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
 
-<Page title="MFU Dashboard">  
+<Page class="pageHeader">  
 
 <VBox class="mainContainer">  
 
-<Title text="MFU Dashboard" level="H2"/>  
+<!-- 🔥 HEADER -->
+<Title text="MFU Dashboard" level="H2" class="headerTitle"/>
 
-<!-- FILTER -->
-<MultiComboBox
-    width="300px"
-    selectionChange="onFilterChange"
-    items="{/modules}">
-    <core:Item key="{module}" text="{module}" />
-</MultiComboBox>
+<!-- 🔥 FILTER -->
+<HBox alignItems="Center" class="filterBar">
+    <Text text="Module" class="filterLabel"/>
+    <MultiComboBox
+        width="250px"
+        selectionChange="onFilterChange"
+        items="{/modules}">
+        <core:Item key="{module}" text="{module}" />
+    </MultiComboBox>
+</HBox>
 
 <!-- TOP -->
-<HBox renderType="Bare">  
+<HBox renderType="Bare" class="topContainer">  
 
     <!-- KPI -->
     <VBox width="35%">  
@@ -82,15 +86,14 @@
 
 </HBox>  
 
-<!-- BOTTOM -->
-<HBox class="bottomGrid">  
+<!-- BOTTOM (ALIGNED PROPERLY) -->
+<HBox class="bottomGrid" justifyContent="SpaceBetween">  
 
-    <!-- PIE -->
-    <Panel>  
+    <Panel width="24%">  
         <Text text="Templates by Count" class="panelTitle"/>  
-        <viz:VizFrame vizType="pie" height="220px">  
+        <viz:VizFrame vizType="pie" height="200px">  
             <viz:dataset>  
-                <viz.data:FlattenedDataset data="{/modules}">  
+                <viz.data:FlattenedDataset data="{/modules}">
                     <viz.data:dimensions>
                         <viz.data:DimensionDefinition name="Module" value="{module}"/>
                     </viz.data:dimensions>
@@ -106,21 +109,17 @@
         </viz:VizFrame>  
     </Panel>  
 
-    <!-- MONTHLY -->
-    <Panel>  
+    <Panel width="24%">  
         <Text text="Monthly" class="panelTitle"/>  
-        <viz:VizFrame vizType="column" height="220px">  
+        <viz:VizFrame vizType="column" height="200px">  
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/monthly}">
-                    
                     <viz.data:dimensions>
                         <viz.data:DimensionDefinition name="Month" value="{month}"/>
                     </viz.data:dimensions>
-
                     <viz.data:measures>
                         <viz.data:MeasureDefinition name="Value" value="{value}"/>
                     </viz.data:measures>
-
                 </viz.data:FlattenedDataset>
             </viz:dataset>
             <viz:feeds>
@@ -130,21 +129,17 @@
         </viz:VizFrame>  
     </Panel>  
 
-    <!-- QUARTERLY -->
-    <Panel>  
+    <Panel width="24%">  
         <Text text="Quarterly" class="panelTitle"/>  
-        <viz:VizFrame vizType="column" height="220px">  
+        <viz:VizFrame vizType="column" height="200px">  
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/quarterly}">
-                    
                     <viz.data:dimensions>
                         <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
                     </viz.data:dimensions>
-
                     <viz.data:measures>
                         <viz.data:MeasureDefinition name="Value" value="{value}"/>
                     </viz.data:measures>
-
                 </viz.data:FlattenedDataset>
             </viz:dataset>
             <viz:feeds>
@@ -154,21 +149,17 @@
         </viz:VizFrame>  
     </Panel>  
 
-    <!-- ✅ FIXED YEARLY -->
-    <Panel>  
+    <Panel width="24%">  
         <Text text="Yearly" class="panelTitle"/>  
-        <viz:VizFrame vizType="column" height="220px">  
+        <viz:VizFrame vizType="column" height="200px">  
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/yearly}">
-                    
                     <viz.data:dimensions>
                         <viz.data:DimensionDefinition name="Year" value="{year}"/>
                     </viz.data:dimensions>
-
                     <viz.data:measures>
                         <viz.data:MeasureDefinition name="Value" value="{value}"/>
                     </viz.data:measures>
-
                 </viz.data:FlattenedDataset>
             </viz:dataset>
             <viz:feeds>
@@ -181,7 +172,7 @@
 </HBox>  
 
 <!-- TABLE -->
-<Panel headerText="MFU Details">  
+<Panel headerText="MFU Details" class="sapUiMediumMarginTop">  
 
 <Table>  
 <columns>  
@@ -214,88 +205,59 @@
 
 
 
-sap.ui.define([
-"sap/ui/core/mvc/Controller",
-"sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-"use strict";
-
-return Controller.extend("mfuanalytics.controller.mfureport", {
-
-onInit: function () {
-
-    this.originalModules = [
-        { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
-        { module: "SCBI", uploaded: 70, approved: 55, pending: 12 },
-        { module: "ESG", uploaded: 28, approved: 20, pending: 6 },
-        { module: "ICON", uploaded: 55, approved: 40, pending: 9 }
-    ];
-
-    var data = {
-        modules: this.originalModules,
-
-        monthly: [
-            { month: "Jan", value: 10 },
-            { month: "Feb", value: 20 },
-            { month: "Mar", value: 15 }
-        ],
-
-        quarterly: [
-            { quarter: "Q1", value: 40 },
-            { quarter: "Q2", value: 25 },
-            { quarter: "Q3", value: 30 }
-        ],
-
-        yearly: [
-            { year: "2022", value: 50 },
-            { year: "2023", value: 70 },
-            { year: "2024", value: 60 }
-        ]
-    };
-
-    this.getView().setModel(new JSONModel(data));
-    this.updateKPIs(this.originalModules);
-},
-
-updateKPIs: function (data) {
-
-    let totalUploaded = 0;
-    let totalApproved = 0;
-    let totalPending = 0;
-
-    data.forEach(function (item) {
-        totalUploaded += item.uploaded;
-        totalApproved += item.approved;
-        totalPending += item.pending;
-    });
-
-    var model = this.getView().getModel();
-
-    model.setProperty("/totalUploaded", totalUploaded);
-    model.setProperty("/totalApproved", totalApproved);
-    model.setProperty("/totalPending", totalPending);
-    model.setProperty("/totalTemplates", data.length);
-},
-
-onFilterChange: function (oEvent) {
-
-    var selectedKeys = oEvent.getSource().getSelectedKeys();
-
-    if (selectedKeys.length === 0) {
-        this.getView().getModel().setProperty("/modules", this.originalModules);
-        this.updateKPIs(this.originalModules);
-        return;
-    }
-
-    var filtered = this.originalModules.filter(function (item) {
-        return selectedKeys.includes(item.module);
-    });
-
-    this.getView().getModel().setProperty("/modules", filtered);
-    this.updateKPIs(filtered);
+.sapMPage {
+    background-color: #f5f7fa;
 }
 
-});
-});
+/* 🔥 HEADER */
+.headerTitle {
+    color: #0a6ed1;   /* SAP Blue */
+    font-weight: bold;
+    margin-bottom: 10px;
+}
 
+/* FILTER */
+.filterBar {
+    margin-bottom: 15px;
+    gap: 10px;
+}
 
+.filterLabel {
+    font-weight: bold;
+}
+
+/* MAIN */
+.mainContainer {
+    padding: 20px;
+}
+
+.topContainer {
+    gap: 20px;
+}
+
+/* KPI */
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* BOTTOM ALIGN FIX */
+.bottomGrid {
+    margin-top: 25px;
+    gap: 15px;
+}
+
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
