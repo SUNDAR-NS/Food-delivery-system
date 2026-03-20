@@ -4,71 +4,109 @@
     xmlns:viz="sap.viz.ui5.controls"  
     xmlns:viz.data="sap.viz.ui5.data"  
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
-  
+
 <Page title="MFU Dashboard">  
-  
+
 <VBox class="mainContainer">  
-  
+
 <Title text="MFU Dashboard" level="H2"/>  
-  
+
 <!-- TOP -->  
 <HBox class="topContainer" renderType="Bare">  
-  
+
     <!-- KPI -->  
     <VBox width="35%">  
-  
+
         <HBox class="kpiRow">  
             <GenericTile header="Total MFU Uploaded" class="tile">  
                 <TileContent><NumericContent value="71"/></TileContent>  
             </GenericTile>  
-  
+
             <GenericTile header="Total MFU Approved" class="tile">  
                 <TileContent><NumericContent value="60"/></TileContent>  
             </GenericTile>  
         </HBox>  
-  
+
         <HBox class="kpiRow">  
             <GenericTile header="MFU Template Onboarded" class="tile">  
                 <TileContent><NumericContent value="115"/></TileContent>  
             </GenericTile>  
-  
+
             <GenericTile header="Total MFU Rejected" class="tile">  
                 <TileContent><NumericContent value="5"/></TileContent>  
             </GenericTile>  
         </HBox>  
-  
+
     </VBox>  
-  
-    <!-- MAIN CHART -->  
-    <Panel width="65%" headerText="MFU Templates by Modules">  
-  
-        <viz:VizFrame vizType="column" height="320px" width="100%">  
-  
-            <viz:dataset>  
-                <viz.data:FlattenedDataset data="{/modules}">  
-                    <viz.data:dimensions>  
-                        <viz.data:DimensionDefinition name="Module" value="{module}"/>  
-                    </viz.data:dimensions>  
-                    <viz.data:measures>  
-                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>  
-                    </viz.data:measures>  
-                </viz.data:FlattenedDataset>  
-            </viz:dataset>  
-  
-            <viz:feeds>  
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved"/>  
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>  
-            </viz:feeds>  
-  
-        </viz:VizFrame>  
-  
+
+    <!-- ✅ STACKED CHART -->
+    <Panel width="65%" headerText="MFU Templates by Modules">
+
+        <viz:VizFrame
+            vizType="stacked_column"
+            height="320px"
+            width="100%"
+            vizProperties='{
+                "plotArea": {
+                    "dataLabel": { "visible": true },
+                    "dataPointStyle": {
+                        "rules": [
+                            {
+                                "dataContext": { "measureNames": "Approved" },
+                                "properties": { "color": "#0070F2" }
+                            },
+                            {
+                                "dataContext": { "measureNames": "Rejected" },
+                                "properties": { "color": "#E9730C" }
+                            },
+                            {
+                                "dataContext": { "measureNames": "Pending" },
+                                "properties": { "color": "#107E3E" }
+                            }
+                        ]
+                    }
+                }
+            }'>
+
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition
+                            name="Module"
+                            value="{module}" />
+                    </viz.data:dimensions>
+
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}" />
+                        <viz.data:MeasureDefinition name="Rejected" value="{rejected}" />
+                        <viz.data:MeasureDefinition name="Pending" value="{pending}" />
+                    </viz.data:measures>
+
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem
+                    uid="valueAxis"
+                    type="Measure"
+                    values="Approved,Rejected,Pending"/>
+
+                <viz.feeds:FeedItem
+                    uid="categoryAxis"
+                    type="Dimension"
+                    values="Module"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
+
     </Panel>  
-  
+
 </HBox>  
-  
+
 <!-- BOTTOM -->  
 <HBox class="bottomGrid" justifyContent="SpaceBetween" renderType="Bare">  
-  
+
     <Panel>  
         <Text text="Templates by Count" class="panelTitle"/>  
         <viz:VizFrame vizType="pie" height="220px" width="100%">  
@@ -88,7 +126,7 @@
             </viz:feeds>  
         </viz:VizFrame>  
     </Panel>  
-  
+
     <Panel>  
         <Text text="Monthly" class="panelTitle"/>  
         <viz:VizFrame vizType="column" height="220px" width="100%">  
@@ -108,7 +146,7 @@
             </viz:feeds>  
         </viz:VizFrame>  
     </Panel>  
-  
+
     <Panel>  
         <Text text="Quarterly" class="panelTitle"/>  
         <viz:VizFrame vizType="column" height="220px" width="100%">  
@@ -128,7 +166,7 @@
             </viz:feeds>  
         </viz:VizFrame>  
     </Panel>  
-  
+
     <Panel>  
         <Text text="Yearly" class="panelTitle"/>  
         <viz:VizFrame vizType="column" height="220px" width="100%">  
@@ -148,221 +186,103 @@
             </viz:feeds>  
         </viz:VizFrame>  
     </Panel>  
-  
+
 </HBox>  
-  
-<!-- TABLE -->  
-<Panel headerText="MFU Details" class="sapUiMediumMarginTop">  
-  
-<Table>  
-  
-<columns>  
-<Column><Text text="Module"/></Column>  
-<Column><Text text="Sub Module"/></Column>  
-<Column><Text text="Load Type"/></Column>  
-<Column><Text text="Template"/></Column>  
-<Column><Text text="Count"/></Column>  
-</columns>  
-  
-<items>  
-<ColumnListItem>  
-<cells>  
-<Text text="Retail"/>  
-<Text text="Sales"/>  
-<Text text="Upload"/>  
-<Text text="Temp1"/>  
-<Text text="10"/>  
-</cells>  
-</ColumnListItem>  
-  
-<ColumnListItem>  
-<cells>  
-<Text text="Finance"/>  
-<Text text="Accounts"/>  
-<Text text="Upload"/>  
-<Text text="Temp2"/>  
-<Text text="25"/>  
-</cells>  
-</ColumnListItem>  
-</items>  
-  
-</Table>  
-  
-</Panel>  
-  
+
 </VBox>  
 </Page>  
-</mvc:View>  
-  
-  
-  
-sap.ui.define([  
-"sap/ui/core/mvc/Controller",  
-"sap/ui/model/json/JSONModel",  
-"sap/viz/ui5/data/FlattenedDataset",  
-"sap/viz/ui5/controls/common/feeds/FeedItem"  
-], function (Controller, JSONModel, FlattenedDataset, FeedItem) {  
-"use strict";  
-  
-return Controller.extend("mfuanalytics.controller.mfureport", {  
-  
-onInit: function () {  
-  
-    var data = {  
-  
-        modules: [  
-            { module: "NFRP", approved: 30 },  
-            { module: "SCBI", approved: 55 },  
-            { module: "ESG", approved: 20 },  
-            { module: "ICON", approved: 40 }  
-        ],  
-  
-        monthly: [  
-            { month: "Jan", value: 10 },  
-            { month: "Feb", value: 20 },  
-            { month: "Mar", value: 15 }  
-        ],  
-  
-        quarterly: [  
-            { quarter: "Q1", value: 40 },  
-            { quarter: "Q2", value: 25 },  
-            { quarter: "Q3", value: 30 }  
-        ],  
-  
-        yearly: [  
-            { year: "2022", value: 50 },  
-            { year: "2023", value: 70 },  
-            { year: "2024", value: 60 }  
-        ]  
-    };  
-  
-    this.getView().setModel(new sap.ui.model.json.JSONModel(data));  
-}  
-  
-});  
-});  
-  
-  
-.sapMPage {  
-    background-color: #f5f7fa;  
-}  
-  
-.mainContainer {  
-    padding: 20px;  
-}  
-  
-/* KPI */  
-.kpiRow {  
-    display: flex;  
-    gap: 15px;  
-    margin-bottom: 15px;  
-}  
-  
-.tile {  
-    flex: 1;  
-    height: 130px;  
-    border-radius: 12px;  
-    background: white;  
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);  
-}  
-  
-/* BOTTOM */  
-.bottomGrid {  
-    display: flex;  
-    gap: 15px;  
-    margin-top: 25px;  
-}  
-  
-.bottomGrid > * {  
-    flex: 1;  
-    min-width: 0;  
-}  
-  
-/* CHART */  
-.sapVizFrame {  
-    width: 100% !important;  
-}  
-  
-/* TITLE */  
-.panelTitle {  
-    text-align: center;  
-    font-weight: bold;  
-    margin-bottom: 5px;  
-}  
-  
+</mvc:View>
 
-This is my code all working perfectly but use this below code logic in xml
 
-    <Panel id="_IDGenPanel" width="65%" headerText="MFU Templates by Modules">
 
-   <viz:VizFrame
-    id="idVizFrame"
-    vizType="stacked_column"
-    width="100%"
-    height="320px"
-    vizProperties='{
-  "plotArea": {
-    "dataLabel": {
-      "visible": true
-    },
-    "dataPointStyle": {
-      "rules": [
-        {
-          "dataContext": { "measureNames": "Approved" },
-          "properties": { "color": "#0070F2" }
-        },
-        {
-          "dataContext": { "measureNames": "Rejected" },
-          "properties": { "color": "#E9730C" }
-        },
-        {
-          "dataContext": { "measureNames": "Pending" },
-          "properties": { "color": "#107E3E" }
-        }
-      ]
-    }
-  }
-}'>
 
-    <viz:dataset>
-        <viz.data:FlattenedDataset id="_IDGenFlattenedDataset" data="{/modules}">
+sap.ui.define([
+"sap/ui/core/mvc/Controller",
+"sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+"use strict";
 
-            <viz.data:dimensions>
-                <viz.data:DimensionDefinition id="_IDGenDimensionDefinition"
-                    name="Module"
-                    value="{module}" />
-            </viz.data:dimensions>
+return Controller.extend("mfuanalytics.controller.mfureport", {
 
-            <viz.data:measures>
-                <viz.data:MeasureDefinition id="_IDGenMeasureDefinition"
-                    name="Approved"
-                    value="{approved}" />
+onInit: function () {
 
-                <viz.data:MeasureDefinition id="_IDGenMeasureDefinition5"
-                    name="Rejected"
-                    value="{rejected}" />
+    var data = {
 
-                <viz.data:MeasureDefinition id="_IDGenMeasureDefinition6"
-                    name="Pending"
-                    value="{pending}" />
-            </viz.data:measures>
+        modules: [
+            { module: "NFRP", approved: 30, rejected: 5, pending: 10 },
+            { module: "SCBI", approved: 55, rejected: 8, pending: 12 },
+            { module: "ESG", approved: 20, rejected: 3, pending: 6 },
+            { module: "ICON", approved: 40, rejected: 6, pending: 9 }
+        ],
 
-        </viz.data:FlattenedDataset>
-    </viz:dataset>
+        monthly: [
+            { month: "Jan", value: 10 },
+            { month: "Feb", value: 20 },
+            { month: "Mar", value: 15 }
+        ],
 
-    <viz:feeds>
+        quarterly: [
+            { quarter: "Q1", value: 40 },
+            { quarter: "Q2", value: 25 },
+            { quarter: "Q3", value: 30 }
+        ],
 
-        <viz.feeds:FeedItem id="_IDGenFeedItem1"
-            uid="valueAxis"
-            type="Measure"
-            values="Approved,Rejected,Pending"/>
+        yearly: [
+            { year: "2022", value: 50 },
+            { year: "2023", value: 70 },
+            { year: "2024", value: 60 }
+        ]
+    };
 
-        <viz.feeds:FeedItem id="_IDGenFeedItem10"
-            uid="categoryAxis"
-            type="Dimension"
-            values="Module"/>
+    this.getView().setModel(new JSONModel(data));
+}
 
-    </viz:feeds>
+});
+});
 
-</viz:VizFrame>
-    </Panel>
+
+
+
+
+.sapMPage {
+    background-color: #f5f7fa;
+}
+
+.mainContainer {
+    padding: 20px;
+}
+
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.bottomGrid {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.bottomGrid > * {
+    flex: 1;
+    min-width: 0;
+}
+
+.sapVizFrame {
+    width: 100% !important;
+}
+
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
