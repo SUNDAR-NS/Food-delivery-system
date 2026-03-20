@@ -10,15 +10,16 @@ sap.ui.define([
 
             var data = {
 
-                // 🔹 KPI + STACKED CHART
-                modules: [
+                // ✅ FULL DATA (FOR DROPDOWN)
+                allModules: [
                     { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
                     { module: "SCBI", uploaded: 70, approved: 50, pending: 15 },
                     { module: "ESG", uploaded: 25, approved: 15, pending: 5 },
                     { module: "ICON", uploaded: 50, approved: 35, pending: 7 }
                 ],
 
-                pieModules: [],
+                // ✅ DISPLAY DATA (FILTERED)
+                modules: [],
 
                 // 🔹 MONTHLY
                 monthly: [
@@ -47,44 +48,26 @@ sap.ui.define([
                     { module: "SCBI", subModule: "Config master", loadType: "Truncate", template: "Temp2", count: 25 }
                 ],
 
-                // 🔥 TREEMAP DATA (SAP CORRECT FORMAT)
-                treeData: [
-
-                    { module: "NFRP", submodule: "Credit Risk", template: "Exposure_Load", value: 10 },
-                    { module: "NFRP", submodule: "Credit Risk", template: "Limit_Load", value: 5 },
-                    { module: "NFRP", submodule: "Liquidity", template: "Liquidity_Load", value: 8 },
-
-                    { module: "SCBI", submodule: "Insurance", template: "Policy_Load", value: 12 },
-                    { module: "SCBI", submodule: "Insurance", template: "Claim_Load", value: 6 },
-
-                    { module: "ESG", submodule: "Climate", template: "Carbon_Load", value: 7 },
-                    { module: "ESG", submodule: "Risk", template: "Risk_Load", value: 4 },
-
-                    { module: "ICON", submodule: "Capital", template: "Capital_Load", value: 9 },
-                    { module: "ICON", submodule: "Assets", template: "Asset_Load", value: 6 }
-
-                ],
-
-                // 🔹 KPI TOTALS
+                // 🔹 KPI TOTALS (INITIAL)
                 totalUploaded: 190,
                 totalApproved: 130,
                 totalPending: 37,
                 totalTemplates: 4
             };
 
-            // 🔥 PIE SAME AS MODULES
-            data.pieModules = data.modules;
+            // ✅ INITIAL LOAD
+            data.modules = data.allModules;
 
-            // 🔥 BACKUP FOR FILTER
-            this._fullModules = data.modules;
+            // ✅ BACKUP
+            this._fullModules = data.allModules;
 
-            // 🔥 SET MODEL
+            // ✅ MODEL
             var oModel = new JSONModel(data);
             this.getView().setModel(oModel);
         },
 
         // =========================
-        // 🔥 FILTER LOGIC
+        // 🔥 FILTER LOGIC (FIXED)
         // =========================
         onFilterChange: function (oEvent) {
 
@@ -120,13 +103,13 @@ sap.ui.define([
                 totalPending += item.pending;
             });
 
-            // 👉 UPDATE
+            // 👉 UPDATE UI
             oModel.setProperty("/modules", filtered);
             oModel.setProperty("/totalUploaded", totalUploaded);
             oModel.setProperty("/totalApproved", totalApproved);
             oModel.setProperty("/totalPending", totalPending);
             oModel.setProperty("/totalTemplates", filtered.length);
-        },
+        }
 
     });
 });
