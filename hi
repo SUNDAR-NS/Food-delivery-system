@@ -1,3 +1,59 @@
+<Panel headerText="MFU Treemap View">
+
+<viz:VizFrame
+    id="idTreemap"
+    vizType="treemap"
+    height="450px"
+    vizProperties='{
+        "title":{"visible":false},
+        "plotArea":{
+            "dataLabel":{"visible":true}
+        }
+    }'>
+
+    <viz:dataset>
+        <viz.data:FlattenedDataset data="{/treeData}">
+
+            <viz.data:dimensions>
+                <viz.data:DimensionDefinition name="Module" value="{module}"/>
+                <viz.data:DimensionDefinition name="Submodule" value="{submodule}"/>
+                <viz.data:DimensionDefinition name="Template" value="{template}"/>
+            </viz.data:dimensions>
+
+            <viz.data:measures>
+                <viz.data:MeasureDefinition name="Count" value="{value}"/>
+            </viz.data:measures>
+
+        </viz.data:FlattenedDataset>
+    </viz:dataset>
+
+    <viz:feeds>
+
+        <!-- HIERARCHY -->
+        <viz.feeds:FeedItem
+            uid="categoryAxis"
+            type="Dimension"
+            values="Module,Submodule,Template"/>
+
+        <!-- SIZE -->
+        <viz.feeds:FeedItem
+            uid="size"
+            type="Measure"
+            values="Count"/>
+
+        <!-- COLOR -->
+        <viz.feeds:FeedItem
+            uid="color"
+            type="Dimension"
+            values="Module"/>
+
+    </viz:feeds>
+
+</viz:VizFrame>
+
+</Panel>
+
+
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -10,6 +66,7 @@ sap.ui.define([
 
             var data = {
 
+                // 🔹 KPI + Bar Chart
                 modules: [
                     { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
                     { module: "SCBI", uploaded: 70, approved: 50, pending: 15 },
@@ -19,6 +76,7 @@ sap.ui.define([
 
                 pieModules: [],
 
+                // 🔹 Charts
                 monthly: [
                     { month: "Jan", value: 10 },
                     { month: "Feb", value: 20 },
@@ -37,51 +95,55 @@ sap.ui.define([
                     { year: "2024", value: 60 }
                 ],
 
+                // 🔹 Table
                 tableData: [
                     { module: "Retail", subModule: "Sales", loadType: "Upload", template: "Temp1", count: 10 },
                     { module: "Finance", subModule: "Accounts", loadType: "Upload", template: "Temp2", count: 25 }
                 ],
 
-                // 🔥 Treemap Data (Dynamic Levels)
-                treeData: [],
+                // 🔥 TREEMAP FULL HIERARCHY DATA (IMPORTANT)
+                treeData: [
 
+                    { module: "NFRP", submodule: "Credit Risk", template: "Exposure_Load", value: 10 },
+                    { module: "NFRP", submodule: "Credit Risk", template: "Limit_Load", value: 5 },
+                    { module: "NFRP", submodule: "Liquidity", template: "Liquidity_Load", value: 8 },
+
+                    { module: "SCBI", submodule: "Insurance", template: "Policy_Load", value: 12 },
+                    { module: "SCBI", submodule: "Insurance", template: "Claim_Load", value: 6 },
+
+                    { module: "ESG", submodule: "Climate", template: "Carbon_Load", value: 7 },
+                    { module: "ESG", submodule: "Risk", template: "Risk_Load", value: 4 },
+
+                    { module: "ICON", submodule: "Capital", template: "Capital_Load", value: 9 },
+                    { module: "ICON", submodule: "Assets", template: "Asset_Load", value: 6 }
+
+                ],
+
+                // 🔹 KPI values
                 totalUploaded: 190,
                 totalApproved: 130,
                 totalPending: 37,
                 totalTemplates: 4
             };
 
+            // Pie uses same modules
             data.pieModules = data.modules;
 
+            // Backup for filter
             this._fullModules = data.modules;
 
-            // 🔥 RAW TREE DATA (MASTER)
-            this._rawTree = [
-                { module: "NFRP", submodule: "Credit Risk", template: "Exposure_Load", value: 10 },
-                { module: "NFRP", submodule: "Liquidity", template: "Liquidity_Load", value: 5 },
-                { module: "SCBI", submodule: "Insurance", template: "Policy_Load", value: 7 },
-                { module: "ICON", submodule: "Capital", template: "Capital_Load", value: 6 }
-            ];
-
-            this._drillLevel = "module";
-            this._currentModule = null;
-            this._currentSubmodule = null;
-
-            var oModel = new JSONModel(data);
-            this.getView().setModel(oModel);
-
-            // 🔥 INITIAL TREEMAP LOAD
-            this._setTreemapModule();
+            this.getView().setModel(new JSONModel(data));
         },
 
         // =========================
-        // 🔥 FILTER LOGIC (UNCHANGED)
+        // 🔥 FILTER LOGIC
         // =========================
         onFilterChange: function (oEvent) {
 
             var selectedKeys = oEvent.getSource().getSelectedKeys();
             var oModel = this.getView().getModel();
 
+            // No selection → reset
             if (selectedKeys.length === 0) {
 
                 oModel.setProperty("/modules", this._fullModules);
@@ -94,10 +156,12 @@ sap.ui.define([
                 return;
             }
 
+            // Filter
             var filtered = this._fullModules.filter(item =>
                 selectedKeys.includes(item.module)
             );
 
+            // Calculate totals
             var totalUploaded = 0,
                 totalApproved = 0,
                 totalPending = 0;
@@ -108,6 +172,7 @@ sap.ui.define([
                 totalPending += item.pending;
             });
 
+            // Update UI
             oModel.setProperty("/modules", filtered);
             oModel.setProperty("/totalUploaded", totalUploaded);
             oModel.setProperty("/totalApproved", totalApproved);
@@ -116,92 +181,11 @@ sap.ui.define([
         },
 
         // =========================
-        // 🔥 TREEMAP DRILL (FINAL FIX)
+        // 🔥 OPTIONAL TREEMAP CLICK
         // =========================
-
-        _setTreemapModule: function () {
-
-            var map = {};
-
-            this._rawTree.forEach(d => {
-                if (!map[d.module]) map[d.module] = 0;
-                map[d.module] += d.value;
-            });
-
-            var result = Object.keys(map).map(k => ({
-                level1: k,
-                level2: k,
-                value: map[k]
-            }));
-
-            this.getView().getModel().setProperty("/treeData", result);
-            this._drillLevel = "module";
-        },
-
-        _setTreemapSubmodule: function (module) {
-
-            var map = {};
-
-            this._rawTree
-                .filter(d => d.module === module)
-                .forEach(d => {
-                    if (!map[d.submodule]) map[d.submodule] = 0;
-                    map[d.submodule] += d.value;
-                });
-
-            var result = Object.keys(map).map(k => ({
-                level1: module,
-                level2: k,
-                value: map[k]
-            }));
-
-            this.getView().getModel().setProperty("/treeData", result);
-
-            this._drillLevel = "submodule";
-            this._currentModule = module;
-        },
-
-        _setTreemapTemplate: function (submodule) {
-
-            var result = this._rawTree
-                .filter(d => d.submodule === submodule)
-                .map(d => ({
-                    level1: submodule,
-                    level2: d.template,
-                    value: d.value
-                }));
-
-            this.getView().getModel().setProperty("/treeData", result);
-
-            this._drillLevel = "template";
-            this._currentSubmodule = submodule;
-        },
-
-        // 🔥 CLICK EVENT
-        onTreemapSelect: function (oEvent) {
-
+        onTreemapClick: function (oEvent) {
             var data = oEvent.getParameter("data")[0].data;
-
-            if (this._drillLevel === "module") {
-                this._setTreemapSubmodule(data.Level1);
-            } else if (this._drillLevel === "submodule") {
-                this._setTreemapTemplate(data.Level2);
-            }
-        },
-
-        // 🔥 BACK
-        onBackDrill: function () {
-
-            if (this._drillLevel === "template") {
-                this._setTreemapSubmodule(this._currentModule);
-            } else if (this._drillLevel === "submodule") {
-                this._setTreemapModule();
-            }
-        },
-
-        // 🔥 RESET
-        onResetTreemap: function () {
-            this._setTreemapModule();
+            console.log("Clicked:", data);
         }
 
     });
