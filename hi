@@ -1,131 +1,259 @@
-{
-  "_version": "1.83.0",
-  "sap.app": {
-    "id": "mfuanalytics",
-    "type": "application",
-    "i18n": "i18n/i18n.properties",
-    "applicationVersion": {
-      "version": "0.0.1"
-    },
-    "title": "{{appTitle}}",
-    "description": "{{appDescription}}",
-    "resources": "resources.json",
-    "sourceTemplate": {
-      "id": "@sap/generator-fiori:basic",
-      "version": "1.21.0",
-      "toolsId": "1766712f-0979-40be-a69b-d9bcdfc37c41"
-    },
-    "dataSources": {
-      "mainService": {
-        "uri": "/service/",
-        "type": "OData",
-        "settings": {
-          "annotations": [],
-          "odataVersion": "4.01"
-        }
-      }
+<mvc:View controllerName="mfuanalytics.controller.mfureport"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
+
+<Page title="MFU Dashboard">
+
+<VBox class="mainContainer">
+
+<Title text="MFU Dashboard" level="H2"/>
+
+<!-- TOP -->
+<HBox class="topContainer" renderType="Bare">
+
+    <!-- KPI -->
+    <VBox width="35%">
+
+        <HBox class="kpiRow">
+            <GenericTile header="Total MFU Uploaded" class="tile">
+                <TileContent><NumericContent value="71"/></TileContent>
+            </GenericTile>
+
+            <GenericTile header="Total MFU Approved" class="tile">
+                <TileContent><NumericContent value="60"/></TileContent>
+            </GenericTile>
+        </HBox>
+
+        <HBox class="kpiRow">
+            <GenericTile header="MFU Template Onboarded" class="tile">
+                <TileContent><NumericContent value="115"/></TileContent>
+            </GenericTile>
+
+            <GenericTile header="Total MFU Rejected" class="tile">
+                <TileContent><NumericContent value="5"/></TileContent>
+            </GenericTile>
+        </HBox>
+
+    </VBox>
+
+    <!-- MAIN CHART -->
+    <Panel width="65%" headerText="MFU Templates by Modules">
+
+        <viz:VizFrame vizType="column" height="320px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Approved"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Module"/>
+            </viz:feeds>
+        </viz:VizFrame>
+
+    </Panel>
+
+</HBox>
+
+<!-- BOTTOM -->
+<HBox class="bottomGrid" justifyContent="SpaceBetween" renderType="Bare">
+
+    <Panel width="24%">
+        <Text text="Templates by Count"/>
+        <viz:VizFrame vizType="pie" height="220px">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{approved}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="size" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </Panel>
+
+    <Panel width="24%">
+        <Text text="Monthly"/>
+        <viz:VizFrame vizType="column" height="220px">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/monthly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </Panel>
+
+    <Panel width="24%">
+        <Text text="Quarterly"/>
+        <viz:VizFrame vizType="column" height="220px">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/quarterly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </Panel>
+
+    <Panel width="24%">
+        <Text text="Yearly"/>
+        <viz:VizFrame vizType="column" height="220px">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/yearly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </Panel>
+
+</HBox>
+
+<!-- ✅ DYNAMIC TABLE -->
+<Panel headerText="MFU Details" class="sapUiMediumMarginTop">
+
+<Table items="{/MFUDetails}">
+
+<columns>
+<Column><Text text="Module"/></Column>
+<Column><Text text="Sub Module"/></Column>
+<Column><Text text="Load Type"/></Column>
+<Column><Text text="Template"/></Column>
+<Column><Text text="File Name"/></Column>
+<Column><Text text="Status"/></Column>
+</columns>
+
+<items>
+<ColumnListItem>
+<cells>
+<Text text="{MODULE_NAME}"/>
+<Text text="{SUB_MODULE_NAME}"/>
+<Text text="{LOAD_TYPE}"/>
+<Text text="{LOAD_TEMPLATE}"/>
+<Text text="{FILE_NAME}"/>
+<Text text="{STATUS}"/>
+</cells>
+</ColumnListItem>
+</items>
+
+</Table>
+
+</Panel>
+
+</VBox>
+</Page>
+</mvc:View>
+
+
+
+
+
+
+sap.ui.define([
+"sap/ui/core/mvc/Controller",
+"sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+"use strict";
+
+return Controller.extend("mfuanalytics.controller.mfureport", {
+
+onInit: function () {
+
+    // ONLY for charts
+    var data = {
+
+        modules: [
+            { module: "Retail", approved: 30 },
+            { module: "Finance", approved: 55 },
+            { module: "HR", approved: 20 },
+            { module: "IT", approved: 40 }
+        ],
+
+        monthly: [
+            { month: "Jan", value: 10 },
+            { month: "Feb", value: 20 },
+            { month: "Mar", value: 15 }
+        ],
+
+        quarterly: [
+            { quarter: "Q1", value: 40 },
+            { quarter: "Q2", value: 25 },
+            { quarter: "Q3", value: 30 }
+        ],
+
+        yearly: [
+            { year: "2022", value: 50 },
+            { year: "2023", value: 70 },
+            { year: "2024", value: 60 }
+        ]
+    };
+
+    this.getView().setModel(new JSONModel(data));
+
+}
+
+});
+});
+
+
+
+"models": {
+  "i18n": {
+    "type": "sap.ui.model.resource.ResourceModel",
+    "settings": {
+      "bundleName": "mfuanalytics.i18n.i18n"
     }
   },
-
-  "sap.ui": {
-    "technology": "UI5",
-    "icons": {
-      "icon": "",
-      "favIcon": "",
-      "phone": "",
-      "phone@2": "",
-      "tablet": "",
-      "tablet@2": ""
-    },
-    "deviceTypes": {
-      "desktop": true,
-      "tablet": true,
-      "phone": true
-    }
-  },
-
-  "sap.ui5": {
-    "flexEnabled": true,
-
-    "dependencies": {
-      "minUI5Version": "1.145.0",
-      "libs": {
-        "sap.m": {},
-        "sap.ui.core": {},
-        "sap.viz": {},
-        "sap.ui.layout": {}
-      }
-    },
-
-    "config": {
-      "fullWidth": true
-    },
-
-    "contentDensities": {
-      "compact": true,
-      "cozy": true
-    },
-
-    "models": {
-      "i18n": {
-        "type": "sap.ui.model.resource.ResourceModel",
-        "settings": {
-          "bundleName": "mfuanalytics.i18n.i18n"
-        }
-      },
-      "": {
-        "dataSource": "mainService",
-        "preload": true,
-        "settings": {
-          "operationMode": "Server",
-          "autoExpandSelect": true,
-          "earlyRequests": true
-        }
-      }
-    },
-
-    "resources": {
-      "css": [
-        {
-          "uri": "css/style.css"
-        }
-      ]
-    },
-
-    "routing": {
-      "config": {
-        "routerClass": "sap.m.routing.Router",
-        "controlAggregation": "pages",
-        "controlId": "app",
-        "transition": "slide",
-        "type": "View",
-        "viewType": "XML",
-        "path": "mfuanalytics.view",
-        "async": true,
-        "viewPath": "mfuanalytics.view"
-      },
-      "routes": [
-        {
-          "name": "Routemfureport",
-          "pattern": ":?query:",
-          "target": [
-            "Targetmfureport"
-          ]
-        }
-      ],
-      "targets": {
-        "Targetmfureport": {
-          "id": "mfureport",
-          "name": "mfureport"
-        }
-      }
-    },
-
-    "rootView": {
-      "viewName": "mfuanalytics.view.App",
-      "type": "XML",
-      "id": "App",
-      "async": true
+  "": {
+    "type": "sap.ui.model.odata.v4.ODataModel",
+    "settings": {
+      "serviceUrl": "/odata/v4/catalog-service/",
+      "synchronizationMode": "None",
+      "operationMode": "Server",
+      "autoExpandSelect": true,
+      "earlyRequests": true
     }
   }
 }
+
+
