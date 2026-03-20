@@ -232,3 +232,136 @@ values="Count"/>
 </VBox>  
 </Page>  
 </mvc:View>
+
+
+
+
+
+
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+    "use strict";
+
+    return Controller.extend("mfuanalytics.controller.mfureport", {
+
+        onInit: function () {
+
+            var data = {
+
+                modules: [
+                    { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
+                    { module: "SCBI", uploaded: 70, approved: 50, pending: 15 },
+                    { module: "ESG", uploaded: 25, approved: 15, pending: 5 },
+                    { module: "ICON", uploaded: 50, approved: 35, pending: 7 }
+                ],
+
+                // 👉 PIE (separate to avoid filter issue)
+                pieModules: [
+                    { module: "NFRP", approved: 30 },
+                    { module: "SCBI", approved: 50 },
+                    { module: "ESG", approved: 15 },
+                    { module: "ICON", approved: 35 }
+                ],
+
+                // 👉 MONTHLY
+                monthly: [
+                    { month: "Jan", value: 10 },
+                    { month: "Feb", value: 20 },
+                    { month: "Mar", value: 15 }
+                ],
+
+                // 👉 QUARTERLY
+                quarterly: [
+                    { quarter: "Q1", value: 40 },
+                    { quarter: "Q2", value: 25 },
+                    { quarter: "Q3", value: 30 }
+                ],
+
+                // 👉 YEARLY
+                yearly: [
+                    { year: "2022", value: 50 },
+                    { year: "2023", value: 70 },
+                    { year: "2024", value: 60 }
+                ],
+
+                // 👉 TABLE
+                tableData: [
+                    { module: "Retail", subModule: "Sales", loadType: "Upload", template: "Temp1", count: 10 },
+                    { module: "Finance", subModule: "Accounts", loadType: "Upload", template: "Temp2", count: 25 }
+                ],
+
+                // 👉 TREEMAP (FIXED STRUCTURE)
+                treeData: [
+                    { module: "NFRP", submodule: "Credit Risk", template: "Exposure_Load", value: 1 },
+                    { module: "NFRP", submodule: "Liquidity", template: "Liquidity_Load", value: 1 },
+                    { module: "SCBI", submodule: "Insurance", template: "Policy_Load", value: 1 },
+                    { module: "ICON", submodule: "Capital", template: "Capital_Load", value: 1 }
+                ],
+
+                totalUploaded: 190,
+                totalApproved: 130,
+                totalPending: 37,
+                totalTemplates: 4
+            };
+
+            // 🔥 STORE ORIGINAL DATA (IMPORTANT)
+            this._fullModules = data.modules;
+            this._originalTotals = {
+                uploaded: 190,
+                approved: 130,
+                pending: 37,
+                templates: 4
+            };
+
+            // SET MODEL
+            var oModel = new JSONModel(data);
+            this.getView().setModel(oModel);
+        },
+
+        // 🔥 FILTER LOGIC (MULTI SELECT WORKING)
+        onFilterChange: function (oEvent) {
+
+            var selectedKeys = oEvent.getSource().getSelectedKeys();
+            var oModel = this.getView().getModel();
+
+            // 👉 If no selection → reset
+            if (!selectedKeys || selectedKeys.length === 0) {
+
+                oModel.setProperty("/modules", this._fullModules);
+
+                oModel.setProperty("/totalUploaded", this._originalTotals.uploaded);
+                oModel.setProperty("/totalApproved", this._originalTotals.approved);
+                oModel.setProperty("/totalPending", this._originalTotals.pending);
+                oModel.setProperty("/totalTemplates", this._originalTotals.templates);
+
+                return;
+            }
+
+            // 👉 Filter modules
+            var filtered = this._fullModules.filter(function (item) {
+                return selectedKeys.includes(item.module);
+            });
+
+            // 👉 Recalculate KPI
+            var totalUploaded = 0;
+            var totalApproved = 0;
+            var totalPending = 0;
+
+            filtered.forEach(function (item) {
+                totalUploaded += item.uploaded;
+                totalApproved += item.approved;
+                totalPending += item.pending;
+            });
+
+            // 👉 Update model safely
+            oModel.setProperty("/modules", filtered);
+            oModel.setProperty("/totalUploaded", totalUploaded);
+            oModel.setProperty("/totalApproved", totalApproved);
+            oModel.setProperty("/totalPending", totalPending);
+            oModel.setProperty("/totalTemplates", filtered.length);
+        }
+
+    });
+});
