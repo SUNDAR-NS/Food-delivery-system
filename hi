@@ -6,7 +6,6 @@
     xmlns:viz.data="sap.viz.ui5.data"  
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
 
-<!-- 🔥 HEADER BAR -->
 <Page title="MFU Dashboard" class="sapBlueHeader">  
 
 <VBox class="mainContainer">  
@@ -22,7 +21,7 @@
     </MultiComboBox>
 </HBox>
 
-<!-- TOP -->
+<!-- TOP SECTION -->
 <HBox class="topContainer">  
 
     <!-- KPI -->
@@ -50,7 +49,7 @@
 
     </VBox>  
 
-    <!-- CHART -->
+    <!-- STACKED CHART -->
     <Panel width="65%" headerText="MFU Templates by Modules">
 
         <viz:VizFrame vizType="stacked_column" height="320px">
@@ -84,12 +83,13 @@
 
 </HBox>  
 
-<!-- 🔥 FIXED GRID (NO SCROLL ISSUE) -->
-<Grid defaultSpan="L3 M6 S12" class="bottomGrid">
+<!-- 🔥 BOTTOM SECTION -->
+<HBox class="bottomGrid" justifyContent="SpaceBetween">
 
-    <Panel>
+    <Panel width="24%">
         <Text text="Templates by Count" class="panelTitle"/>
         <viz:VizFrame vizType="pie" height="200px">
+
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/modules}">
                     <viz.data:dimensions>
@@ -100,16 +100,19 @@
                     </viz.data:measures>
                 </viz.data:FlattenedDataset>
             </viz:dataset>
+
             <viz:feeds>
                 <viz.feeds:FeedItem uid="size" type="Measure" values="Approved"/>
                 <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
             </viz:feeds>
+
         </viz:VizFrame>
     </Panel>
 
-    <Panel>
+    <Panel width="24%">
         <Text text="Monthly" class="panelTitle"/>
         <viz:VizFrame vizType="column" height="200px">
+
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/monthly}">
                     <viz.data:dimensions>
@@ -120,16 +123,19 @@
                     </viz.data:measures>
                 </viz.data:FlattenedDataset>
             </viz:dataset>
+
             <viz:feeds>
                 <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
                 <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
             </viz:feeds>
+
         </viz:VizFrame>
     </Panel>
 
-    <Panel>
+    <Panel width="24%">
         <Text text="Quarterly" class="panelTitle"/>
         <viz:VizFrame vizType="column" height="200px">
+
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/quarterly}">
                     <viz.data:dimensions>
@@ -140,16 +146,19 @@
                     </viz.data:measures>
                 </viz.data:FlattenedDataset>
             </viz:dataset>
+
             <viz:feeds>
                 <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
                 <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
             </viz:feeds>
+
         </viz:VizFrame>
     </Panel>
 
-    <Panel>
+    <Panel width="24%">
         <Text text="Yearly" class="panelTitle"/>
         <viz:VizFrame vizType="column" height="200px">
+
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/yearly}">
                     <viz.data:dimensions>
@@ -160,17 +169,20 @@
                     </viz.data:measures>
                 </viz.data:FlattenedDataset>
             </viz:dataset>
+
             <viz:feeds>
                 <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
                 <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
             </viz:feeds>
+
         </viz:VizFrame>
     </Panel>
 
-</Grid>
+</HBox>
 
 <!-- TABLE -->
 <Panel headerText="MFU Details" class="sapUiMediumMarginTop">
+
 <Table>
 <columns>
 <Column><Text text="Module"/></Column>
@@ -191,7 +203,9 @@
 </cells>
 </ColumnListItem>
 </items>
+
 </Table>
+
 </Panel>
 
 </VBox>  
@@ -240,12 +254,14 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
-/* 🔥 GRID FIX (NO SCROLL ISSUE) */
+/* BOTTOM */
 .bottomGrid {
     margin-top: 25px;
+    gap: 15px;
 }
 
 .panelTitle {
     text-align: center;
     font-weight: bold;
+    margin-bottom: 5px;
 }
