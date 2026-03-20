@@ -1,115 +1,35 @@
-{
-  "_version": "1.83.0",
-  "sap.app": {
-    "id": "mfuanalytics",
-    "type": "application",
-    "i18n": "i18n/i18n.properties",
-    "applicationVersion": {
-      "version": "0.0.1"
-    },
-    "title": "{{appTitle}}",
-    "description": "{{appDescription}}",
-    "dataSources": {
-      "mainService": {
-        "uri": "/service/",
-        "type": "OData",
-        "settings": {
-          "annotations": [],
-          "odataVersion": "4.01"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>MFU Analytics</title>
+    <style>
+        html, body, body > div, #container, #container-uiarea {
+            height: 100%;
         }
-      }
-    }
-  },
-
-  "sap.ui": {
-    "technology": "UI5",
-    "deviceTypes": {
-      "desktop": true,
-      "tablet": true,
-      "phone": true
-    }
-  },
-
-  "sap.ui5": {
-    "flexEnabled": true,
-
-    "dependencies": {
-      "minUI5Version": "1.145.0",
-      "libs": {
-        "sap.m": {},
-        "sap.ui.core": {},
-        "sap.f": {},
-        "sap.viz": {},
-        "sap.ui.layout": {}
-      }
-    },
-
-    "config": {
-      "fullWidth": true
-    },
-
-    "contentDensities": {
-      "compact": true,
-      "cozy": true
-    },
-
-    "models": {
-      "i18n": {
-        "type": "sap.ui.model.resource.ResourceModel",
-        "settings": {
-          "bundleName": "mfuanalytics.i18n.i18n"
-        }
-      },
-      "": {
-        "dataSource": "mainService",
-        "preload": true,
-        "settings": {
-          "operationMode": "Server",
-          "autoExpandSelect": true,
-          "earlyRequests": true
-        }
-      }
-    },
-
-    "resources": {
-      "css": [
-        {
-          "uri": "css/style.css"
-        }
-      ]
-    },
-
-    "routing": {
-      "config": {
-        "routerClass": "sap.m.routing.Router",
-        "controlAggregation": "pages",
-        "controlId": "app",
-        "transition": "slide",
-        "type": "View",
-        "viewType": "XML",
-        "path": "mfuanalytics.view",
-        "async": true
-      },
-      "routes": [
-        {
-          "name": "Routemfureport",
-          "pattern": ":?query:",
-          "target": ["Targetmfureport"]
-        }
-      ],
-      "targets": {
-        "Targetmfureport": {
-          "id": "mfureport",
-          "name": "mfureport"
-        }
-      }
-    },
-
-    "rootView": {
-      "viewName": "mfuanalytics.view.App",
-      "type": "XML",
-      "id": "App",
-      "async": true
-    }
-  }
-}
+    </style>
+    <script
+        id="sap-ui-bootstrap"
+        src="https://sapui5.hana.ondemand.com/1.145.0/resources/sap-ui-core.js"
+        data-sap-ui-theme="sap_horizon"
+        data-sap-ui-resource-roots='{
+            "mfuanalytics": "./"
+        }'
+        data-sap-ui-on-init="module:sap/ui/core/ComponentSupport"
+        data-sap-ui-compat-version="edge"
+        data-sap-ui-async="true"
+        data-sap-ui-frame-options="trusted"
+    ></script>
+</head>
+<body class="sapUiBody sapUiSizeCompact" id="content">
+    <div
+        data-sap-ui-component
+        data-name="mfuanalytics"
+        data-id="container"
+        data-settings='{"id" : "mfuanalytics"}'
+        data-handle-validation="true"
+    ></div>
+</body>
+</html>
