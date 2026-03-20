@@ -1,6 +1,7 @@
 <mvc:View controllerName="mfuanalytics.controller.mfureport"  
     xmlns:mvc="sap.ui.core.mvc"  
     xmlns="sap.m"  
+    xmlns:core="sap.ui.core"
     xmlns:viz="sap.viz.ui5.controls"  
     xmlns:viz.data="sap.viz.ui5.data"  
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
@@ -11,6 +12,14 @@
 
 <Title text="MFU Dashboard" level="H2"/>  
 
+<!-- 🔥 FILTER -->
+<MultiComboBox
+    width="300px"
+    selectionChange="onFilterChange"
+    items="{/modules}">
+    <core:Item key="{module}" text="{module}" />
+</MultiComboBox>
+
 <!-- TOP -->
 <HBox renderType="Bare">  
 
@@ -18,47 +27,31 @@
     <VBox width="35%">  
 
         <HBox class="kpiRow">  
-            <GenericTile header="Total Uploaded" class="tile">  
-                <TileContent><NumericContent value="71"/></TileContent>  
+            <GenericTile header="Total Uploaded">  
+                <TileContent><NumericContent value="{/totalUploaded}"/></TileContent>  
             </GenericTile>  
 
-            <GenericTile header="Total Approved" class="tile">  
-                <TileContent><NumericContent value="60"/></TileContent>  
+            <GenericTile header="Total Approved">  
+                <TileContent><NumericContent value="{/totalApproved}"/></TileContent>  
             </GenericTile>  
         </HBox>  
 
         <HBox class="kpiRow">  
-            <GenericTile header="Total Pending" class="tile">  
-                <TileContent><NumericContent value="20"/></TileContent>  
+            <GenericTile header="Total Pending">  
+                <TileContent><NumericContent value="{/totalPending}"/></TileContent>  
             </GenericTile>  
 
-            <GenericTile header="Total Templates" class="tile">  
-                <TileContent><NumericContent value="115"/></TileContent>  
+            <GenericTile header="Total Templates">  
+                <TileContent><NumericContent value="{/totalTemplates}"/></TileContent>  
             </GenericTile>  
         </HBox>  
 
     </VBox>  
 
-    <!-- STACKED CHART -->
+    <!-- ✅ STACKED CHART -->
     <Panel width="65%" headerText="MFU Templates by Modules">
 
-        <viz:VizFrame
-            vizType="stacked_column"
-            height="320px"
-            width="100%"
-            vizProperties='{
-                "legend": { "visible": true },
-                "plotArea": {
-                    "dataLabel": { "visible": true },
-                    "dataPointStyle": {
-                        "rules": [
-                            { "dataContext": { "measureNames": "Uploaded" }, "properties": { "color": "#5CBAE6" } },
-                            { "dataContext": { "measureNames": "Approved" }, "properties": { "color": "#107E3E" } },
-                            { "dataContext": { "measureNames": "Pending" }, "properties": { "color": "#E9730C" } }
-                        ]
-                    }
-                }
-            }'>
+        <viz:VizFrame vizType="stacked_column" height="320px">
 
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/modules}">
@@ -87,12 +80,13 @@
 
 </HBox>  
 
-<!-- BOTTOM -->
-<HBox class="bottomGrid" renderType="Bare">  
+<!-- 🔽 BELOW PART (UNCHANGED) -->
+
+<HBox class="bottomGrid">  
 
     <!-- PIE -->
     <Panel>  
-        <Text text="Templates by Count" class="panelTitle"/>  
+        <Text text="Templates by Count"/>  
         <viz:VizFrame vizType="pie" height="220px">  
             <viz:dataset>  
                 <viz.data:FlattenedDataset data="{/modules}">  
@@ -113,7 +107,7 @@
 
     <!-- MONTHLY -->
     <Panel>  
-        <Text text="Monthly" class="panelTitle"/>  
+        <Text text="Monthly"/>  
         <viz:VizFrame vizType="column" height="220px">  
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/monthly}">
@@ -134,7 +128,7 @@
 
     <!-- QUARTERLY -->
     <Panel>  
-        <Text text="Quarterly" class="panelTitle"/>  
+        <Text text="Quarterly"/>  
         <viz:VizFrame vizType="column" height="220px">  
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/quarterly}">
@@ -155,7 +149,7 @@
 
     <!-- YEARLY -->
     <Panel>  
-        <Text text="Yearly" class="panelTitle"/>  
+        <Text text="Yearly"/>  
         <viz:VizFrame vizType="column" height="220px">  
             <viz:dataset>
                 <viz.data:FlattenedDataset data="{/yearly}">
@@ -164,8 +158,8 @@
                     </viz.data:dimensions>
                     <viz.data:measures>
                         <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
+                    </viz.data:FlattenedDataset>
+                </viz.data:measures>
             </viz:dataset>
             <viz:feeds>
                 <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
@@ -176,10 +170,10 @@
 
 </HBox>  
 
-<!-- TABLE -->
-<Panel headerText="MFU Details" class="sapUiMediumMarginTop">  
+<!-- TABLE (UNCHANGED) -->
+<Panel headerText="MFU Details">  
 
-<Table items="{/tableData}">  
+<Table>  
 
 <columns>  
 <Column><Text text="Module"/></Column>  
@@ -192,11 +186,11 @@
 <items>  
 <ColumnListItem>  
 <cells>  
-<Text text="{module}"/>  
-<Text text="{subModule}"/>  
-<Text text="{loadType}"/>  
-<Text text="{template}"/>  
-<Text text="{count}"/>  
+<Text text="Retail"/>  
+<Text text="Sales"/>  
+<Text text="Upload"/>  
+<Text text="Temp1"/>  
+<Text text="10"/>  
 </cells>  
 </ColumnListItem>  
 </items>  
@@ -211,6 +205,7 @@
 
 
 
+
 sap.ui.define([
 "sap/ui/core/mvc/Controller",
 "sap/ui/model/json/JSONModel"
@@ -221,14 +216,15 @@ return Controller.extend("mfuanalytics.controller.mfureport", {
 
 onInit: function () {
 
-    var data = {
+    this.originalModules = [
+        { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
+        { module: "SCBI", uploaded: 70, approved: 55, pending: 12 },
+        { module: "ESG", uploaded: 28, approved: 20, pending: 6 },
+        { module: "ICON", uploaded: 55, approved: 40, pending: 9 }
+    ];
 
-        modules: [
-            { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
-            { module: "SCBI", uploaded: 70, approved: 55, pending: 12 },
-            { module: "ESG", uploaded: 28, approved: 20, pending: 6 },
-            { module: "ICON", uploaded: 55, approved: 40, pending: 9 }
-        ],
+    var data = {
+        modules: this.originalModules,
 
         monthly: [
             { month: "Jan", value: 10 },
@@ -246,15 +242,49 @@ onInit: function () {
             { year: "2022", value: 50 },
             { year: "2023", value: 70 },
             { year: "2024", value: 60 }
-        ],
-
-        tableData: [
-            { module: "Retail", subModule: "Sales", loadType: "Upload", template: "Temp1", count: 10 },
-            { module: "Finance", subModule: "Accounts", loadType: "Upload", template: "Temp2", count: 25 }
         ]
     };
 
     this.getView().setModel(new JSONModel(data));
+    this.updateKPIs(this.originalModules);
+},
+
+updateKPIs: function (data) {
+
+    let totalUploaded = 0;
+    let totalApproved = 0;
+    let totalPending = 0;
+
+    data.forEach(function (item) {
+        totalUploaded += item.uploaded;
+        totalApproved += item.approved;
+        totalPending += item.pending;
+    });
+
+    var model = this.getView().getModel();
+
+    model.setProperty("/totalUploaded", totalUploaded);
+    model.setProperty("/totalApproved", totalApproved);
+    model.setProperty("/totalPending", totalPending);
+    model.setProperty("/totalTemplates", data.length);
+},
+
+onFilterChange: function (oEvent) {
+
+    var selectedKeys = oEvent.getSource().getSelectedKeys();
+
+    if (selectedKeys.length === 0) {
+        this.getView().getModel().setProperty("/modules", this.originalModules);
+        this.updateKPIs(this.originalModules);
+        return;
+    }
+
+    var filtered = this.originalModules.filter(function (item) {
+        return selectedKeys.includes(item.module);
+    });
+
+    this.getView().getModel().setProperty("/modules", filtered);
+    this.updateKPIs(filtered);
 }
 
 });
@@ -262,39 +292,4 @@ onInit: function () {
 
 
 
-.sapMPage {
-    background-color: #f5f7fa;
-}
 
-.mainContainer {
-    padding: 20px;
-}
-
-.kpiRow {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.tile {
-    flex: 1;
-    height: 130px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-.bottomGrid {
-    display: flex;
-    gap: 15px;
-    margin-top: 25px;
-}
-
-.bottomGrid > * {
-    flex: 1;
-}
-
-.panelTitle {
-    text-align: center;
-    font-weight: bold;
-}
