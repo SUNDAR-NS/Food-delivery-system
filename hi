@@ -1,140 +1,24 @@
-/* ===== GLOBAL FONT (ENTERPRISE SAP STYLE) ===== */
-* {
-    font-family: "72", "Segoe UI", Arial, sans-serif !important;
-}
+namespace com.scb.fileupload;
 
-/* ===== PAGE ===== */
-.sapMPage {
-    background: #f2f4f7;   /* light grey */
-}
+using {
+  cuid,
+  managed
+} from '@sap/cds/common';
 
-/* MAIN CONTAINER */
-.mainContainer {
-    padding: 16px 20px;
-}
-
-/* ===== TITLE ===== */
-.sapMTitle {
-    font-size: 18px !important;
-    font-weight: 600 !important;
-    color: #1f2937;
-    margin-bottom: 10px;
-}
-
-/* ===== TOP SECTION ===== */
-.topContainer {
-    display: flex;
-    gap: 20px;
-    margin-top: 10px;
-}
-
-/* ===== KPI SECTION ===== */
-.kpiSection {
-    width: 35%;
-}
-
-/* KPI ROW */
-.kpiRow {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-/* KPI TILE */
-.tile {
-    flex: 1;
-    height: 100px;
-    background: #ffffff;
-    border-radius: 6px;
-    border: 1px solid #e0e6ed;
-}
-
-/* KPI HEADER */
-.sapMGTHeaderText {
-    font-size: 12px !important;
-    font-weight: 500;
-    color: #6b7280;
-}
-
-/* KPI VALUE */
-.sapMNCValue {
-    font-size: 24px !important;
-    font-weight: 700 !important;
-    color: #0a6ed1 !important; /* SAP blue */
-}
-
-/* ===== MAIN CHART PANEL ===== */
-.chartPanel {
-    width: 65%;
-    background: #ffffff;
-    border-radius: 6px;
-    border: 1px solid #e0e6ed;
-    padding: 10px;
-}
-
-/* PANEL HEADER */
-.sapMPanelHdr {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    color: #374151;
-}
-
-/* ===== CHART ===== */
-.sapVizFrame {
-    width: 100% !important;
-    height: 260px !important;
-}
-
-/* ===== BOTTOM GRID ===== */
-.bottomGrid {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-/* BOTTOM PANELS */
-.bottomGrid .sapMPanel {
-    flex: 1;
-    background: #ffffff;
-    border-radius: 6px;
-    border: 1px solid #e0e6ed;
-    padding: 8px;
-}
-
-/* ===== TABLE ===== */
-.sapMTable {
-    margin-top: 20px;
-    background: #ffffff;
-    border: 1px solid #e0e6ed;
-    border-radius: 6px;
-    font-size: 12px;
-}
-
-/* TABLE HEADER */
-.sapMListTblHeaderCell {
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    color: #111827;
-    background: #f4f6f8;
-}
-
-/* TABLE ROW */
-.sapMListTblRow {
-    font-size: 12px;
-    color: #374151;
-}
-
-/* ROW HOVER */
-.sapMListTblRow:hover {
-    background: #f0f4f9;
-}
-
-/* ===== CLEAN ===== */
-.sapMPanelContent {
-    overflow: hidden !important;
-}
-
-.sapMGT,
-.sapMPanel {
-    transition: none;
+entity ReportFileStorage @(odata.stream) : cuid,managed {
+  MODULE_NAME     : String(100);
+  SUB_MODULE_NAME : String(100);
+  LOAD_TEMPLATE   : String(100);
+  FILE_NAME       : String(255);
+  FILE_MIME_TYPE  : String(100);
+  FILE_SIZE       : Integer;
+  @Core.MediaType: 'FILE_MIME_TYPE'
+  FILE_CONTENT    : LargeBinary;
+  STATUS          : String(50);
+  COMMENTS        : String(1000);
+  JSON_DATA       : LargeString;
+  LOAD_STATUS     : Boolean;
+  LOAD_TYPE       : String(50);
+  EXPIRY_DATE     : Date;
+  ACTION_BY       : String(100);
 }
