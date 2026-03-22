@@ -1,3 +1,229 @@
+<mvc:View controllerName="mfuanalytics.controller.mfureport"  
+    xmlns:mvc="sap.ui.core.mvc"  
+    xmlns="sap.m"  
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"  
+    xmlns:viz.data="sap.viz.ui5.data"  
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
+
+<Page id="_IDGenPage" title="MFU Dashboard" class="sapBlueHeader">  
+
+<VBox id="_IDGenVBox" class="mainContainer">  
+
+<Panel  class="moduleFilterBox">
+    
+    <VBox class="filterContainer">
+        <HBox alignItems="Center" class="filterRow">
+
+            <Text text="Module" class="filterLable"/>
+            <MultiComboBox
+        width="200px"
+        selectionFinish="onFilterChange"
+        items="{/allModules}"
+        showClearIcon="true"
+        placeholder="Type and select Modules">
+        
+        <core:Item key="{module}" text="{module}" />
+    </MultiComboBox>
+        </HBox>
+    </VBox>
+
+</Panel>
+
+
+<HBox id="_IDGenHBox3" class="topContainer">  
+
+
+    <VBox id="_IDGenVBox1" width="35%">  
+
+        <HBox id="_IDGenHBox4" class="kpiRow">  
+            <GenericTile id="_IDGenGenericTile" header="Total Uploaded" class="tile">  
+                <TileContent id="_IDGenTileContent">
+                    <NumericContent id="_IDGenNumericContent" value="{/totalUploaded}"/>
+                </TileContent>  
+            </GenericTile>  
+
+            <GenericTile id="_IDGenGenericTile1" header="Total Approved" class="tile">  
+                <TileContent id="_IDGenTileContent1">
+                    <NumericContent id="_IDGenNumericContent1" value="{/totalApproved}"/>
+                </TileContent>  
+            </GenericTile>  
+        </HBox>  
+
+        <HBox id="_IDGenHBox5" class="kpiRow">  
+            <GenericTile id="_IDGenGenericTile2" header="Total Pending" class="tile">  
+                <TileContent id="_IDGenTileContent2">
+                    <NumericContent id="_IDGenNumericContent2" value="{/totalPending}"/>
+                </TileContent>  
+            </GenericTile>  
+
+            <GenericTile id="_IDGenGenericTile3" header="Total Templates" class="tile">  
+                <TileContent id="_IDGenTileContent3">
+                    <NumericContent id="_IDGenNumericContent3" value="{/totalTemplates}"/>
+                </TileContent>  
+            </GenericTile>  
+        </HBox>  
+
+    </VBox>  
+
+    <Panel id="_IDGenPanel" width="700px" headerText="MFU Templates by Modules">
+
+        <viz:VizFrame id="_IDGenVizFrame" vizType="stacked_column" height="320px" width="100%"
+            vizProperties='{
+                "title": { "visible": false },
+                "legend": { "visible": true },
+                "plotArea": {
+                    "dataLabel": { "visible": true }
+                }
+            }'>
+
+            <viz:dataset>
+                <viz.data:FlattenedDataset id="_IDGenFlattenedDataset" data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition id="_IDGenDimensionDefinition" name="Module" value="{module}" />
+                    </viz.data:dimensions>
+
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition id="_IDGenMeasureDefinition" name="Uploaded" value="{uploaded}" />
+                        <viz.data:MeasureDefinition id="_IDGenMeasureDefinition1" name="Approved" value="{approved}" />
+                        <viz.data:MeasureDefinition id="_IDGenMeasureDefinition2" name="Pending" value="{pending}" />
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem id="_IDGenFeedItem" uid="valueAxis" type="Measure"
+                    values="Uploaded,Approved,Pending"/>
+                <viz.feeds:FeedItem id="_IDGenFeedItem1" uid="categoryAxis" type="Dimension"
+                    values="Module"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
+
+    </Panel>  
+
+</HBox>  
+
+<HBox id="_IDGenHBox6" class="chartRow">
+
+    <VBox id="_IDGenVBox2" class="chartBox">
+        <Text id="_IDGenText1" text="Templates by Count" class="panelTitle"/>
+        <viz:VizFrame id="_IDGenVizFrame1" vizType="pie" height="200px" width="100%"
+            vizProperties='{"title":{"visible":false}}'>
+            <viz:dataset>
+                <viz.data:FlattenedDataset id="_IDGenFlattenedDataset1" data="{/pieModules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition id="_IDGenDimensionDefinition1" name="Module" value="{module}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition id="_IDGenMeasureDefinition3" name="Approved" value="{approved}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem id="_IDGenFeedItem2" uid="size" type="Measure" values="Approved"/>
+                <viz.feeds:FeedItem id="_IDGenFeedItem3" uid="color" type="Dimension" values="Module"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </VBox>
+
+    <VBox id="_IDGenVBox3" class="chartBox">
+        <Text id="_IDGenText2" text="Monthly" class="panelTitle"/>
+        <viz:VizFrame id="_IDGenVizFrame2" vizType="column" height="200px" width="100%"
+            vizProperties='{"title":{"visible":false}}'>
+            <viz:dataset>
+                <viz.data:FlattenedDataset id="_IDGenFlattenedDataset2" data="{/monthly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition id="_IDGenDimensionDefinition2" name="Month" value="{month}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition id="_IDGenMeasureDefinition4" name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem id="_IDGenFeedItem4" uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem id="_IDGenFeedItem5" uid="categoryAxis" type="Dimension" values="Month"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </VBox>
+
+    <VBox id="_IDGenVBox4" class="chartBox">
+        <Text id="_IDGenText3" text="Quarterly" class="panelTitle"/>
+        <viz:VizFrame id="_IDGenVizFrame3" vizType="column" height="200px" width="100%"
+            vizProperties='{"title":{"visible":false}}'>
+            <viz:dataset>
+                <viz.data:FlattenedDataset id="_IDGenFlattenedDataset3" data="{/quarterly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition id="_IDGenDimensionDefinition3" name="Quarter" value="{quarter}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition id="_IDGenMeasureDefinition5" name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem id="_IDGenFeedItem6" uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem id="_IDGenFeedItem7" uid="categoryAxis" type="Dimension" values="Quarter"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </VBox>
+
+    <VBox id="_IDGenVBox5" class="chartBox">
+        <Text id="_IDGenText4" text="Yearly" class="panelTitle"/>
+        <viz:VizFrame id="_IDGenVizFrame4" vizType="column" height="200px" width="100%"
+            vizProperties='{"title":{"visible":false}}'>
+            <viz:dataset>
+                <viz.data:FlattenedDataset id="_IDGenFlattenedDataset4" data="{/yearly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition id="_IDGenDimensionDefinition4" name="Year" value="{year}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition id="_IDGenMeasureDefinition6" name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem id="_IDGenFeedItem8" uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem id="_IDGenFeedItem9" uid="categoryAxis" type="Dimension" values="Year"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </VBox>
+
+</HBox>
+
+
+<Panel id="_IDGenPanel1" headerText="MFU Details" class="sapUiMediumMarginTop">
+    <Table id="_IDGenTable" items="{/tableData}">
+        <columns>
+            <Column id="_IDGenColumn1"><Text id="_IDGenText5" text="Module"/></Column>
+            <Column id="_IDGenColumn2"><Text id="_IDGenText6" text="Sub Module"/></Column>
+            <Column id="_IDGenColumn3"><Text id="_IDGenText7" text="Load Type"/></Column>
+            <Column id="_IDGenColumn4"><Text id="_IDGenText8" text="Template"/></Column>
+            <Column id="_IDGenColumn5"><Text id="_IDGenText9" text="Count"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem id="_IDGenColumnListItem">
+                <cells>
+                    <Text id="_IDGenText10" text="{module}"/>
+                    <Text id="_IDGenText11" text="{subModule}"/>
+                    <Text id="_IDGenText12" text="{loadType}"/>
+                    <Text id="_IDGenText13" text="{template}"/>
+                    <Text id="_IDGenText14" text="{count}"/>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</Panel>
+
+
+</VBox>  
+</Page>  
+</mvc:View>
+
+
+
+
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -10,7 +236,6 @@ sap.ui.define([
 
             var data = {
 
-                // ✅ FULL DATA (FOR DROPDOWN)
                 allModules: [
                     { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
                     { module: "SCBI", uploaded: 70, approved: 50, pending: 15 },
@@ -66,9 +291,6 @@ sap.ui.define([
             this.getView().setModel(oModel);
         },
 
-        // =========================
-        // 🔥 FILTER LOGIC (FIXED)
-        // =========================
         onFilterChange: function (oEvent) {
 
             var selectedKeys = oEvent.getSource().getSelectedKeys();
