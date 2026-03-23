@@ -1,32 +1,3 @@
-onInit: function () {
-
-    var oModel = new sap.ui.model.json.JSONModel({
-        allModules: [],
-        modules: [],
-        tableData: [],
-        totalUploaded: 0,
-        totalApproved: 0,
-        totalPending: 0,
-        totalTemplates: 0
-    });
-
-    this.getView().setModel(oModel);
-
-    // 🔥 LOAD DROPDOWN
-    fetch("/odata/v4/mfu/getModules()")
-        .then(res => res.json())
-        .then(data => {
-            oModel.setProperty("/allModules", data.value);
-        });
-
-    // 🔥 LOAD DASHBOARD
-    this.loadDashboard(null);
-},
-
-
-// =========================
-// 🔥 LOAD DASHBOARD
-// =========================
 loadDashboard: function (module) {
 
     fetch("/odata/v4/mfu/getDashboardData", {
@@ -41,14 +12,9 @@ loadDashboard: function (module) {
     .then(res => res.json())
     .then(data => {
 
-        console.log("API RESPONSE:", data); // 🔥 DEBUG
+        console.log("API RESPONSE:", data);
 
-        var result = data.value;
-
-        if (!result) {
-            console.error("No data from backend");
-            return;
-        }
+        var result = data; // 🔥 FIXED HERE
 
         var oModel = this.getView().getModel();
 
@@ -63,19 +29,4 @@ loadDashboard: function (module) {
     .catch(err => {
         console.error("API ERROR:", err);
     });
-},
-
-
-// =========================
-// 🔥 FILTER CHANGE
-// =========================
-onFilterChange: function (oEvent) {
-
-    const keys = oEvent.getSource().getSelectedKeys();
-
-    if (!keys || keys.length === 0) {
-        this.loadDashboard(null);
-    } else {
-        this.loadDashboard(keys[0]); // single select for now
-    }
 }
