@@ -20,7 +20,7 @@ sap.ui.define([
 
             this.getView().setModel(oModel);
 
-            // 🔥 LOAD DROPDOWN
+            // 🔥 LOAD MODULE DROPDOWN
             fetch("/odata/v4/mfu/getModules()")
                 .then(res => res.json())
                 .then(data => {
@@ -51,31 +51,17 @@ sap.ui.define([
 
                 console.log("API RESPONSE:", data);
 
-                var result = data;
-
                 var oModel = this.getView().getModel();
 
-                oModel.setProperty("/modules", result.modules || []);
-                oModel.setProperty("/tableData", result.table || []);
-                oModel.setProperty("/totalUploaded", result.uploaded || 0);
-                oModel.setProperty("/totalApproved", result.approved || 0);
-                oModel.setProperty("/totalPending", result.pending || 0);
-                oModel.setProperty("/totalTemplates", result.totalTemplates || 0);
+                oModel.setProperty("/modules", data.modules || []);
+                oModel.setProperty("/tableData", data.table || []);
+                oModel.setProperty("/totalUploaded", data.uploaded || 0);
+                oModel.setProperty("/totalApproved", data.approved || 0);
+                oModel.setProperty("/totalPending", data.pending || 0);
+                oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
 
-                // 🔥 APPLY CHART COLORS HERE (CORRECT PLACE)
-                var oChart = this.byId("idVizFrame");
-
-                if (oChart) {
-                    oChart.setVizProperties({
-                        plotArea: {
-                            colorPalette: [
-                                "#0070f2", // Uploaded
-                                "#107e3e", // Approved
-                                "#e9730c"  // Pending
-                            ]
-                        }
-                    });
-                }
+                // 🔥 APPLY CHART SETTINGS AFTER DATA LOAD
+                this._applyChartSettings();
 
             })
             .catch(err => {
@@ -95,6 +81,44 @@ sap.ui.define([
                 this.loadDashboard(null);
             } else {
                 this.loadDashboard(keys[0]);
+            }
+        },
+
+
+        // =========================
+        // 🔥 CHART SETTINGS (MAIN FIX)
+        // =========================
+        _applyChartSettings: function () {
+
+            var oChart = this.byId("idVizFrame");
+
+            if (oChart) {
+                oChart.setVizProperties({
+
+                    // ❌ REMOVE TITLE
+                    title: {
+                        visible: false
+                    },
+
+                    plotArea: {
+                        // ✅ COLORS
+                        colorPalette: [
+                            "#0070f2", // Uploaded (Blue)
+                            "#107e3e", // Approved (Green)
+                            "#e9730c"  // Pending (Orange)
+                        ],
+
+                        // ✅ SHOW VALUES ON HOVER
+                        dataLabel: {
+                            visible: true
+                        }
+                    },
+
+                    // ✅ ENABLE TOOLTIP (HOVER)
+                    tooltip: {
+                        visible: true
+                    }
+                });
             }
         }
 
