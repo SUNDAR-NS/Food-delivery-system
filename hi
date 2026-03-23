@@ -10,7 +10,7 @@ sap.ui.define([
 
             var data = {
 
-                // 🔥 FULL DATA (WITH USER + DATE)
+                // 🔥 MASTER DATA (SOURCE OF TRUTH)
                 allModules: [
                     { module: "NFRP", uploaded: 45, approved: 30, pending: 10, user: "Anand", date: "10D" },
                     { module: "SCBI", uploaded: 70, approved: 50, pending: 15, user: "Sundar", date: "3M" },
@@ -20,14 +20,12 @@ sap.ui.define([
 
                 modules: [],
 
-                // 🔹 STATUS
                 statusList: [
                     { key: "uploaded", text: "Uploaded" },
                     { key: "approved", text: "Approved" },
                     { key: "pending", text: "Pending" }
                 ],
 
-                // 🔹 USER
                 userList: [
                     { key: "Anand", text: "Anand" },
                     { key: "Sundar", text: "Sundar" },
@@ -35,7 +33,6 @@ sap.ui.define([
                     { key: "Shivani", text: "Shivani" }
                 ],
 
-                // 🔹 DATE
                 dateList: [
                     { key: "10D", text: "Last 10 Days" },
                     { key: "3M", text: "Last 3 Months" },
@@ -43,35 +40,37 @@ sap.ui.define([
                     { key: "1Y", text: "Last 1 Year" }
                 ],
 
-                totalUploaded: 190,
-                totalApproved: 130,
-                totalPending: 37,
-                totalTemplates: 4
+                totalUploaded: 0,
+                totalApproved: 0,
+                totalPending: 0,
+                totalTemplates: 0
             };
 
-            // INITIAL LOAD
+            // 🔥 INITIAL LOAD
             data.modules = data.allModules;
-
             this._fullModules = data.allModules;
 
             var oModel = new JSONModel(data);
             this.getView().setModel(oModel);
+
+            // 👉 INITIAL KPI CALCULATION
+            this._recalculateKPI(data.modules);
         },
 
-        // 🔥 FINAL FILTER (ALL 4 FILTERS USED PROPERLY)
+        // 🔥 MAIN FILTER HANDLER
         onFilterChange: function () {
 
             var oView = this.getView();
             var oModel = oView.getModel();
 
-            var moduleKeys = oView.byId("moduleFilter").getSelectedKeys();
-            var statusKeys = oView.byId("statusFilter").getSelectedKeys();
-            var userKeys = oView.byId("userFilter").getSelectedKeys();
-            var dateKeys = oView.byId("dateFilter").getSelectedKeys();
+            var moduleKeys = oView.byId("moduleFilter")?.getSelectedKeys() || [];
+            var statusKeys = oView.byId("statusFilter")?.getSelectedKeys() || [];
+            var userKeys = oView.byId("userFilter")?.getSelectedKeys() || [];
+            var dateKeys = oView.byId("dateFilter")?.getSelectedKeys() || [];
 
             var baseData = this._fullModules;
 
-            // ✅ STEP 1: APPLY ALL FILTERS (AND CONDITION)
+            // ✅ STEP 1: APPLY ALL FILTERS (AND LOGIC)
             var filtered = baseData.filter(item => {
 
                 var moduleMatch = moduleKeys.length === 0 || moduleKeys.includes(item.module);
@@ -81,7 +80,14 @@ sap.ui.define([
                 return moduleMatch && userMatch && dateMatch;
             });
 
-            // ✅ STEP 2: APPLY STATUS FILTER (FOR CHART + KPI)
+            // ✅ STEP 2: HANDLE NO DATA CASE
+            if (filtered.length === 0) {
+                oModel.setProperty("/modules", []);
+                this._resetKPI();
+                return;
+            }
+
+            // ✅ STEP 3: APPLY STATUS FILTER (VALUE LEVEL)
             var finalData = filtered.map(item => {
 
                 return {
@@ -92,23 +98,43 @@ sap.ui.define([
                 };
             });
 
-            // ✅ STEP 3: KPI CALCULATION
+            // ✅ STEP 4: UPDATE MODEL
+            oModel.setProperty("/modules", finalData);
+
+            // ✅ STEP 5: KPI UPDATE
+            this._recalculateKPI(finalData);
+        },
+
+        // 🔥 KPI CALCULATION (REUSABLE)
+        _recalculateKPI: function (data) {
+
             var totalUploaded = 0,
                 totalApproved = 0,
                 totalPending = 0;
 
-            finalData.forEach(item => {
-                totalUploaded += item.uploaded;
-                totalApproved += item.approved;
-                totalPending += item.pending;
+            data.forEach(item => {
+                totalUploaded += item.uploaded || 0;
+                totalApproved += item.approved || 0;
+                totalPending += item.pending || 0;
             });
 
-            // ✅ STEP 4: UPDATE MODEL (DRIVES CHART)
-            oModel.setProperty("/modules", finalData);
+            var oModel = this.getView().getModel();
+
             oModel.setProperty("/totalUploaded", totalUploaded);
             oModel.setProperty("/totalApproved", totalApproved);
             oModel.setProperty("/totalPending", totalPending);
-            oModel.setProperty("/totalTemplates", finalData.length);
+            oModel.setProperty("/totalTemplates", data.length);
+        },
+
+        // 🔥 RESET KPI (EMPTY STATE)
+        _resetKPI: function () {
+
+            var oModel = this.getView().getModel();
+
+            oModel.setProperty("/totalUploaded", 0);
+            oModel.setProperty("/totalApproved", 0);
+            oModel.setProperty("/totalPending", 0);
+            oModel.setProperty("/totalTemplates", 0);
         }
 
     });
