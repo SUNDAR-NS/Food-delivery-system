@@ -10,7 +10,6 @@ sap.ui.define([
 
             var data = {
 
-                // 🔥 MASTER DATA
                 allModules: [
                     { module: "NFRP", uploaded: 45, approved: 30, pending: 10, user: "Anand", date: "10D" },
                     { module: "SCBI", uploaded: 70, approved: 50, pending: 15, user: "Sundar", date: "3M" },
@@ -19,8 +18,8 @@ sap.ui.define([
                 ],
 
                 modules: [],
+                tableData: [],
 
-                // 🔹 FILTER LISTS
                 statusList: [
                     { key: "uploaded", text: "Uploaded" },
                     { key: "approved", text: "Approved" },
@@ -41,25 +40,22 @@ sap.ui.define([
                     { key: "1Y", text: "Last 1 Year" }
                 ],
 
-                // 🔹 KPI (INITIAL = 0 → WILL CALCULATE)
                 totalUploaded: 0,
                 totalApproved: 0,
                 totalPending: 0,
                 totalTemplates: 0
             };
 
-            // INITIAL LOAD
             data.modules = data.allModules;
             this._fullModules = data.allModules;
 
             var oModel = new JSONModel(data);
             this.getView().setModel(oModel);
 
-            // 🔥 INITIAL KPI CALCULATION
+            this._updateTable(data.modules);
             this._recalculateKPI(data.modules);
         },
 
-        // 🔥 FILTER HANDLER (ALL FILTERS)
         onFilterChange: function () {
 
             var oView = this.getView();
@@ -72,7 +68,7 @@ sap.ui.define([
 
             var baseData = this._fullModules;
 
-            // ✅ STEP 1: APPLY ALL FILTERS
+            // 🔥 FILTER
             var filtered = baseData.filter(item => {
 
                 var moduleMatch = moduleKeys.length === 0 || moduleKeys.includes(item.module);
@@ -82,14 +78,14 @@ sap.ui.define([
                 return moduleMatch && userMatch && dateMatch;
             });
 
-            // ✅ STEP 2: NO DATA CASE
             if (filtered.length === 0) {
                 oModel.setProperty("/modules", []);
+                oModel.setProperty("/tableData", []);
                 this._resetKPI();
                 return;
             }
 
-            // ✅ STEP 3: APPLY STATUS FILTER
+            // 🔥 STATUS FILTER
             var finalData = filtered.map(item => {
 
                 return {
@@ -100,14 +96,58 @@ sap.ui.define([
                 };
             });
 
-            // ✅ STEP 4: UPDATE MODEL (CHART)
             oModel.setProperty("/modules", finalData);
 
-            // ✅ STEP 5: KPI UPDATE
+            // 🔥 TABLE UPDATE
+            this._updateTable(finalData);
+
+            // 🔥 KPI
             this._recalculateKPI(finalData);
         },
 
-        // 🔥 KPI CALCULATION (CORRECT MATH)
+        // 🔥 TABLE GENERATION
+        _updateTable: function (data) {
+
+            var tableData = [];
+
+            data.forEach(item => {
+
+                if (item.uploaded > 0) {
+                    tableData.push({
+                        module: item.module,
+                        subModule: "N/A",
+                        loadType: "Uploaded",
+                        template: "Template",
+                        count: item.uploaded
+                    });
+                }
+
+                if (item.approved > 0) {
+                    tableData.push({
+                        module: item.module,
+                        subModule: "N/A",
+                        loadType: "Approved",
+                        template: "Template",
+                        count: item.approved
+                    });
+                }
+
+                if (item.pending > 0) {
+                    tableData.push({
+                        module: item.module,
+                        subModule: "N/A",
+                        loadType: "Pending",
+                        template: "Template",
+                        count: item.pending
+                    });
+                }
+
+            });
+
+            this.getView().getModel().setProperty("/tableData", tableData);
+        },
+
+        // 🔥 KPI
         _recalculateKPI: function (data) {
 
             var totalUploaded = 0,
@@ -130,7 +170,6 @@ sap.ui.define([
             oModel.setProperty("/totalTemplates", totalTemplates);
         },
 
-        // 🔥 RESET KPI
         _resetKPI: function () {
 
             var oModel = this.getView().getModel();
