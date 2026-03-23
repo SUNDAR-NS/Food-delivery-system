@@ -1,61 +1,3 @@
-<Panel class="moduleFilterBox">
-    
-    <VBox class="filterContainer">
-
-        <!-- MODULE -->
-        <HBox alignItems="Center" class="filterRow">
-            <Text text="Module" class="filterLable"/>
-            <MultiComboBox
-                id="moduleFilter"
-                width="180px"
-                selectionFinish="onFilterChange"
-                items="{/allModules}">
-                <core:Item key="{module}" text="{module}" />
-            </MultiComboBox>
-        </HBox>
-
-        <!-- STATUS -->
-        <HBox alignItems="Center" class="filterRow">
-            <Text text="Status" class="filterLable"/>
-            <MultiComboBox
-                id="statusFilter"
-                width="180px"
-                selectionFinish="onFilterChange"
-                items="{/statusList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </HBox>
-
-        <!-- USER -->
-        <HBox alignItems="Center" class="filterRow">
-            <Text text="User" class="filterLable"/>
-            <MultiComboBox
-                id="userFilter"
-                width="180px"
-                selectionFinish="onFilterChange"
-                items="{/userList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </HBox>
-
-        <!-- DATE -->
-        <HBox alignItems="Center" class="filterRow">
-            <Text text="Created Date" class="filterLable"/>
-            <MultiComboBox
-                id="dateFilter"
-                width="180px"
-                selectionFinish="onFilterChange"
-                items="{/dateList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </HBox>
-
-    </VBox>
-
-</Panel>
-
-
-
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -68,6 +10,7 @@ sap.ui.define([
 
             var data = {
 
+                // 🔥 FULL DATA (WITH USER + DATE)
                 allModules: [
                     { module: "NFRP", uploaded: 45, approved: 30, pending: 10, user: "Anand", date: "10D" },
                     { module: "SCBI", uploaded: 70, approved: 50, pending: 15, user: "Sundar", date: "3M" },
@@ -77,12 +20,14 @@ sap.ui.define([
 
                 modules: [],
 
+                // 🔹 STATUS
                 statusList: [
                     { key: "uploaded", text: "Uploaded" },
                     { key: "approved", text: "Approved" },
                     { key: "pending", text: "Pending" }
                 ],
 
+                // 🔹 USER
                 userList: [
                     { key: "Anand", text: "Anand" },
                     { key: "Sundar", text: "Sundar" },
@@ -90,6 +35,7 @@ sap.ui.define([
                     { key: "Shivani", text: "Shivani" }
                 ],
 
+                // 🔹 DATE
                 dateList: [
                     { key: "10D", text: "Last 10 Days" },
                     { key: "3M", text: "Last 3 Months" },
@@ -103,14 +49,16 @@ sap.ui.define([
                 totalTemplates: 4
             };
 
+            // INITIAL LOAD
             data.modules = data.allModules;
+
             this._fullModules = data.allModules;
 
             var oModel = new JSONModel(data);
             this.getView().setModel(oModel);
         },
 
-        // 🔥 ALL FILTERS COMBINED
+        // 🔥 FINAL FILTER (ALL 4 FILTERS USED PROPERLY)
         onFilterChange: function () {
 
             var oView = this.getView();
@@ -123,7 +71,7 @@ sap.ui.define([
 
             var baseData = this._fullModules;
 
-            // 👉 STEP 1: FILTER ALL CONDITIONS
+            // ✅ STEP 1: APPLY ALL FILTERS (AND CONDITION)
             var filtered = baseData.filter(item => {
 
                 var moduleMatch = moduleKeys.length === 0 || moduleKeys.includes(item.module);
@@ -133,7 +81,7 @@ sap.ui.define([
                 return moduleMatch && userMatch && dateMatch;
             });
 
-            // 👉 STEP 2: APPLY STATUS FILTER
+            // ✅ STEP 2: APPLY STATUS FILTER (FOR CHART + KPI)
             var finalData = filtered.map(item => {
 
                 return {
@@ -144,7 +92,7 @@ sap.ui.define([
                 };
             });
 
-            // 👉 STEP 3: KPI
+            // ✅ STEP 3: KPI CALCULATION
             var totalUploaded = 0,
                 totalApproved = 0,
                 totalPending = 0;
@@ -155,7 +103,7 @@ sap.ui.define([
                 totalPending += item.pending;
             });
 
-            // 👉 STEP 4: UPDATE
+            // ✅ STEP 4: UPDATE MODEL (DRIVES CHART)
             oModel.setProperty("/modules", finalData);
             oModel.setProperty("/totalUploaded", totalUploaded);
             oModel.setProperty("/totalApproved", totalApproved);
