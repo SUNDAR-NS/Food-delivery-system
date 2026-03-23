@@ -30,18 +30,15 @@ sap.ui.define([
 
                     oModel.setProperty("/allModules", data.value);
 
+                    // ✅ SELECT ALL BY DEFAULT
                     const allKeys = data.value.map(m => m.module);
+                    this.byId("moduleFilter").setSelectedKeys(allKeys);
 
-                    const oMultiCombo = this.byId("moduleFilter");
-                    oMultiCombo.setSelectedKeys(allKeys);
-
-                    // 🔥 LOAD DATA
+                    // ✅ LOAD DASHBOARD
                     this.loadDashboard(allKeys);
-
-                    // 🔥 FIX TEXT AFTER RENDER
-                    setTimeout(() => {
-                        this._updateMultiComboText();
-                    }, 300);
+                })
+                .catch(err => {
+                    console.error("MODULE LOAD ERROR:", err);
                 });
         },
 
@@ -56,7 +53,7 @@ sap.ui.define([
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    module: modules
+                    module: modules   // ✅ ARRAY
                 })
             })
             .then(res => res.json())
@@ -72,6 +69,9 @@ sap.ui.define([
                 oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
 
                 this._applyChartSettings();
+            })
+            .catch(err => {
+                console.error("DASHBOARD ERROR:", err);
             });
         },
 
@@ -87,41 +87,6 @@ sap.ui.define([
             } else {
                 this.loadDashboard(keys);
             }
-
-            // 🔥 FORCE TEXT UPDATE (VERY IMPORTANT)
-            setTimeout(() => {
-                this._updateMultiComboText();
-            }, 0);
-        },
-
-        // =========================
-        // 🔥 FIX MULTI COMBO TEXT (+MORE)
-        // =========================
-        _updateMultiComboText: function () {
-
-            const oMultiCombo = this.byId("moduleFilter");
-            const keys = oMultiCombo.getSelectedKeys();
-
-            if (!keys || keys.length === 0) {
-                oMultiCombo.setValue("");
-                return;
-            }
-
-            const first = keys[0];
-            const more = keys.length - 1;
-
-            let text = first;
-
-            if (more > 0) {
-                text = first + " +" + more + " more";
-            }
-
-            // 🔥 REMOVE SAP DEFAULT TOKENS TEXT
-            oMultiCombo.setValue("");
-            oMultiCombo.setTokens([]);
-
-            // 🔥 APPLY CUSTOM TEXT
-            oMultiCombo.setValue(text);
         },
 
         // =========================
@@ -134,10 +99,12 @@ sap.ui.define([
             if (oChart) {
                 oChart.setVizProperties({
 
+                    // ❌ REMOVE TITLE
                     title: {
                         visible: false
                     },
 
+                    // ✅ COLORS
                     plotArea: {
                         colorPalette: [
                             "#0070f2", // Uploaded
@@ -146,6 +113,7 @@ sap.ui.define([
                         ]
                     },
 
+                    // ✅ TOOLTIP ON HOVER
                     interaction: {
                         tooltip: {
                             visible: true
