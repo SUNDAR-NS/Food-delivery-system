@@ -1,15 +1,11 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel",
-    "sap/m/Token"
-], function (Controller, JSONModel, Token) {
+    "sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
     "use strict";
 
     return Controller.extend("mfuanalytics.controller.mfureport", {
 
-        // =========================
-        // 🔥 INIT
-        // =========================
         onInit: function () {
 
             var oModel = new JSONModel({
@@ -36,17 +32,15 @@ sap.ui.define([
                     // ✅ SELECT ALL
                     oMulti.setSelectedKeys(allKeys);
 
-                    // 🔥 FIX DISPLAY
-                    this._updateDisplay(allKeys);
+                    // 🔥 SAFE FIX (HIDE EXTRA TOKENS)
+                    setTimeout(() => {
+                        this._limitTokens();
+                    }, 200);
 
-                    // 🔥 LOAD DATA
                     this.loadDashboard(allKeys);
                 });
         },
 
-        // =========================
-        // 🔥 LOAD DASHBOARD
-        // =========================
         loadDashboard: function (modules) {
 
             fetch("/odata/v4/mfu/getDashboardData", {
@@ -72,14 +66,13 @@ sap.ui.define([
             });
         },
 
-        // =========================
-        // 🔥 FILTER CHANGE
-        // =========================
         onFilterChange: function (oEvent) {
 
             const keys = oEvent.getSource().getSelectedKeys();
 
-            this._updateDisplay(keys);
+            setTimeout(() => {
+                this._limitTokens();
+            }, 0);
 
             if (!keys || keys.length === 0) {
                 this.loadDashboard([]);
@@ -88,36 +81,30 @@ sap.ui.define([
             }
         },
 
-        // =========================
-        // 🔥 FIX "+MORE" DISPLAY
-        // =========================
-        _updateDisplay: function (keys) {
+        // 🔥 SAFE TOKEN LIMIT (NO BREAK)
+        _limitTokens: function () {
 
             const oMulti = this.byId("moduleFilter");
+            const tokens = oMulti.getTokens();
 
-            if (!keys || keys.length === 0) return;
+            if (!tokens || tokens.length <= 1) return;
 
-            const first = keys[0];
-            const more = keys.length - 1;
+            // hide extra tokens visually
+            tokens.forEach((t, index) => {
+                if (index > 0) {
+                    t.setVisible(false);
+                }
+            });
 
-            let text = first;
+            // update first token text
+            const first = tokens[0];
+            const more = tokens.length - 1;
 
-            if (more > 0) {
-                text = first + " +" + more + " more";
+            if (first && more > 0) {
+                first.setText(first.getText() + " +" + more + " more");
             }
-
-            // ❌ remove default tokens
-            oMulti.destroyTokens();
-
-            // ✅ add custom token
-            oMulti.addToken(new Token({
-                text: text
-            }));
         },
 
-        // =========================
-        // 🔥 CHART SETTINGS
-        // =========================
         _applyChartSettings: function () {
 
             var oChart = this.byId("idVizFrame");
