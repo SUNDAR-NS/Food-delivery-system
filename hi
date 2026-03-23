@@ -1,3 +1,296 @@
+<mvc:View controllerName="mfuanalytics.controller.mfureport"  
+    xmlns:mvc="sap.ui.core.mvc"  
+    xmlns="sap.m"  
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"  
+    xmlns:viz.data="sap.viz.ui5.data"  
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
+
+<Page title="MFU Dashboard" class="sapBlueHeader">  
+
+<VBox class="mainContainer">  
+
+<!-- 🔥 FILTER BOX -->
+<Panel class="moduleFilterBox">
+    
+    <HBox class="filterRow" alignItems="Center" justifyContent="SpaceBetween">
+
+        <!-- MODULE -->
+        <VBox class="filterItem">
+            <Text text="Module" class="filterLabel"/>
+            <MultiComboBox
+                id="moduleFilter"
+                selectionFinish="onFilterChange"
+                items="{/allModules}">
+    <core:Item key="{module}" text="{module}" />
+</MultiComboBox>
+        </VBox>
+
+        <!-- STATUS -->
+        <VBox class="filterItem">
+            <Text text="Status" class="filterLabel"/>
+            <MultiComboBox
+                id="statusFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/statusList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </VBox>
+
+        <!-- USER -->
+        <VBox class="filterItem">
+            <Text text="User" class="filterLabel"/>
+            <MultiComboBox
+                id="userFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/userList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </VBox>
+
+        <!-- DATE -->
+        <VBox class="filterItem">
+            <Text text="Created Date" class="filterLabel"/>
+            <MultiComboBox
+                id="dateFilter"
+                width="200px"
+                selectionFinish="onFilterChange"
+                items="{/dateList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </VBox>
+
+    </HBox>
+
+</Panel>
+
+
+<!-- 🔥 TOP -->
+<HBox class="topContainer">  
+
+    <!-- KPI -->
+    <VBox width="35%">  
+
+        <HBox class="kpiRow">  
+            <GenericTile header="Total Uploaded" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalUploaded}"/>
+                </TileContent>  
+            </GenericTile>  
+
+            <GenericTile header="Total Approved" class="tile">
+                <TileContent>
+                    <NumericContent value="{/totalApproved}"/>
+                </TileContent>  
+            </GenericTile>  
+        </HBox>  
+
+        <HBox class="kpiRow">  
+            <GenericTile header="Total Pending" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalPending}"/>
+                </TileContent>  
+            </GenericTile>  
+
+            <GenericTile header="Total Templates" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalTemplates}"/>
+                </TileContent>  
+            </GenericTile>  
+        </HBox>  
+
+    </VBox>  
+
+    <!-- STACKED CHART -->
+    <Panel width="700px" headerText="MFU Templates by Modules">
+
+        <viz:VizFrame vizType="stacked_column" height="320px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}" />
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}" />
+                        <viz.data:MeasureDefinition name="Pending" value="{pending}" />
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure"
+                    values="Uploaded,Approved,Pending"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
+                    values="Module"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
+
+    </Panel>  
+
+</HBox>  
+
+<!-- 🔥 CHARTS -->
+<HBox class="chartRow">
+
+    <!-- PIE -->
+    <VBox class="chartBox">
+        <Text text="Templates by Count" class="panelTitle"/>
+        <viz:VizFrame vizType="pie" height="200px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="size" type="Measure" values="Approved"/>
+                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </VBox>
+
+    <!-- MONTHLY -->
+    <VBox class="chartBox">
+        <Text text="Monthly" class="panelTitle"/>
+        <viz:VizFrame vizType="column" height="200px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/monthly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </VBox>
+
+    <!-- QUARTERLY -->
+    <VBox class="chartBox">
+        <Text text="Quarterly" class="panelTitle"/>
+        <viz:VizFrame vizType="column" height="200px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/quarterly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </VBox>
+
+    <!-- YEARLY -->
+    <VBox class="chartBox">
+        <Text text="Yearly" class="panelTitle"/>
+        <viz:VizFrame vizType="column" height="200px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/yearly}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
+            </viz:feeds>
+        </viz:VizFrame>
+    </VBox>
+
+</HBox>
+
+<!-- TABLE -->
+<Panel headerText="MFU Details" class="sapUiMediumMarginTop">
+    <Table items="{/tableData}">
+        <columns>
+            <Column><Text text="Module"/></Column>
+            <Column><Text text="Sub Module"/></Column>
+            <Column><Text text="Load Type"/></Column>
+            <Column><Text text="Template"/></Column>
+            <Column><Text text="Count"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Text text="{module}"/>
+                    <Text text="{subModule}"/>
+                    <Text text="{loadType}"/>
+                    <Text text="{template}"/>
+                    <Text text="{count}"/>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</Panel>
+
+</VBox>  
+</Page>  
+</mvc:View>
+
+
+
+
+
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+    "use strict";
+
+    return Controller.extend("mfuanalytics.controller.mfureport", {
+
+        onInit: function () {
+
+    var oModel = new sap.ui.model.json.JSONModel({
+        allModules: [],
+        modules: [],
+        tableData: [],
+        totalUploaded: 0,
+        totalApproved: 0,
+        totalPending: 0,
+        totalTemplates: 0
+    });
+
+    this.getView().setModel(oModel);
+
+    // 🔥 LOAD DROPDOWN
+    fetch("/odata/v4/mfu/getModules()")
+        .then(res => res.json())
+        .then(data => {
+            oModel.setProperty("/allModules", data.value);
+        });
+
+    // 🔥 LOAD DASHBOARD
+    this.loadDashboard(null);
+},
+
+
+// =========================
+// 🔥 LOAD DASHBOARD
+// =========================
 loadDashboard: function (module) {
 
     fetch("/odata/v4/mfu/getDashboardData", {
@@ -29,4 +322,127 @@ loadDashboard: function (module) {
     .catch(err => {
         console.error("API ERROR:", err);
     });
+},
+
+
+// =========================
+// 🔥 FILTER CHANGE
+// =========================
+onFilterChange: function (oEvent) {
+
+    const keys = oEvent.getSource().getSelectedKeys();
+
+    if (!keys || keys.length === 0) {
+        this.loadDashboard(null);
+    } else {
+        this.loadDashboard(keys[0]); // single select for now
+    }
+}
+
+    });
+});
+
+
+
+
+
+/* PAGE BACKGROUND */
+.sapMPage {
+    background-color: #f5f7fa;
+}
+
+/* HEADER */
+.sapBlueHeader .sapMBar {
+    background-color: #0a6ed1 !important;
+    color: white !important;
+}
+
+/* MAIN CONTAINER */
+.mainContainer {
+    padding: 20px 30px;
+}
+
+/* ========================= */
+/* 🔥 FILTER SECTION */
+/* ========================= */
+
+/* FILTER CONTAINER */
+.moduleFilterBox {
+    margin-bottom: 15px;
+    border-radius: 12px;
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* FORCE SINGLE ROW */
+.filterRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* EACH FILTER BLOCK */
+.filterItem {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* LABEL */
+.filterLabel {
+    font-weight: 600;
+}
+
+/* DROPDOWN SIZE CONTROL */
+.sapMMultiComboBox {
+    min-width: 150px;
+}
+
+/* ========================= */
+/* 🔥 KPI SECTION */
+/* ========================= */
+
+.topContainer {
+    gap: 20px;
+}
+
+/* KPI ROW */
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* KPI TILE */
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* ========================= */
+/* 🔥 CHART SECTION */
+/* ========================= */
+
+.chartRow {
+    margin-top: 25px;
+    gap: 15px;
+}
+
+/* CHART BOX */
+.chartBox {
+    flex: 1;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* CHART TITLE */
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
