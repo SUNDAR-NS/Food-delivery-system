@@ -1,38 +1,146 @@
-namespace com.scb.fileupload;
+using com.scb.fileupload.master as db from '../db/schema';
 
-using {
-  cuid,
-  managed
-} from '@sap/cds/common';
+service MFUService {
 
-context master {
-
-entity ReportFileStorage @(odata.stream) : cuid,managed {
-  MODULE_NAME     : String(100);
-  SUB_MODULE_NAME : String(100);
-  LOAD_TEMPLATE   : String(100);
-  FILE_NAME       : String(255);
-  FILE_MIME_TYPE  : String(100);
-  FILE_SIZE       : Integer;
-  @Core.MediaType: 'FILE_MIME_TYPE'
-  FILE_CONTENT    : LargeBinary;
-  STATUS          : String(50);
-  COMMENTS        : String(1000);
-  JSON_DATA       : LargeString;
-  LOAD_STATUS     : Boolean;
-  LOAD_TYPE       : String(50);
-  EXPIRY_DATE     : Date;
-  ACTION_BY       : String(100);
-}
-
-entity TemplateStorage : cuid,managed {
-  MODULE_NAME     : String(100);
-  SUB_MODULE_NAME : String(100);
-  LOAD_TEMPLATE   : String(100);
-  STATUS          : String(50);
-  JSON_TEMPLATE       : LargeString;
-  EXPIRY_DATE     : Date;
-  ACTION_BY       : String(100);
-}
+    function getDashboardData(module: String) returns {
+        uploaded        : Integer;
+        approved        : Integer;
+        pending         : Integer;
+        totalTemplates  : Integer;
+        chart           : array of {
+            module : String;
+            status : String;
+            count  : Integer;
+        };
+        table           : array of {
+            module      : String;
+            subModule   : String;
+            template    : String;
+            status      : String;
+            user        : String;
+        };
+    };
 
 }
+
+
+
+const cds = require('@sap/cds');
+
+module.exports = cds.service.impl(async function () {
+
+    const { ReportFileStorage, TemplateStorage } = cds.entities('com.scb.fileupload.master');
+
+    this.on('getDashboardData', async (req) => {
+
+        const module = req.data.module;
+
+        // 🔥 KPI + CHART
+        const reportData = await cds.run(
+            SELECT.from(ReportFileStorage)
+                .columns('STATUS', 'MODULE_NAME')
+                .where({ MODULE_NAME: module })
+        );
+
+        let uploaded = 0, approved = 0, pending = 0;
+
+        reportData.forEach(r => {
+            if (r.STATUS === 'uploaded') uploaded++;
+            if (r.STATUS === 'approved') approved++;
+            if (r.STATUS === 'pending') pending++;
+        });
+
+        // 🔥 CHART FORMAT
+        const chart = [
+            { module, status: 'uploaded', count: uploaded },
+            { module, status: 'approved', count: approved },
+            { module, status: 'pending', count: pending }
+        ];
+
+        // 🔥 TEMPLATE TABLE
+        const templateData = await cds.run(
+            SELECT.from(TemplateStorage)
+                .where({ MODULE_NAME: module })
+        );
+
+        const totalTemplates = templateData.length;
+
+        const table = templateData.map(t => ({
+            module: t.MODULE_NAME,
+            subModule: t.SUB_MODULE_NAME,
+            template: t.LOAD_TEMPLATE,
+            status: t.STATUS,
+            user: t.ACTION_BY
+        }));
+
+        return {
+            uploaded,
+            approved,
+            pending,
+            totalTemplates,
+            chart,
+            table
+        };
+    });
+
+});
+
+
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+    "use strict";
+
+    return Controller.extend("mfuanalytics.controller.mfureport", {
+
+        onInit: function () {
+
+            var oModel = new JSONModel({
+                modules: [],
+                totalUploaded: 0,
+                totalApproved: 0,
+                totalPending: 0,
+                totalTemplates: 0,
+                tableData: []
+            });
+
+            this.getView().setModel(oModel);
+        },
+
+        onModuleChange: async function (oEvent) {
+
+            var module = oEvent.getSource().getSelectedKey();
+
+            if (!module) return;
+
+            // 🔥 CALL BACKEND
+            const response = await fetch(`/odata/v4/MFUService/getDashboardData(module='${module}')`);
+            const data = await response.json();
+
+            const result = data.value;
+
+            var oModel = this.getView().getModel();
+
+            // 🔥 KPI
+            oModel.setProperty("/totalUploaded", result.uploaded);
+            oModel.setProperty("/totalApproved", result.approved);
+            oModel.setProperty("/totalPending", result.pending);
+            oModel.setProperty("/totalTemplates", result.totalTemplates);
+
+            // 🔥 CHART TRANSFORM
+            const modules = [{
+                module: module,
+                uploaded: result.uploaded,
+                approved: result.approved,
+                pending: result.pending
+            }];
+
+            oModel.setProperty("/modules", modules);
+
+            // 🔥 TABLE
+            oModel.setProperty("/tableData", result.table);
+        }
+
+    });
+});
