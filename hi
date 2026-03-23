@@ -1,55 +1,100 @@
-<Panel class="moduleFilterBox">
-    
-    <HBox class="filterRow" justifyContent="Start" alignItems="Center" wrap="Wrap">
+/* PAGE BACKGROUND */
+.sapMPage {
+    background-color: #f5f7fa;
+}
 
-        <!-- MODULE -->
-        <HBox alignItems="Center" class="singleFilter">
-            <Text text="Module" class="filterLabel"/>
-            <MultiComboBox
-                id="moduleFilter"
-                width="160px"
-                selectionFinish="onFilterChange"
-                items="{/allModules}">
-                <core:Item key="{module}" text="{module}" />
-            </MultiComboBox>
-        </HBox>
+/* HEADER */
+.sapBlueHeader .sapMBar {
+    background-color: #0a6ed1 !important;
+    color: white !important;
+}
 
-        <!-- STATUS -->
-        <HBox alignItems="Center" class="singleFilter">
-            <Text text="Status" class="filterLabel"/>
-            <MultiComboBox
-                id="statusFilter"
-                width="160px"
-                selectionFinish="onFilterChange"
-                items="{/statusList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </HBox>
+/* MAIN CONTAINER */
+.mainContainer {
+    padding: 20px 30px;
+}
 
-        <!-- USER -->
-        <HBox alignItems="Center" class="singleFilter">
-            <Text text="User" class="filterLabel"/>
-            <MultiComboBox
-                id="userFilter"
-                width="160px"
-                selectionFinish="onFilterChange"
-                items="{/userList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </HBox>
+/* ========================= */
+/* 🔥 FILTER SECTION */
+/* ========================= */
 
-        <!-- DATE -->
-        <HBox alignItems="Center" class="singleFilter">
-            <Text text="Created Date" class="filterLabel"/>
-            <MultiComboBox
-                id="dateFilter"
-                width="180px"
-                selectionFinish="onFilterChange"
-                items="{/dateList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </HBox>
+.moduleFilterBox {
+    margin-bottom: 15px;
+    border-radius: 12px;
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
 
-    </HBox>
+/* ROW (ALL FILTERS IN ONE LINE) */
+.filterRow {
+    gap: 20px;
+    flex-wrap: wrap; /* responsive */
+}
 
-</Panel>
+/* EACH FILTER BLOCK */
+.singleFilter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 25px;
+}
+
+/* LABEL */
+.filterLabel {
+    min-width: 110px;
+    font-weight: 600;
+}
+
+/* DROPDOWN */
+.sapMMultiComboBox {
+    border-radius: 8px !important;
+}
+
+/* ========================= */
+/* 🔥 KPI SECTION */
+/* ========================= */
+
+.topContainer {
+    gap: 20px;
+}
+
+/* KPI ROW */
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* KPI TILE */
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* ========================= */
+/* 🔥 CHART SECTION */
+/* ========================= */
+
+.chartRow {
+    margin-top: 25px;
+    gap: 15px;
+}
+
+/* CHART BOX */
+.chartBox {
+    flex: 1;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* CHART TITLE */
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
