@@ -28,17 +28,17 @@ module.exports = cds.service.impl(async function () {
         let reportData = [];
         let templateData = [];
 
-        // 🔥 HANDLE MULTIPLE / SINGLE / NO FILTER
         let modules = module ? module.split(",") : [];
 
+        // =========================
+        // 🔥 FETCH DATA
+        // =========================
         if (modules.length > 0) {
 
             reportData = await cds.run(
                 SELECT.from(ReportFileStorage)
                     .where({ MODULE_NAME: { in: modules } })
             );
-
-            console.log("=====================",reportData);
 
             templateData = await cds.run(
                 SELECT.from(TemplateStorage)
@@ -86,17 +86,29 @@ module.exports = cds.service.impl(async function () {
         const modulesData = Object.values(moduleMap);
 
         // =========================
-        // 🔥 TABLE DATA
+        // 🔥 TABLE DATA (FINAL FIX)
         // =========================
-        const table = templateData.map(t => ({
-            module: t.MODULE_NAME,
-            subModule: t.SUB_MODULE_NAME,
-            template: t.LOAD_TEMPLATE,
-            status: t.STATUS,
-            user: t.ACTION_BY
-        }));
+        const tableMap = {};
 
-        // 🔥 FIXED BUG HERE
+        reportData.forEach(r => {
+
+            const key = `${r.MODULE_NAME}_${r.SUB_MODULE_NAME}_${r.LOAD_TYPE}_${r.LOAD_TEMPLATE}`;
+
+            if (!tableMap[key]) {
+                tableMap[key] = {
+                    module: r.MODULE_NAME,
+                    subModule: r.SUB_MODULE_NAME,
+                    loadType: r.LOAD_TYPE,
+                    template: r.LOAD_TEMPLATE,
+                    count: 0
+                };
+            }
+
+            tableMap[key].count++;
+        });
+
+        const table = Object.values(tableMap);
+
         const totalTemplates = table.length;
 
         return {
@@ -110,137 +122,3 @@ module.exports = cds.service.impl(async function () {
     });
 
 });
-
-
-
-
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-    "use strict";
-
-    return Controller.extend("mfuanalytics.controller.mfureport", {
-
-        onInit: function () {
-
-            var oModel = new JSONModel({
-                allModules: [],
-                modules: [],
-                tableData: [],
-                totalUploaded: 0,
-                totalApproved: 0,
-                totalPending: 0,
-                totalTemplates: 0
-            });
-
-            this.getView().setModel(oModel);
-
-            // 🔥 LOAD MODULE DROPDOWN
-            fetch("/odata/v4/mfu/getModules()")
-                .then(res => res.json())
-                .then(data => {
-                    oModel.setProperty("/allModules", data.value);
-                });
-
-            // 🔥 LOAD DASHBOARD
-            this.loadDashboard(null);
-        },
-
-
-        // =========================
-        // 🔥 LOAD DASHBOARD
-        // =========================
-        loadDashboard: function (module) {
-
-            fetch("/odata/v4/mfu/getDashboardData", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    module: module
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-
-                console.log("API RESPONSE:", data);
-
-                var oModel = this.getView().getModel();
-
-                oModel.setProperty("/modules", data.modules || []);
-                oModel.setProperty("/tableData", data.table || []);
-                oModel.setProperty("/totalUploaded", data.uploaded || 0);
-                oModel.setProperty("/totalApproved", data.approved || 0);
-                oModel.setProperty("/totalPending", data.pending || 0);
-                oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
-
-                // 🔥 APPLY CHART SETTINGS AFTER DATA LOAD
-                this._applyChartSettings();
-
-            })
-            .catch(err => {
-                console.error("API ERROR:", err);
-            });
-        },
-
-
-        // =========================
-        // 🔥 FILTER CHANGE
-        // =========================
-        onFilterChange: function (oEvent) {
-
-            const keys = oEvent.getSource().getSelectedKeys();
-
-            if (!keys || keys.length === 0) {
-                this.loadDashboard(null);
-            } else {
-                this.loadDashboard(keys[0]);
-            }
-        },
-
-
-        // =========================
-        // 🔥 CHART SETTINGS (FINAL)
-        // =========================
-        _applyChartSettings: function () {
-
-            var oChart = this.byId("idVizFrame");
-
-            if (oChart) {
-                oChart.setVizProperties({
-
-                    // ❌ REMOVE TITLE
-                    title: {
-                        visible: false
-                    },
-
-                    plotArea: {
-                        // ✅ COLORS
-                        colorPalette: [
-                            "#0070f2", // Uploaded (Blue)
-                            "#107e3e", // Approved (Green)
-                            "#e9730c"  // Pending (Orange)
-                        ]
-                    },
-
-                    // ✅ TOOLTIP ON HOVER (IMPORTANT)
-                    interaction: {
-                        tooltip: {
-                            visible: true
-                        }
-                    }
-                });
-            }
-        }
-
-    });
-});
-
-
-
-
-This is my full all codes that is working perfectly fine, i just want to change the table name from templatestorage to reportfilestorage .
-
-And give me all required full codes so i copy paste it
