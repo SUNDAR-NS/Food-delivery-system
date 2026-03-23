@@ -1,13 +1,15 @@
-var oChart = this.byId("idVizFrame");
+setTimeout(() => {
+    var oChart = this.byId("idVizFrame");
 
-if (oChart) {
-    oChart.setVizProperties({
-        plotArea: {
-            colorPalette: [
-                "#0070f2",
-                "#107e3e",
-                "#e9730c"
-            ]
-        }
-    });
-}
+    if (oChart) {
+        oChart.setVizProperties({
+            plotArea: {
+                colorPalette: [
+                    "#0070f2", // Uploaded (Blue)
+                    "#107e3e", // Approved (Green)
+                    "#e9730c"  // Pending (Orange)
+                ]
+            }
+        });
+    }
+}, 500);
