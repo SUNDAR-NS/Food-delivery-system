@@ -1,3 +1,119 @@
+const cds = require('@sap/cds');
+
+module.exports = cds.service.impl(async function () {
+
+    const { ReportFileStorage, TemplateStorage } = cds.entities('com.scb.fileupload.master');
+
+    // =========================
+    // 🔥 GET MODULE DROPDOWN
+    // =========================
+    this.on('getModules', async () => {
+
+        const data = await cds.run(
+            SELECT.distinct.from(TemplateStorage).columns('MODULE_NAME')
+        );
+
+        return data.map(d => ({
+            module: d.MODULE_NAME
+        }));
+    });
+
+    // =========================
+    // 🔥 MAIN DASHBOARD
+    // =========================
+    this.on('getDashboardData', async (req) => {
+
+        const module = req.data.module;
+
+        let reportData = [];
+        let templateData = [];
+
+        // 🔥 HANDLE MULTIPLE / SINGLE / NO FILTER
+        let modules = module ? module.split(",") : [];
+
+        if (modules.length > 0) {
+
+            reportData = await cds.run(
+                SELECT.from(ReportFileStorage)
+                    .where({ MODULE_NAME: { in: modules } })
+            );
+
+            console.log("=====================",reportData);
+
+            templateData = await cds.run(
+                SELECT.from(TemplateStorage)
+                    .where({ MODULE_NAME: { in: modules } })
+            );
+
+        } else {
+
+            reportData = await cds.run(SELECT.from(ReportFileStorage));
+            templateData = await cds.run(SELECT.from(TemplateStorage));
+        }
+
+        // =========================
+        // 🔥 KPI CALCULATION
+        // =========================
+        let uploaded = 0, approved = 0, pending = 0;
+
+        reportData.forEach(r => {
+            if (r.STATUS === 'uploaded') uploaded++;
+            if (r.STATUS === 'approved') approved++;
+            if (r.STATUS === 'pending') pending++;
+        });
+
+        // =========================
+        // 🔥 CHART DATA
+        // =========================
+        const moduleMap = {};
+
+        reportData.forEach(r => {
+
+            if (!moduleMap[r.MODULE_NAME]) {
+                moduleMap[r.MODULE_NAME] = {
+                    module: r.MODULE_NAME,
+                    uploaded: 0,
+                    approved: 0,
+                    pending: 0
+                };
+            }
+
+            if (r.STATUS === 'uploaded') moduleMap[r.MODULE_NAME].uploaded++;
+            if (r.STATUS === 'approved') moduleMap[r.MODULE_NAME].approved++;
+            if (r.STATUS === 'pending') moduleMap[r.MODULE_NAME].pending++;
+        });
+
+        const modulesData = Object.values(moduleMap);
+
+        // =========================
+        // 🔥 TABLE DATA
+        // =========================
+        const table = templateData.map(t => ({
+            module: t.MODULE_NAME,
+            subModule: t.SUB_MODULE_NAME,
+            template: t.LOAD_TEMPLATE,
+            status: t.STATUS,
+            user: t.ACTION_BY
+        }));
+
+        // 🔥 FIXED BUG HERE
+        const totalTemplates = table.length;
+
+        return {
+            uploaded,
+            approved,
+            pending,
+            totalTemplates,
+            modules: modulesData,
+            table
+        };
+    });
+
+});
+
+
+
+
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -121,3 +237,10 @@ sap.ui.define([
 
     });
 });
+
+
+
+
+This is my full all codes that is working perfectly fine, i just want to change the table name from templatestorage to reportfilestorage .
+
+And give me all required full codes so i copy paste it
