@@ -1,7 +1,8 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
+    "sap/ui/model/json/JSONModel",
+    "sap/m/Token"
+], function (Controller, JSONModel, Token) {
     "use strict";
 
     return Controller.extend("mfuanalytics.controller.mfureport", {
@@ -29,12 +30,11 @@ sap.ui.define([
                     const allKeys = data.value.map(m => m.module);
                     const oMulti = this.byId("moduleFilter");
 
-                    // ✅ SELECT ALL
                     oMulti.setSelectedKeys(allKeys);
 
-                    // 🔥 SAFE FIX (HIDE EXTRA TOKENS)
+                    // 🔥 SAFE DISPLAY FIX
                     setTimeout(() => {
-                        this._limitTokens();
+                        this._applyCompactView();
                     }, 200);
 
                     this.loadDashboard(allKeys);
@@ -45,9 +45,7 @@ sap.ui.define([
 
             fetch("/odata/v4/mfu/getDashboardData", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ module: modules })
             })
             .then(res => res.json())
@@ -71,7 +69,7 @@ sap.ui.define([
             const keys = oEvent.getSource().getSelectedKeys();
 
             setTimeout(() => {
-                this._limitTokens();
+                this._applyCompactView();
             }, 0);
 
             if (!keys || keys.length === 0) {
@@ -81,27 +79,27 @@ sap.ui.define([
             }
         },
 
-        // 🔥 SAFE TOKEN LIMIT (NO BREAK)
-        _limitTokens: function () {
+        // 🔥 SAFE COMPACT VIEW (NO BREAK)
+        _applyCompactView: function () {
 
             const oMulti = this.byId("moduleFilter");
             const tokens = oMulti.getTokens();
 
             if (!tokens || tokens.length <= 1) return;
 
-            // hide extra tokens visually
-            tokens.forEach((t, index) => {
-                if (index > 0) {
-                    t.setVisible(false);
+            const firstToken = tokens[0];
+            const moreCount = tokens.length - 1;
+
+            // hide remaining tokens (UI only)
+            tokens.forEach((t, i) => {
+                if (i > 0) {
+                    t.getDomRef()?.style && (t.getDomRef().style.display = "none");
                 }
             });
 
             // update first token text
-            const first = tokens[0];
-            const more = tokens.length - 1;
-
-            if (first && more > 0) {
-                first.setText(first.getText() + " +" + more + " more");
+            if (firstToken && moreCount > 0) {
+                firstToken.setText(firstToken.getText() + " +" + moreCount + " more");
             }
         },
 
