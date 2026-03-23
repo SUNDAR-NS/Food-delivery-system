@@ -1,3 +1,61 @@
+<Panel class="moduleFilterBox">
+    
+    <VBox class="filterContainer">
+
+        <!-- MODULE -->
+        <HBox alignItems="Center" class="filterRow">
+            <Text text="Module" class="filterLable"/>
+            <MultiComboBox
+                id="moduleFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/allModules}">
+                <core:Item key="{module}" text="{module}" />
+            </MultiComboBox>
+        </HBox>
+
+        <!-- STATUS -->
+        <HBox alignItems="Center" class="filterRow">
+            <Text text="Status" class="filterLable"/>
+            <MultiComboBox
+                id="statusFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/statusList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </HBox>
+
+        <!-- USER -->
+        <HBox alignItems="Center" class="filterRow">
+            <Text text="User" class="filterLable"/>
+            <MultiComboBox
+                id="userFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/userList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </HBox>
+
+        <!-- DATE -->
+        <HBox alignItems="Center" class="filterRow">
+            <Text text="Created Date" class="filterLable"/>
+            <MultiComboBox
+                id="dateFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/dateList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </HBox>
+
+    </VBox>
+
+</Panel>
+
+
+
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -11,10 +69,10 @@ sap.ui.define([
             var data = {
 
                 allModules: [
-                    { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
-                    { module: "SCBI", uploaded: 70, approved: 50, pending: 15 },
-                    { module: "ESG", uploaded: 25, approved: 15, pending: 5 },
-                    { module: "ICON", uploaded: 50, approved: 35, pending: 7 }
+                    { module: "NFRP", uploaded: 45, approved: 30, pending: 10, user: "Anand", date: "10D" },
+                    { module: "SCBI", uploaded: 70, approved: 50, pending: 15, user: "Sundar", date: "3M" },
+                    { module: "ESG", uploaded: 25, approved: 15, pending: 5, user: "Kiran", date: "6M" },
+                    { module: "ICON", uploaded: 50, approved: 35, pending: 7, user: "Shivani", date: "1Y" }
                 ],
 
                 modules: [],
@@ -25,27 +83,18 @@ sap.ui.define([
                     { key: "pending", text: "Pending" }
                 ],
 
-                monthly: [
-                    { month: "Jan", value: 10 },
-                    { month: "Feb", value: 20 },
-                    { month: "Mar", value: 15 }
+                userList: [
+                    { key: "Anand", text: "Anand" },
+                    { key: "Sundar", text: "Sundar" },
+                    { key: "Kiran", text: "Kiran" },
+                    { key: "Shivani", text: "Shivani" }
                 ],
 
-                quarterly: [
-                    { quarter: "Q1", value: 40 },
-                    { quarter: "Q2", value: 25 },
-                    { quarter: "Q3", value: 30 }
-                ],
-
-                yearly: [
-                    { year: "2022", value: 50 },
-                    { year: "2023", value: 70 },
-                    { year: "2024", value: 60 }
-                ],
-
-                tableData: [
-                    { module: "NFRP", subModule: "Mapping master", loadType: "Upload", template: "Temp1", count: 10 },
-                    { module: "SCBI", subModule: "Config master", loadType: "Truncate", template: "Temp2", count: 25 }
+                dateList: [
+                    { key: "10D", text: "Last 10 Days" },
+                    { key: "3M", text: "Last 3 Months" },
+                    { key: "6M", text: "Last 6 Months" },
+                    { key: "1Y", text: "Last 1 Year" }
                 ],
 
                 totalUploaded: 190,
@@ -55,14 +104,13 @@ sap.ui.define([
             };
 
             data.modules = data.allModules;
-
             this._fullModules = data.allModules;
 
             var oModel = new JSONModel(data);
             this.getView().setModel(oModel);
         },
 
-        // 🔥 FINAL COMBINED FILTER (MODULE + STATUS + CHART FIX)
+        // 🔥 ALL FILTERS COMBINED
         onFilterChange: function () {
 
             var oView = this.getView();
@@ -70,19 +118,22 @@ sap.ui.define([
 
             var moduleKeys = oView.byId("moduleFilter").getSelectedKeys();
             var statusKeys = oView.byId("statusFilter").getSelectedKeys();
+            var userKeys = oView.byId("userFilter").getSelectedKeys();
+            var dateKeys = oView.byId("dateFilter").getSelectedKeys();
 
             var baseData = this._fullModules;
 
-            // 👉 STEP 1: FILTER MODULE
-            var filtered = baseData;
+            // 👉 STEP 1: FILTER ALL CONDITIONS
+            var filtered = baseData.filter(item => {
 
-            if (moduleKeys.length > 0) {
-                filtered = baseData.filter(item =>
-                    moduleKeys.includes(item.module)
-                );
-            }
+                var moduleMatch = moduleKeys.length === 0 || moduleKeys.includes(item.module);
+                var userMatch = userKeys.length === 0 || userKeys.includes(item.user);
+                var dateMatch = dateKeys.length === 0 || dateKeys.includes(item.date);
 
-            // 👉 STEP 2: APPLY STATUS FILTER (IMPORTANT 🔥)
+                return moduleMatch && userMatch && dateMatch;
+            });
+
+            // 👉 STEP 2: APPLY STATUS FILTER
             var finalData = filtered.map(item => {
 
                 return {
@@ -93,7 +144,7 @@ sap.ui.define([
                 };
             });
 
-            // 👉 STEP 3: KPI CALCULATION
+            // 👉 STEP 3: KPI
             var totalUploaded = 0,
                 totalApproved = 0,
                 totalPending = 0;
@@ -104,7 +155,7 @@ sap.ui.define([
                 totalPending += item.pending;
             });
 
-            // 👉 STEP 4: UPDATE MODEL (THIS DRIVES CHART 🔥)
+            // 👉 STEP 4: UPDATE
             oModel.setProperty("/modules", finalData);
             oModel.setProperty("/totalUploaded", totalUploaded);
             oModel.setProperty("/totalApproved", totalApproved);
