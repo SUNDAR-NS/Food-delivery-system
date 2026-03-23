@@ -1,8 +1,7 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel",
-    "sap/m/Token"
-], function (Controller, JSONModel, Token) {
+    "sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
     "use strict";
 
     return Controller.extend("mfuanalytics.controller.mfureport", {
@@ -30,23 +29,34 @@ sap.ui.define([
                     const allKeys = data.value.map(m => m.module);
                     const oMulti = this.byId("moduleFilter");
 
+                    // ✅ Select all by default
                     oMulti.setSelectedKeys(allKeys);
 
-                    // 🔥 SAFE DISPLAY FIX
-                    setTimeout(() => {
-                        this._applyCompactView();
-                    }, 200);
+                    // ✅ FIX: Apply compact view after rendering
+                    this.getView().addEventDelegate({
+                        onAfterRendering: () => {
+                            this._applyCompactView();
+                        }
+                    });
 
                     this.loadDashboard(allKeys);
                 });
         },
 
+
+        // =========================
+        // 🔥 LOAD DASHBOARD
+        // =========================
         loadDashboard: function (modules) {
 
             fetch("/odata/v4/mfu/getDashboardData", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ module: modules })
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    module: modules
+                })
             })
             .then(res => res.json())
             .then(data => {
@@ -64,10 +74,15 @@ sap.ui.define([
             });
         },
 
+
+        // =========================
+        // 🔥 FILTER CHANGE
+        // =========================
         onFilterChange: function (oEvent) {
 
             const keys = oEvent.getSource().getSelectedKeys();
 
+            // ✅ Re-apply compact view after selection
             setTimeout(() => {
                 this._applyCompactView();
             }, 0);
@@ -79,7 +94,10 @@ sap.ui.define([
             }
         },
 
-        // 🔥 SAFE COMPACT VIEW (NO BREAK)
+
+        // =========================
+        // 🔥 COMPACT VIEW (+more)
+        // =========================
         _applyCompactView: function () {
 
             const oMulti = this.byId("moduleFilter");
@@ -90,10 +108,13 @@ sap.ui.define([
             const firstToken = tokens[0];
             const moreCount = tokens.length - 1;
 
-            // hide remaining tokens (UI only)
+            // hide extra tokens
             tokens.forEach((t, i) => {
                 if (i > 0) {
-                    t.getDomRef()?.style && (t.getDomRef().style.display = "none");
+                    const dom = t.getDomRef();
+                    if (dom) {
+                        dom.style.display = "none";
+                    }
                 }
             });
 
@@ -103,22 +124,31 @@ sap.ui.define([
             }
         },
 
+
+        // =========================
+        // 🔥 CHART SETTINGS
+        // =========================
         _applyChartSettings: function () {
 
             var oChart = this.byId("idVizFrame");
 
             if (oChart) {
                 oChart.setVizProperties({
+
                     title: { visible: false },
+
                     plotArea: {
                         colorPalette: [
-                            "#0070f2",
-                            "#107e3e",
-                            "#bb0000"
+                            "#0070f2", // Uploaded
+                            "#107e3e", // Approved
+                            "#bb0000"  // Rejected
                         ]
                     },
+
                     interaction: {
-                        tooltip: { visible: true }
+                        tooltip: {
+                            visible: true
+                        }
                     }
                 });
             }
