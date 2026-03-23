@@ -31,35 +31,26 @@ sap.ui.define([
                     oModel.setProperty("/allModules", data.value);
 
                     const allKeys = data.value.map(m => m.module);
-
                     const oMultiCombo = this.byId("moduleFilter");
 
                     // ✅ SELECT ALL
                     oMultiCombo.setSelectedKeys(allKeys);
 
-                    // 🔥 FORCE "+more" UI IMMEDIATELY
+                    // 🔥 FORCE "+more" UI FIX (MAIN FIX)
                     setTimeout(() => {
-                        oMultiCombo.rerender();
-                    }, 0);
 
-                    // 🔥 LOAD DATA
+                        oMultiCombo.invalidate();
+                        sap.ui.getCore().applyChanges();
+
+                        // trigger tokenizer calculation
+                        oMultiCombo.focus();
+                        oMultiCombo.blur();
+
+                    }, 100);
+
+                    // 🔥 LOAD DASHBOARD
                     this.loadDashboard(allKeys);
                 });
-        },
-
-
-        // =========================
-        // 🔥 AFTER RENDER (DOUBLE SAFETY)
-        // =========================
-        onAfterRendering: function () {
-
-            const oMultiCombo = this.byId("moduleFilter");
-
-            if (oMultiCombo) {
-                setTimeout(() => {
-                    oMultiCombo.rerender();
-                }, 0);
-            }
         },
 
 
@@ -74,7 +65,7 @@ sap.ui.define([
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    module: modules   // ✅ ARRAY
+                    module: modules
                 })
             })
             .then(res => res.json())
@@ -89,7 +80,6 @@ sap.ui.define([
                 oModel.setProperty("/totalRejected", data.rejected || 0);
                 oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
 
-                // 🔥 APPLY CHART SETTINGS
                 this._applyChartSettings();
             })
             .catch(err => {
@@ -108,7 +98,7 @@ sap.ui.define([
             if (!keys || keys.length === 0) {
                 this.loadDashboard([]);
             } else {
-                this.loadDashboard(keys); // ✅ MULTI SELECT FIX
+                this.loadDashboard(keys);
             }
         },
 
@@ -129,15 +119,14 @@ sap.ui.define([
                     },
 
                     plotArea: {
-                        // ✅ COLORS
                         colorPalette: [
-                            "#0070f2", // Uploaded (Blue)
-                            "#107e3e", // Approved (Green)
-                            "#bb0000"  // Rejected (Red)
+                            "#0070f2", // Uploaded
+                            "#107e3e", // Approved
+                            "#bb0000"  // Rejected
                         ]
                     },
 
-                    // ✅ HOVER TOOLTIP
+                    // ✅ TOOLTIP ON HOVER
                     interaction: {
                         tooltip: {
                             visible: true
@@ -149,3 +138,6 @@ sap.ui.define([
 
     });
 });
+
+
+
