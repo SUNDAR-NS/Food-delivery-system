@@ -35,11 +35,12 @@ entity TemplateStorage : cuid, managed {
 
 
 
+
 using com.scb.fileupload.master as db from '../db/schema';
 
 service MFUService {
 
-    function getDashboardData(module: String) returns {
+    action getDashboardData(module: String) returns {
         uploaded        : Integer;
         approved        : Integer;
         pending         : Integer;
@@ -72,7 +73,7 @@ module.exports = cds.service.impl(async function () {
 
         const module = req.data.module;
 
-        // KPI
+        // 🔥 KPI + CHART
         const reportData = await cds.run(
             SELECT.from(ReportFileStorage)
                 .columns('STATUS')
@@ -93,7 +94,7 @@ module.exports = cds.service.impl(async function () {
             { module, status: 'pending', count: pending }
         ];
 
-        // Templates
+        // 🔥 TEMPLATE DATA
         const templateData = await cds.run(
             SELECT.from(TemplateStorage)
                 .where({ MODULE_NAME: module })
@@ -132,7 +133,6 @@ annotate MFUService with {
 
 
 
-
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -157,21 +157,32 @@ sap.ui.define([
 
         onModuleChange: async function (oEvent) {
 
-            var module = oEvent.getSource().getSelectedKey();
+            var module = oEvent.getSource().getSelectedKeys()[0];
             if (!module) return;
 
-            const response = await fetch(`/odata/v4/MFUService/getDashboardData(module='${module}')`);
-            const data = await response.json();
+            // 🔥 CALL ACTION (POST)
+            const response = await fetch("/odata/v4/MFUService/getDashboardData", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    module: module
+                })
+            });
 
+            const data = await response.json();
             const result = data.value;
 
             var oModel = this.getView().getModel();
 
+            // KPI
             oModel.setProperty("/totalUploaded", result.uploaded);
             oModel.setProperty("/totalApproved", result.approved);
             oModel.setProperty("/totalPending", result.pending);
             oModel.setProperty("/totalTemplates", result.totalTemplates);
 
+            // Chart
             oModel.setProperty("/modules", [{
                 module: module,
                 uploaded: result.uploaded,
@@ -179,19 +190,9 @@ sap.ui.define([
                 pending: result.pending
             }]);
 
+            // Table
             oModel.setProperty("/tableData", result.table);
         }
 
     });
 });
-
-
-
-
-
-<MultiComboBox
-    id="moduleFilter"
-    selectionFinish="onModuleChange"
-    items="{/moduleList}">
-    <core:Item key="{module}" text="{module}" />
-</MultiComboBox>
