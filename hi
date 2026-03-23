@@ -1,258 +1,3 @@
-<mvc:View controllerName="mfuanalytics.controller.mfureport"  
-    xmlns:mvc="sap.ui.core.mvc"  
-    xmlns="sap.m"  
-    xmlns:core="sap.ui.core"
-    xmlns:viz="sap.viz.ui5.controls"  
-    xmlns:viz.data="sap.viz.ui5.data"  
-    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
-
-<Page title="MFU Dashboard" class="sapBlueHeader">  
-
-<VBox class="mainContainer">  
-
-<Panel class="moduleFilterBox">
-    
-    <HBox class="filterRow" alignItems="Center" justifyContent="SpaceBetween">
-
-        <!-- MODULE -->
-        <VBox class="filterItem">
-            <Text text="Module" class="filterLabel"/>
-            <MultiComboBox
-                id="moduleFilter"
-                selectionFinish="onFilterChange"
-                items="{/allModules}">
-    <core:Item key="{module}" text="{module}" />
-</MultiComboBox>
-        </VBox>
-
-        <!-- STATUS -->
-        <VBox class="filterItem">
-            <Text text="Status" class="filterLabel"/>
-            <MultiComboBox
-                id="statusFilter"
-                width="180px"
-                selectionFinish="onFilterChange"
-                items="{/statusList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </VBox>
-
-        <!-- USER -->
-        <VBox class="filterItem">
-            <Text text="User" class="filterLabel"/>
-            <MultiComboBox
-                id="userFilter"
-                width="180px"
-                selectionFinish="onFilterChange"
-                items="{/userList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </VBox>
-
-        <!-- DATE -->
-        <VBox class="filterItem">
-            <Text text="Created Date" class="filterLabel"/>
-            <MultiComboBox
-                id="dateFilter"
-                width="200px"
-                selectionFinish="onFilterChange"
-                items="{/dateList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </VBox>
-
-    </HBox>
-
-</Panel>
-
-
-<!-- 🔥 TOP -->
-<HBox class="topContainer">  
-
-    <!-- KPI -->
-    <VBox width="35%">  
-
-        <HBox class="kpiRow">  
-            <GenericTile header="Total Uploaded" class="tile">  
-                <TileContent>
-                    <NumericContent value="{/totalUploaded}"/>
-                </TileContent>  
-            </GenericTile>  
-
-            <GenericTile header="Total Approved" class="tile">
-                <TileContent>
-                    <NumericContent value="{/totalApproved}"/>
-                </TileContent>  
-            </GenericTile>  
-        </HBox>  
-
-        <HBox class="kpiRow">  
-            <GenericTile header="Total Rejected" class="tile">  
-                <TileContent>
-                    <NumericContent value="{/totalRejected}"/>
-                </TileContent>  
-            </GenericTile>  
-
-            <GenericTile header="Total Templates" class="tile">  
-                <TileContent>
-                    <NumericContent value="{/totalTemplates}"/>
-                </TileContent>  
-            </GenericTile>  
-        </HBox>  
-
-    </VBox>  
-
-    <!-- STACKED CHART -->
-    <Panel width="700px" headerText="MFU Templates by Modules">
-
-        <viz:VizFrame id="idVizFrame" vizType="stacked_column" height="320px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}" />
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
-                        <viz.data:MeasureDefinition name="Approved" value="{approved}" />
-                        <viz.data:MeasureDefinition name="Rejected" value="{rejected}" />
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure"
-                    values="Uploaded,Approved,Rejected"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
-                    values="Module"/>
-            </viz:feeds>
-
-        </viz:VizFrame>
-
-    </Panel>  
-
-</HBox>  
-
-<!-- 🔥 CHARTS -->
-<HBox class="chartRow">
-
-    <!-- PIE -->
-    <VBox class="chartBox">
-        <Text text="Templates by Count" class="panelTitle"/>
-        <viz:VizFrame vizType="pie" height="200px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Approved" value="{approved}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="size" type="Measure" values="Approved"/>
-                <viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </VBox>
-
-    <!-- MONTHLY -->
-    <VBox class="chartBox">
-        <Text text="Monthly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/monthly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Month" value="{month}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </VBox>
-
-    <!-- QUARTERLY -->
-    <VBox class="chartBox">
-        <Text text="Quarterly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/quarterly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Quarter" value="{quarter}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Quarter"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </VBox>
-
-    <!-- YEARLY -->
-    <VBox class="chartBox">
-        <Text text="Yearly" class="panelTitle"/>
-        <viz:VizFrame vizType="column" height="200px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/yearly}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Year" value="{year}"/>
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Value" value="{value}"/>
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Value"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Year"/>
-            </viz:feeds>
-        </viz:VizFrame>
-    </VBox>
-
-</HBox>
-
-<!-- TABLE -->
-<Panel headerText="MFU Details" class="sapUiMediumMarginTop">
-    <Table items="{/tableData}">
-        <columns>
-            <Column><Text text="Module"/></Column>
-            <Column><Text text="Sub Module"/></Column>
-            <Column><Text text="Load Type"/></Column>
-            <Column><Text text="Template"/></Column>
-            <Column><Text text="Count"/></Column>
-        </columns>
-        <items>
-            <ColumnListItem>
-                <cells>
-                    <Text text="{module}"/>
-                    <Text text="{subModule}"/>
-                    <Text text="{loadType}"/>
-                    <Text text="{template}"/>
-                    <Text text="{count}"/>
-                </cells>
-            </ColumnListItem>
-        </items>
-    </Table>
-</Panel>
-
-</VBox>  
-</Page>  
-</mvc:View>
-
-
-
-
-
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -261,6 +6,9 @@ sap.ui.define([
 
     return Controller.extend("mfuanalytics.controller.mfureport", {
 
+        // =========================
+        // 🔥 INIT
+        // =========================
         onInit: function () {
 
             var oModel = new JSONModel({
@@ -282,13 +30,36 @@ sap.ui.define([
 
                     oModel.setProperty("/allModules", data.value);
 
-                    // ✅ SELECT ALL BY DEFAULT
                     const allKeys = data.value.map(m => m.module);
-                    this.byId("moduleFilter").setSelectedKeys(allKeys);
 
-                    // ✅ LOAD ALL DATA
+                    const oMultiCombo = this.byId("moduleFilter");
+
+                    // ✅ SELECT ALL
+                    oMultiCombo.setSelectedKeys(allKeys);
+
+                    // 🔥 FORCE "+more" UI IMMEDIATELY
+                    setTimeout(() => {
+                        oMultiCombo.rerender();
+                    }, 0);
+
+                    // 🔥 LOAD DATA
                     this.loadDashboard(allKeys);
                 });
+        },
+
+
+        // =========================
+        // 🔥 AFTER RENDER (DOUBLE SAFETY)
+        // =========================
+        onAfterRendering: function () {
+
+            const oMultiCombo = this.byId("moduleFilter");
+
+            if (oMultiCombo) {
+                setTimeout(() => {
+                    oMultiCombo.rerender();
+                }, 0);
+            }
         },
 
 
@@ -303,7 +74,7 @@ sap.ui.define([
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    module: modules   // ✅ ARRAY PASS
+                    module: modules   // ✅ ARRAY
                 })
             })
             .then(res => res.json())
@@ -318,13 +89,17 @@ sap.ui.define([
                 oModel.setProperty("/totalRejected", data.rejected || 0);
                 oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
 
+                // 🔥 APPLY CHART SETTINGS
                 this._applyChartSettings();
+            })
+            .catch(err => {
+                console.error("API ERROR:", err);
             });
         },
 
 
         // =========================
-        // 🔥 FILTER
+        // 🔥 FILTER CHANGE
         // =========================
         onFilterChange: function (oEvent) {
 
@@ -348,16 +123,21 @@ sap.ui.define([
             if (oChart) {
                 oChart.setVizProperties({
 
-                    title: { visible: false },
+                    // ❌ REMOVE TITLE
+                    title: {
+                        visible: false
+                    },
 
                     plotArea: {
+                        // ✅ COLORS
                         colorPalette: [
-                            "#0070f2", // Uploaded
-                            "#107e3e", // Approved
-                            "#bb0000"  // Rejected
+                            "#0070f2", // Uploaded (Blue)
+                            "#107e3e", // Approved (Green)
+                            "#bb0000"  // Rejected (Red)
                         ]
                     },
 
+                    // ✅ HOVER TOOLTIP
                     interaction: {
                         tooltip: {
                             visible: true
@@ -369,134 +149,3 @@ sap.ui.define([
 
     });
 });
-
-
-
-const cds = require('@sap/cds');
-
-module.exports = cds.service.impl(async function () {
-
-    const { ReportFileStorage, TemplateStorage } = cds.entities('com.scb.fileupload.master');
-
-    // =========================
-    // 🔥 GET MODULE DROPDOWN
-    // =========================
-    this.on('getModules', async () => {
-
-        const data = await cds.run(
-            SELECT.distinct.from(TemplateStorage).columns('MODULE_NAME')
-        );
-
-        return data.map(d => ({
-            module: d.MODULE_NAME
-        }));
-    });
-
-    // =========================
-    // 🔥 MAIN DASHBOARD
-    // =========================
-    this.on('getDashboardData', async (req) => {
-
-        let modules = req.data.module || [];
-
-        // 🔥 HANDLE ARRAY (MULTI SELECT)
-        if (typeof modules === "string") {
-            modules = [modules];
-        }
-
-        let reportData = [];
-        let templateData = [];
-
-        if (modules.length > 0) {
-
-            reportData = await cds.run(
-                SELECT.from(ReportFileStorage)
-                    .where({ MODULE_NAME: { in: modules } })
-            );
-
-            templateData = await cds.run(
-                SELECT.from(TemplateStorage)
-                    .where({ MODULE_NAME: { in: modules } })
-            );
-
-        } else {
-            reportData = await cds.run(SELECT.from(ReportFileStorage));
-            templateData = await cds.run(SELECT.from(TemplateStorage));
-        }
-
-        // =========================
-        // 🔥 KPI
-        // =========================
-        let uploaded = 0, approved = 0, rejected = 0;
-
-        reportData.forEach(r => {
-            if (r.STATUS === 'uploaded') uploaded++;
-            if (r.STATUS === 'approved') approved++;
-            if (r.STATUS === 'rejected') rejected++;
-        });
-
-        // =========================
-        // 🔥 CHART DATA (GROUP BY MODULE)
-        // =========================
-        const moduleMap = {};
-
-        reportData.forEach(r => {
-
-            if (!moduleMap[r.MODULE_NAME]) {
-                moduleMap[r.MODULE_NAME] = {
-                    module: r.MODULE_NAME,
-                    uploaded: 0,
-                    approved: 0,
-                    rejected: 0
-                };
-            }
-
-            if (r.STATUS === 'uploaded') moduleMap[r.MODULE_NAME].uploaded++;
-            if (r.STATUS === 'approved') moduleMap[r.MODULE_NAME].approved++;
-            if (r.STATUS === 'rejected') moduleMap[r.MODULE_NAME].rejected++;
-        });
-
-        const modulesData = Object.values(moduleMap);
-
-        // =========================
-        // 🔥 TABLE (FROM REPORTFILESTORAGE)
-        // =========================
-        const tableMap = {};
-
-        reportData.forEach(r => {
-
-            const key = `${r.MODULE_NAME}_${r.SUB_MODULE_NAME}_${r.LOAD_TYPE}`;
-
-            if (!tableMap[key]) {
-                tableMap[key] = {
-                    module: r.MODULE_NAME,
-                    subModule: r.SUB_MODULE_NAME,
-                    loadType: r.LOAD_TYPE,
-                    count: 0
-                };
-            }
-
-            tableMap[key].count++;
-        });
-
-        const table = Object.values(tableMap);
-
-        // =========================
-        // 🔥 TOTAL TEMPLATES (FROM TEMPLATESTORAGE)
-        // =========================
-        const totalTemplates = templateData.length;
-
-        return {
-            uploaded,
-            approved,
-            rejected,
-            totalTemplates,
-            modules: modulesData,
-            table
-        };
-    });
-
-});
-
-
-this is my code check it
