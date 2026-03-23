@@ -31,21 +31,19 @@ sap.ui.define([
                     oModel.setProperty("/allModules", data.value);
 
                     const allKeys = data.value.map(m => m.module);
-                    const oMultiCombo = this.byId("moduleFilter");
 
-                    // ✅ SELECT ALL
+                    const oMultiCombo = this.byId("moduleFilter");
                     oMultiCombo.setSelectedKeys(allKeys);
 
-                    // 🔥 CUSTOM TEXT FIX
+                    // 🔥 LOAD DATA
+                    this.loadDashboard(allKeys);
+
+                    // 🔥 FIX TEXT AFTER RENDER
                     setTimeout(() => {
                         this._updateMultiComboText();
-                    }, 200);
-
-                    // 🔥 LOAD DASHBOARD
-                    this.loadDashboard(allKeys);
+                    }, 300);
                 });
         },
-
 
         // =========================
         // 🔥 LOAD DASHBOARD
@@ -74,12 +72,8 @@ sap.ui.define([
                 oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
 
                 this._applyChartSettings();
-            })
-            .catch(err => {
-                console.error("API ERROR:", err);
             });
         },
-
 
         // =========================
         // 🔥 FILTER CHANGE
@@ -94,13 +88,14 @@ sap.ui.define([
                 this.loadDashboard(keys);
             }
 
-            // 🔥 UPDATE DISPLAY TEXT
-            this._updateMultiComboText();
+            // 🔥 FORCE TEXT UPDATE (VERY IMPORTANT)
+            setTimeout(() => {
+                this._updateMultiComboText();
+            }, 0);
         },
 
-
         // =========================
-        // 🔥 CUSTOM "+MORE" TEXT
+        // 🔥 FIX MULTI COMBO TEXT (+MORE)
         // =========================
         _updateMultiComboText: function () {
 
@@ -115,13 +110,19 @@ sap.ui.define([
             const first = keys[0];
             const more = keys.length - 1;
 
-            if (more > 0) {
-                oMultiCombo.setValue(first + " +" + more + " more");
-            } else {
-                oMultiCombo.setValue(first);
-            }
-        },
+            let text = first;
 
+            if (more > 0) {
+                text = first + " +" + more + " more";
+            }
+
+            // 🔥 REMOVE SAP DEFAULT TOKENS TEXT
+            oMultiCombo.setValue("");
+            oMultiCombo.setTokens([]);
+
+            // 🔥 APPLY CUSTOM TEXT
+            oMultiCombo.setValue(text);
+        },
 
         // =========================
         // 🔥 CHART SETTINGS
@@ -133,7 +134,9 @@ sap.ui.define([
             if (oChart) {
                 oChart.setVizProperties({
 
-                    title: { visible: false },
+                    title: {
+                        visible: false
+                    },
 
                     plotArea: {
                         colorPalette: [
