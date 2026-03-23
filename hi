@@ -1,198 +1,99 @@
-namespace com.scb.fileupload;
-
-using { cuid, managed } from '@sap/cds/common';
-
-context master {
-
-entity ReportFileStorage : cuid, managed {
-  MODULE_NAME     : String(100);
-  SUB_MODULE_NAME : String(100);
-  LOAD_TEMPLATE   : String(100);
-  FILE_NAME       : String(255);
-  FILE_MIME_TYPE  : String(100);
-  FILE_SIZE       : Integer;
-  FILE_CONTENT    : LargeBinary;
-  STATUS          : String(50);
-  COMMENTS        : String(1000);
-  JSON_DATA       : LargeString;
-  LOAD_STATUS     : Boolean;
-  LOAD_TYPE       : String(50);
-  EXPIRY_DATE     : Date;
-  ACTION_BY       : String(100);
-}
-
-entity TemplateStorage : cuid, managed {
-  MODULE_NAME     : String(100);
-  SUB_MODULE_NAME : String(100);
-  LOAD_TEMPLATE   : String(100);
-  STATUS          : String(50);
-  JSON_TEMPLATE   : LargeString;
-  EXPIRY_DATE     : Date;
-  ACTION_BY       : String(100);
-}
-
+{
+  "name": "MFUAnalytics",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^8.9.4",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1",
+    "@cap-js/cds-types": "^0.8.0",
+    "cds-plugin-ui5": "^0.13.0"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-project1": "cds watch --open project1/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-mfuanalytics": "cds watch --open mfuanalytics/index.html?sap-ui-xx-viewCache=false --livereload false"
+  },
+  "workspaces": [
+    "app/*"
+  ]
 }
 
 
+This is my package.json, below code is the reference we already used this for other project , kindly add the above code according to the below code
 
-
-using com.scb.fileupload.master as db from '../db/schema';
-
-service MFUService {
-
-    action getDashboardData(module: String) returns {
-        uploaded        : Integer;
-        approved        : Integer;
-        pending         : Integer;
-        totalTemplates  : Integer;
-        chart           : array of {
-            module : String;
-            status : String;
-            count  : Integer;
-        };
-        table           : array of {
-            module      : String;
-            subModule   : String;
-            template    : String;
-            status      : String;
-            user        : String;
-        };
-    };
-
-}
-
-
-
-const cds = require('@sap/cds');
-
-module.exports = cds.service.impl(async function () {
-
-    const { ReportFileStorage, TemplateStorage } = cds.entities('com.scb.fileupload.master');
-
-    this.on('getDashboardData', async (req) => {
-
-        const module = req.data.module;
-
-        // 🔥 KPI + CHART
-        const reportData = await cds.run(
-            SELECT.from(ReportFileStorage)
-                .columns('STATUS')
-                .where({ MODULE_NAME: module })
-        );
-
-        let uploaded = 0, approved = 0, pending = 0;
-
-        reportData.forEach(r => {
-            if (r.STATUS === 'uploaded') uploaded++;
-            if (r.STATUS === 'approved') approved++;
-            if (r.STATUS === 'pending') pending++;
-        });
-
-        const chart = [
-            { module, status: 'uploaded', count: uploaded },
-            { module, status: 'approved', count: approved },
-            { module, status: 'pending', count: pending }
-        ];
-
-        // 🔥 TEMPLATE DATA
-        const templateData = await cds.run(
-            SELECT.from(TemplateStorage)
-                .where({ MODULE_NAME: module })
-        );
-
-        const totalTemplates = templateData.length;
-
-        const table = templateData.map(t => ({
-            module: t.MODULE_NAME,
-            subModule: t.SUB_MODULE_NAME,
-            template: t.LOAD_TEMPLATE,
-            status: t.STATUS,
-            user: t.ACTION_BY
-        }));
-
-        return {
-            uploaded,
-            approved,
-            pending,
-            totalTemplates,
-            chart,
-            table
-        };
-    });
-
-});
-
-
-
-using MFUService from '../../srv/service';
-
-annotate MFUService with {
-
-};
-
-
-
-
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-    "use strict";
-
-    return Controller.extend("mfuanalytics.controller.mfureport", {
-
-        onInit: function () {
-
-            var oModel = new JSONModel({
-                modules: [],
-                totalUploaded: 0,
-                totalApproved: 0,
-                totalPending: 0,
-                totalTemplates: 0,
-                tableData: []
-            });
-
-            this.getView().setModel(oModel);
+{
+  "name": "scbfilehub",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^8.9.4",
+    "express": "^4",
+    "exceljs": "4.4.0",
+    "xlsx": "0.18.5",
+    "@sap/cds-hana": "^2.1.0",
+    "@sap/hana-client": "^2.25.29",
+    "@sap/xssec": "4.9.0",
+    "body-parser": "2.2.0",
+    "get-stream": "9.0.1",
+    "base64-stream": "1.0.0"
+  },
+  "devDependencies": {
+    "@cap-js/cds-types": "^0.8.0",
+    "@cap-js/sqlite": "^1"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "deploy": "cds deploy --to hana",
+    "build":"cds build",
+    "watch-scb": "cds watch --open scb/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch-fileuploader": "cds watch --open fileuploader/webapp/index.html?sap-ui-xx-viewCache=false"
+  },
+  "cds": {
+    "requires": {
+      "auth": {
+        "[development]": {
+          "kind": "basic",
+          "users": {
+            "alice": {
+              "roles": [
+                "NFRP_File_Uploader_Maker",
+                "NFRP_File_Uploader_Checker"
+              ],
+              "attr": {
+                "givenName": "Alice",
+                "familyName": "Doe",
+                "email": "alice@sap.com"
+              }
+            }
+          }
         },
-
-        onModuleChange: async function (oEvent) {
-
-            var module = oEvent.getSource().getSelectedKeys()[0];
-            if (!module) return;
-
-            // 🔥 CALL ACTION (POST)
-            const response = await fetch("/odata/v4/MFUService/getDashboardData", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    module: module
-                })
-            });
-
-            const data = await response.json();
-            const result = data.value;
-
-            var oModel = this.getView().getModel();
-
-            // KPI
-            oModel.setProperty("/totalUploaded", result.uploaded);
-            oModel.setProperty("/totalApproved", result.approved);
-            oModel.setProperty("/totalPending", result.pending);
-            oModel.setProperty("/totalTemplates", result.totalTemplates);
-
-            // Chart
-            oModel.setProperty("/modules", [{
-                module: module,
-                uploaded: result.uploaded,
-                approved: result.approved,
-                pending: result.pending
-            }]);
-
-            // Table
-            oModel.setProperty("/tableData", result.table);
+        "[production]": {
+          "kind": "xsuaa"
         }
-
-    });
-});
+      },
+      "db": {
+        "kind": "hana"
+      },
+      "server": {
+        "body_parser": {
+          "limit": "50mb"
+        }
+      },
+      "sql": {
+        "native_hana_associations": false
+      }
+    }
+  },
+  "sapux": [
+    "app/fileuploader"
+  ]
+}
