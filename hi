@@ -1,3 +1,40 @@
+namespace com.scb.fileupload;
+
+using { cuid, managed } from '@sap/cds/common';
+
+context master {
+
+entity ReportFileStorage : cuid, managed {
+  MODULE_NAME     : String(100);
+  SUB_MODULE_NAME : String(100);
+  LOAD_TEMPLATE   : String(100);
+  FILE_NAME       : String(255);
+  FILE_MIME_TYPE  : String(100);
+  FILE_SIZE       : Integer;
+  FILE_CONTENT    : LargeBinary;
+  STATUS          : String(50);
+  COMMENTS        : String(1000);
+  JSON_DATA       : LargeString;
+  LOAD_STATUS     : Boolean;
+  LOAD_TYPE       : String(50);
+  EXPIRY_DATE     : Date;
+  ACTION_BY       : String(100);
+}
+
+entity TemplateStorage : cuid, managed {
+  MODULE_NAME     : String(100);
+  SUB_MODULE_NAME : String(100);
+  LOAD_TEMPLATE   : String(100);
+  STATUS          : String(50);
+  JSON_TEMPLATE   : LargeString;
+  EXPIRY_DATE     : Date;
+  ACTION_BY       : String(100);
+}
+
+}
+
+
+
 using com.scb.fileupload.master as db from '../db/schema';
 
 service MFUService {
@@ -35,10 +72,10 @@ module.exports = cds.service.impl(async function () {
 
         const module = req.data.module;
 
-        // 🔥 KPI + CHART
+        // KPI
         const reportData = await cds.run(
             SELECT.from(ReportFileStorage)
-                .columns('STATUS', 'MODULE_NAME')
+                .columns('STATUS')
                 .where({ MODULE_NAME: module })
         );
 
@@ -50,14 +87,13 @@ module.exports = cds.service.impl(async function () {
             if (r.STATUS === 'pending') pending++;
         });
 
-        // 🔥 CHART FORMAT
         const chart = [
             { module, status: 'uploaded', count: uploaded },
             { module, status: 'approved', count: approved },
             { module, status: 'pending', count: pending }
         ];
 
-        // 🔥 TEMPLATE TABLE
+        // Templates
         const templateData = await cds.run(
             SELECT.from(TemplateStorage)
                 .where({ MODULE_NAME: module })
@@ -86,6 +122,17 @@ module.exports = cds.service.impl(async function () {
 });
 
 
+
+using MFUService from '../../srv/service';
+
+annotate MFUService with {
+
+};
+
+
+
+
+
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -111,10 +158,8 @@ sap.ui.define([
         onModuleChange: async function (oEvent) {
 
             var module = oEvent.getSource().getSelectedKey();
-
             if (!module) return;
 
-            // 🔥 CALL BACKEND
             const response = await fetch(`/odata/v4/MFUService/getDashboardData(module='${module}')`);
             const data = await response.json();
 
@@ -122,25 +167,31 @@ sap.ui.define([
 
             var oModel = this.getView().getModel();
 
-            // 🔥 KPI
             oModel.setProperty("/totalUploaded", result.uploaded);
             oModel.setProperty("/totalApproved", result.approved);
             oModel.setProperty("/totalPending", result.pending);
             oModel.setProperty("/totalTemplates", result.totalTemplates);
 
-            // 🔥 CHART TRANSFORM
-            const modules = [{
+            oModel.setProperty("/modules", [{
                 module: module,
                 uploaded: result.uploaded,
                 approved: result.approved,
                 pending: result.pending
-            }];
+            }]);
 
-            oModel.setProperty("/modules", modules);
-
-            // 🔥 TABLE
             oModel.setProperty("/tableData", result.table);
         }
 
     });
 });
+
+
+
+
+
+<MultiComboBox
+    id="moduleFilter"
+    selectionFinish="onModuleChange"
+    items="{/moduleList}">
+    <core:Item key="{module}" text="{module}" />
+</MultiComboBox>
