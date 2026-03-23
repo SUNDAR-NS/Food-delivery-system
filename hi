@@ -1,74 +1,211 @@
-user: MFUAnalytics $ cds watch
+using com.scb.fileupload.master as db from '../db/schema';
 
-cds serve all --with-mocks --in-memory? 
-( live reload enabled for browsers ) 
+service MFUService {
 
-        ___________________________
- 
-[cds-plugin-ui5] [INFO] Running cds-plugin-ui5@0.13.6 (@sap/cds-dk@9.3.2, @sap/cds@8.9.9)
-[cds-plugin-ui5] [INFO] Mounting /mfuanalytics to UI5 app /home/user/projects/MFUAnalytics/MFUAnalytics/app/mfuanalytics (id=mfuanalytics)
-[cds] [INFO] loaded model from 5 file(s):
+    // 🔥 MAIN DASHBOARD
+    action getDashboardData(module: String) returns {
+        uploaded        : Integer;
+        approved        : Integer;
+        pending         : Integer;
+        totalTemplates  : Integer;
+        modules         : array of {
+            module   : String;
+            uploaded : Integer;
+            approved : Integer;
+            pending  : Integer;
+        };
+        table           : array of {
+            module      : String;
+            subModule   : String;
+            template    : String;
+            status      : String;
+            user        : String;
+        };
+    };
 
-  app/services.cds
-  app/mfuanalytics/annotations.cds
-  srv/service.cds
-  db/schema.cds
-  node_modules/@sap/cds/common.cds
+    // 🔥 DROPDOWN DATA
+    function getModules() returns array of {
+        module : String;
+    };
 
-[cds] [INFO] connect using bindings from: { registry: '~/.cds-services.json' }
-[cds] [INFO] connect to db > hana {
-  certificate: '...',
-  database_id: '3cb8ff87-b67f-4b68-8106-e297566641ef',
-  driver: 'com.sap.db.jdbc.Driver',
-  hdi_password: '...',
-  hdi_user: 'T1GDTL_PHY_D2WVJ4OSEF29M8KODQ5RV7A7F_DT',
-  host: '3cb8ff87-b67f-4b68-8106-e297566641ef.hana.prod-ap11.hanacloud.ondemand.com',
-  password: '...',
-  port: '443',
-  schema: 'T1GDTL_PHY',
-  url: 'jdbc:sap://3cb8ff87-b67f-4b68-8106-e297566641ef.hana.prod-ap11.hanacloud.ondemand.com:443?encrypt=true&validateCertificate=true&currentschema=T1GDTL_PHY',
-  user: 'T1GDTL_PHY_D2WVJ4OSEF29M8KODQ5RV7A7F_RT'
 }
-[cds] [INFO] using auth strategy {
-  kind: 'basic',
-  impl: 'node_modules/@sap/cds/lib/srv/middlewares/auth/basic-auth'
-} 
 
-[cds] [INFO] serving MFUService { impl: 'srv/service.js', path: '/odata/v4/mfu' }
-[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
-info fiori-tools-proxy Using UI5 version 1.145.0 based on manifest.json
-info fiori-tools-proxy Starting fiori-tools-proxy using following configuration:
-info fiori-tools-proxy proxy: 'http://127.0.0.1:8887'
-info fiori-tools-proxy ignoreCertErrors: 'false'
-info fiori-tools-proxy backend: undefined
-info fiori-tools-proxy ui5: [{"path":"/resources","url":"https://sapui5.hana.ondemand.com","version":"1.145.0"},{"path":"/test-resources","url":"https://sapui5.hana.ondemand.com","version":"1.145.0"}]
-info fiori-tools-proxy debug: 'false'
-info fiori-tools-appreload Livereload middleware started for port 35730 and path /home/user/projects/MFUAnalytics/MFUAnalytics/app/mfuanalytics/webapp
-[cds] [INFO] loaded model from 5 file(s):
 
-  app/services.cds
-  app/mfuanalytics/annotations.cds
-  srv/service.cds
-  db/schema.cds
-  node_modules/@sap/cds/common.cds
 
-[cds] [INFO] loaded model from 5 file(s):
+const cds = require('@sap/cds');
 
-  app/services.cds
-  app/mfuanalytics/annotations.cds
-  srv/service.cds
-  db/schema.cds
-  node_modules/@sap/cds/common.cds
+module.exports = cds.service.impl(async function () {
 
-info fiori-tools-preview Initialized for app mfuanalytics
-2026-03-23 06:41:19 error   main: developerMode is ONLY supported for SAP UI5 adaptation projects. 
-2026-03-23 06:41:19 warn    main: developerMode for /editor.html disabled 
+    const { ReportFileStorage, TemplateStorage } = cds.entities('com.scb.fileupload.master');
 
-[cds] [INFO] server listening on { url: 'http://localhost:4004' }
-[cds] - server launched in: 1.966s
-[cds] [INFO] [ terminate with ^C ]
+    // =========================
+    // 🔥 GET MODULE DROPDOWN
+    // =========================
+    this.on('getModules', async () => {
 
-(node:38811) Warning: No such label '[cds] - server launched in' for console.timeEnd()
-(Use `node --trace-warnings ...` to show where the warning was created)
-[warn] builder:processors:manifestEnhancer: /manifest.json: Generated supported locales ('') for bundle 'i18n/i18n.properties' do not contain default fallback locale 'en'. Either provide a properties file for 'en' or configure another available fallbackLocale
-[warn] builder:processors:manifestEnhancer: /manifest.json: Generated supported locales ('') for bundle 'i18n/i18n.properties' do not contain default fallback locale 'en'. Either provide a properties file for 'en' or configure another available fallbackLocale
+        const data = await cds.run(
+            SELECT.distinct.from(TemplateStorage).columns('MODULE_NAME')
+        );
+
+        return data.map(d => ({
+            module: d.MODULE_NAME
+        }));
+    });
+
+
+    // =========================
+    // 🔥 MAIN DASHBOARD
+    // =========================
+    this.on('getDashboardData', async (req) => {
+
+        const module = req.data.module;
+
+        let reportData, templateData;
+
+        // 🔥 NO FILTER → GET ALL
+        if (!module) {
+
+            reportData = await cds.run(
+                SELECT.from(ReportFileStorage)
+            );
+
+            templateData = await cds.run(
+                SELECT.from(TemplateStorage)
+            );
+
+        } else {
+
+            // 🔥 FILTERED
+            reportData = await cds.run(
+                SELECT.from(ReportFileStorage)
+                    .where({ MODULE_NAME: module })
+            );
+
+            templateData = await cds.run(
+                SELECT.from(TemplateStorage)
+                    .where({ MODULE_NAME: module })
+            );
+        }
+
+        // =========================
+        // 🔥 KPI CALCULATION
+        // =========================
+        let uploaded = 0, approved = 0, pending = 0;
+
+        reportData.forEach(r => {
+            if (r.STATUS === 'uploaded') uploaded++;
+            if (r.STATUS === 'approved') approved++;
+            if (r.STATUS === 'pending') pending++;
+        });
+
+        // =========================
+        // 🔥 CHART (GROUP BY MODULE)
+        // =========================
+        const moduleMap = {};
+
+        reportData.forEach(r => {
+
+            if (!moduleMap[r.MODULE_NAME]) {
+                moduleMap[r.MODULE_NAME] = {
+                    module: r.MODULE_NAME,
+                    uploaded: 0,
+                    approved: 0,
+                    pending: 0
+                };
+            }
+
+            if (r.STATUS === 'uploaded') moduleMap[r.MODULE_NAME].uploaded++;
+            if (r.STATUS === 'approved') moduleMap[r.MODULE_NAME].approved++;
+            if (r.STATUS === 'pending') moduleMap[r.MODULE_NAME].pending++;
+        });
+
+        const modules = Object.values(moduleMap);
+
+        // =========================
+        // 🔥 TABLE
+        // =========================
+        const table = templateData.map(t => ({
+            module: t.MODULE_NAME,
+            subModule: t.SUB_MODULE_NAME,
+            template: t.LOAD_TEMPLATE,
+            status: t.STATUS,
+            user: t.ACTION_BY
+        }));
+
+        const totalTemplates = template.length;
+
+        return {
+            uploaded,
+            approved,
+            pending,
+            totalTemplates,
+            modules,
+            table
+        };
+    });
+
+});
+
+
+
+
+onInit: async function () {
+
+    var oModel = new sap.ui.model.json.JSONModel({
+        allModules: [],
+        modules: [],
+        tableData: [],
+        totalUploaded: 0,
+        totalApproved: 0,
+        totalPending: 0,
+        totalTemplates: 0
+    });
+
+    this.getView().setModel(oModel);
+
+    // 🔥 LOAD DROPDOWN
+    const res = await fetch("/odata/v4/mfu/getModules()");
+    const data = await res.json();
+
+    oModel.setProperty("/allModules", data.value);
+
+    // 🔥 LOAD INITIAL DATA (ALL)
+    this.loadDashboard();
+},
+
+loadDashboard: async function (module = null) {
+
+    const response = await fetch("/odata/v4/mfu/getDashboardData", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            module: module
+        })
+    });
+
+    const data = await response.json();
+    const result = data.value;
+
+    var oModel = this.getView().getModel();
+
+    oModel.setProperty("/modules", result.modules);
+    oModel.setProperty("/tableData", result.table);
+    oModel.setProperty("/totalUploaded", result.uploaded);
+    oModel.setProperty("/totalApproved", result.approved);
+    oModel.setProperty("/totalPending", result.pending);
+    oModel.setProperty("/totalTemplates", result.totalTemplates);
+},
+
+onFilterChange: function (oEvent) {
+
+    const keys = oEvent.getSource().getSelectedKeys();
+
+    // 🔥 NO FILTER
+    if (keys.length === 0) {
+        this.loadDashboard(null);
+    } else {
+        this.loadDashboard(keys[0]);
+    }
+}
