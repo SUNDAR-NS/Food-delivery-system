@@ -1,14 +1,12 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
+    "sap/ui/model/json/JSONModel",
+    "sap/m/Token"
+], function (Controller, JSONModel, Token) {
     "use strict";
 
     return Controller.extend("mfuanalytics.controller.mfureport", {
 
-        // =========================
-        // 🔥 INIT
-        // =========================
         onInit: function () {
 
             var oModel = new JSONModel({
@@ -23,28 +21,25 @@ sap.ui.define([
 
             this.getView().setModel(oModel);
 
-            // 🔥 LOAD MODULES
             fetch("/odata/v4/mfu/getModules()")
                 .then(res => res.json())
                 .then(data => {
 
                     oModel.setProperty("/allModules", data.value);
 
-                    // ✅ SELECT ALL BY DEFAULT
                     const allKeys = data.value.map(m => m.module);
-                    this.byId("moduleFilter").setSelectedKeys(allKeys);
+                    const oMulti = this.byId("moduleFilter");
 
-                    // ✅ LOAD DASHBOARD
+                    // ✅ select all
+                    oMulti.setSelectedKeys(allKeys);
+
+                    // ✅ FIX DISPLAY TEXT
+                    this._fixMultiComboDisplay(allKeys);
+
                     this.loadDashboard(allKeys);
-                })
-                .catch(err => {
-                    console.error("MODULE LOAD ERROR:", err);
                 });
         },
 
-        // =========================
-        // 🔥 LOAD DASHBOARD
-        // =========================
         loadDashboard: function (modules) {
 
             fetch("/odata/v4/mfu/getDashboardData", {
@@ -53,7 +48,7 @@ sap.ui.define([
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    module: modules   // ✅ ARRAY
+                    module: modules
                 })
             })
             .then(res => res.json())
@@ -69,18 +64,14 @@ sap.ui.define([
                 oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
 
                 this._applyChartSettings();
-            })
-            .catch(err => {
-                console.error("DASHBOARD ERROR:", err);
             });
         },
 
-        // =========================
-        // 🔥 FILTER CHANGE
-        // =========================
         onFilterChange: function (oEvent) {
 
             const keys = oEvent.getSource().getSelectedKeys();
+
+            this._fixMultiComboDisplay(keys);
 
             if (!keys || keys.length === 0) {
                 this.loadDashboard([]);
@@ -89,35 +80,46 @@ sap.ui.define([
             }
         },
 
-        // =========================
-        // 🔥 CHART SETTINGS
-        // =========================
+        // 🔥 MAIN FIX HERE
+        _fixMultiComboDisplay: function (keys) {
+
+            const oMulti = this.byId("moduleFilter");
+
+            if (!keys || keys.length === 0) return;
+
+            const first = keys[0];
+            const more = keys.length - 1;
+
+            // ❌ REMOVE ALL TOKENS
+            oMulti.destroyTokens();
+
+            // ✅ ADD CUSTOM TOKEN
+            let text = first;
+            if (more > 0) {
+                text = first + " +" + more + " more";
+            }
+
+            oMulti.addToken(new Token({
+                text: text
+            }));
+        },
+
         _applyChartSettings: function () {
 
             var oChart = this.byId("idVizFrame");
 
             if (oChart) {
                 oChart.setVizProperties({
-
-                    // ❌ REMOVE TITLE
-                    title: {
-                        visible: false
-                    },
-
-                    // ✅ COLORS
+                    title: { visible: false },
                     plotArea: {
                         colorPalette: [
-                            "#0070f2", // Uploaded
-                            "#107e3e", // Approved
-                            "#bb0000"  // Rejected
+                            "#0070f2",
+                            "#107e3e",
+                            "#bb0000"
                         ]
                     },
-
-                    // ✅ TOOLTIP ON HOVER
                     interaction: {
-                        tooltip: {
-                            visible: true
-                        }
+                        tooltip: { visible: true }
                     }
                 });
             }
