@@ -36,17 +36,10 @@ sap.ui.define([
                     // ✅ SELECT ALL
                     oMultiCombo.setSelectedKeys(allKeys);
 
-                    // 🔥 FORCE "+more" UI FIX (MAIN FIX)
+                    // 🔥 CUSTOM TEXT FIX
                     setTimeout(() => {
-
-                        oMultiCombo.invalidate();
-                        sap.ui.getCore().applyChanges();
-
-                        // trigger tokenizer calculation
-                        oMultiCombo.focus();
-                        oMultiCombo.blur();
-
-                    }, 100);
+                        this._updateMultiComboText();
+                    }, 200);
 
                     // 🔥 LOAD DASHBOARD
                     this.loadDashboard(allKeys);
@@ -100,6 +93,33 @@ sap.ui.define([
             } else {
                 this.loadDashboard(keys);
             }
+
+            // 🔥 UPDATE DISPLAY TEXT
+            this._updateMultiComboText();
+        },
+
+
+        // =========================
+        // 🔥 CUSTOM "+MORE" TEXT
+        // =========================
+        _updateMultiComboText: function () {
+
+            const oMultiCombo = this.byId("moduleFilter");
+            const keys = oMultiCombo.getSelectedKeys();
+
+            if (!keys || keys.length === 0) {
+                oMultiCombo.setValue("");
+                return;
+            }
+
+            const first = keys[0];
+            const more = keys.length - 1;
+
+            if (more > 0) {
+                oMultiCombo.setValue(first + " +" + more + " more");
+            } else {
+                oMultiCombo.setValue(first);
+            }
         },
 
 
@@ -113,10 +133,7 @@ sap.ui.define([
             if (oChart) {
                 oChart.setVizProperties({
 
-                    // ❌ REMOVE TITLE
-                    title: {
-                        visible: false
-                    },
+                    title: { visible: false },
 
                     plotArea: {
                         colorPalette: [
@@ -126,7 +143,6 @@ sap.ui.define([
                         ]
                     },
 
-                    // ✅ TOOLTIP ON HOVER
                     interaction: {
                         tooltip: {
                             visible: true
