@@ -86,7 +86,7 @@ sap.ui.define([
 
 
         // =========================
-        // 🔥 CHART SETTINGS (MAIN FIX)
+        // 🔥 CHART SETTINGS (FINAL)
         // =========================
         _applyChartSettings: function () {
 
@@ -106,17 +106,14 @@ sap.ui.define([
                             "#0070f2", // Uploaded (Blue)
                             "#107e3e", // Approved (Green)
                             "#e9730c"  // Pending (Orange)
-                        ],
-
-                        // ✅ SHOW VALUES ON HOVER
-                        dataLabel: {
-                            visible: true
-                        }
+                        ]
                     },
 
-                    // ✅ ENABLE TOOLTIP (HOVER)
-                    tooltip: {
-                        visible: true
+                    // ✅ TOOLTIP ON HOVER (IMPORTANT)
+                    interaction: {
+                        tooltip: {
+                            visible: true
+                        }
                     }
                 });
             }
