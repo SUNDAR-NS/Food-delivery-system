@@ -1,184 +1,38 @@
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-    "use strict";
+namespace com.scb.fileupload;
 
-    return Controller.extend("mfuanalytics.controller.mfureport", {
+using {
+  cuid,
+  managed
+} from '@sap/cds/common';
 
-        onInit: function () {
+context master {
 
-            var data = {
+entity ReportFileStorage @(odata.stream) : cuid,managed {
+  MODULE_NAME     : String(100);
+  SUB_MODULE_NAME : String(100);
+  LOAD_TEMPLATE   : String(100);
+  FILE_NAME       : String(255);
+  FILE_MIME_TYPE  : String(100);
+  FILE_SIZE       : Integer;
+  @Core.MediaType: 'FILE_MIME_TYPE'
+  FILE_CONTENT    : LargeBinary;
+  STATUS          : String(50);
+  COMMENTS        : String(1000);
+  JSON_DATA       : LargeString;
+  LOAD_STATUS     : Boolean;
+  LOAD_TYPE       : String(50);
+  EXPIRY_DATE     : Date;
+  ACTION_BY       : String(100);
+}
 
-                allModules: [
-                    { module: "NFRP", uploaded: 45, approved: 30, pending: 10, user: "Anand", date: "10D" },
-                    { module: "SCBI", uploaded: 70, approved: 50, pending: 15, user: "Sundar", date: "3M" },
-                    { module: "ESG", uploaded: 25, approved: 15, pending: 5, user: "Kiran", date: "6M" },
-                    { module: "ICON", uploaded: 50, approved: 35, pending: 7, user: "Shivani", date: "1Y" }
-                ],
+entity TemplateStorage : cuid,managed {
+  MODULE_NAME     : String(100);
+  SUB_MODULE_NAME : String(100);
+  LOAD_TEMPLATE   : String(100);
+  STATUS          : String(50);
+  JSON_TEMPLATE       : LargeString;
+  EXPIRY_DATE     : Date;
+  ACTION_BY       : String(100);
+}
 
-                modules: [],
-                tableData: [],
-
-                statusList: [
-                    { key: "uploaded", text: "Uploaded" },
-                    { key: "approved", text: "Approved" },
-                    { key: "pending", text: "Pending" }
-                ],
-
-                userList: [
-                    { key: "Anand", text: "Anand" },
-                    { key: "Sundar", text: "Sundar" },
-                    { key: "Kiran", text: "Kiran" },
-                    { key: "Shivani", text: "Shivani" }
-                ],
-
-                dateList: [
-                    { key: "10D", text: "Last 10 Days" },
-                    { key: "3M", text: "Last 3 Months" },
-                    { key: "6M", text: "Last 6 Months" },
-                    { key: "1Y", text: "Last 1 Year" }
-                ],
-
-                totalUploaded: 0,
-                totalApproved: 0,
-                totalPending: 0,
-                totalTemplates: 0
-            };
-
-            data.modules = data.allModules;
-            this._fullModules = data.allModules;
-
-            var oModel = new JSONModel(data);
-            this.getView().setModel(oModel);
-
-            this._updateTable(data.modules);
-            this._recalculateKPI(data.modules);
-        },
-
-        onFilterChange: function () {
-
-            var oView = this.getView();
-            var oModel = oView.getModel();
-
-            var moduleKeys = oView.byId("moduleFilter")?.getSelectedKeys() || [];
-            var statusKeys = oView.byId("statusFilter")?.getSelectedKeys() || [];
-            var userKeys = oView.byId("userFilter")?.getSelectedKeys() || [];
-            var dateKeys = oView.byId("dateFilter")?.getSelectedKeys() || [];
-
-            var baseData = this._fullModules;
-
-            // 🔥 FILTER
-            var filtered = baseData.filter(item => {
-
-                var moduleMatch = moduleKeys.length === 0 || moduleKeys.includes(item.module);
-                var userMatch = userKeys.length === 0 || userKeys.includes(item.user);
-                var dateMatch = dateKeys.length === 0 || dateKeys.includes(item.date);
-
-                return moduleMatch && userMatch && dateMatch;
-            });
-
-            if (filtered.length === 0) {
-                oModel.setProperty("/modules", []);
-                oModel.setProperty("/tableData", []);
-                this._resetKPI();
-                return;
-            }
-
-            // 🔥 STATUS FILTER
-            var finalData = filtered.map(item => {
-
-                return {
-                    module: item.module,
-                    uploaded: (statusKeys.length === 0 || statusKeys.includes("uploaded")) ? item.uploaded : 0,
-                    approved: (statusKeys.length === 0 || statusKeys.includes("approved")) ? item.approved : 0,
-                    pending: (statusKeys.length === 0 || statusKeys.includes("pending")) ? item.pending : 0
-                };
-            });
-
-            oModel.setProperty("/modules", finalData);
-
-            // 🔥 TABLE UPDATE
-            this._updateTable(finalData);
-
-            // 🔥 KPI
-            this._recalculateKPI(finalData);
-        },
-
-        // 🔥 TABLE GENERATION
-        _updateTable: function (data) {
-
-            var tableData = [];
-
-            data.forEach(item => {
-
-                if (item.uploaded > 0) {
-                    tableData.push({
-                        module: item.module,
-                        subModule: "N/A",
-                        loadType: "Uploaded",
-                        template: "Template",
-                        count: item.uploaded
-                    });
-                }
-
-                if (item.approved > 0) {
-                    tableData.push({
-                        module: item.module,
-                        subModule: "N/A",
-                        loadType: "Approved",
-                        template: "Template",
-                        count: item.approved
-                    });
-                }
-
-                if (item.pending > 0) {
-                    tableData.push({
-                        module: item.module,
-                        subModule: "N/A",
-                        loadType: "Pending",
-                        template: "Template",
-                        count: item.pending
-                    });
-                }
-
-            });
-
-            this.getView().getModel().setProperty("/tableData", tableData);
-        },
-
-        // 🔥 KPI
-        _recalculateKPI: function (data) {
-
-            var totalUploaded = 0,
-                totalApproved = 0,
-                totalPending = 0;
-
-            data.forEach(item => {
-                totalUploaded += item.uploaded || 0;
-                totalApproved += item.approved || 0;
-                totalPending += item.pending || 0;
-            });
-
-            var totalTemplates = totalUploaded + totalApproved + totalPending;
-
-            var oModel = this.getView().getModel();
-
-            oModel.setProperty("/totalUploaded", totalUploaded);
-            oModel.setProperty("/totalApproved", totalApproved);
-            oModel.setProperty("/totalPending", totalPending);
-            oModel.setProperty("/totalTemplates", totalTemplates);
-        },
-
-        _resetKPI: function () {
-
-            var oModel = this.getView().getModel();
-
-            oModel.setProperty("/totalUploaded", 0);
-            oModel.setProperty("/totalApproved", 0);
-            oModel.setProperty("/totalPending", 0);
-            oModel.setProperty("/totalTemplates", 0);
-        }
-
-    });
-});
+}
