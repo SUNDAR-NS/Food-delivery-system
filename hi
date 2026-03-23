@@ -7,6 +7,9 @@ sap.ui.define([
 
     return Controller.extend("mfuanalytics.controller.mfureport", {
 
+        // =========================
+        // 🔥 INIT
+        // =========================
         onInit: function () {
 
             var oModel = new JSONModel({
@@ -30,16 +33,20 @@ sap.ui.define([
                     const allKeys = data.value.map(m => m.module);
                     const oMulti = this.byId("moduleFilter");
 
-                    // ✅ select all
+                    // ✅ SELECT ALL
                     oMulti.setSelectedKeys(allKeys);
 
-                    // ✅ FIX DISPLAY TEXT
-                    this._fixMultiComboDisplay(allKeys);
+                    // 🔥 FIX DISPLAY
+                    this._updateDisplay(allKeys);
 
+                    // 🔥 LOAD DATA
                     this.loadDashboard(allKeys);
                 });
         },
 
+        // =========================
+        // 🔥 LOAD DASHBOARD
+        // =========================
         loadDashboard: function (modules) {
 
             fetch("/odata/v4/mfu/getDashboardData", {
@@ -47,9 +54,7 @@ sap.ui.define([
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    module: modules
-                })
+                body: JSON.stringify({ module: modules })
             })
             .then(res => res.json())
             .then(data => {
@@ -67,11 +72,14 @@ sap.ui.define([
             });
         },
 
+        // =========================
+        // 🔥 FILTER CHANGE
+        // =========================
         onFilterChange: function (oEvent) {
 
             const keys = oEvent.getSource().getSelectedKeys();
 
-            this._fixMultiComboDisplay(keys);
+            this._updateDisplay(keys);
 
             if (!keys || keys.length === 0) {
                 this.loadDashboard([]);
@@ -80,8 +88,10 @@ sap.ui.define([
             }
         },
 
-        // 🔥 MAIN FIX HERE
-        _fixMultiComboDisplay: function (keys) {
+        // =========================
+        // 🔥 FIX "+MORE" DISPLAY
+        // =========================
+        _updateDisplay: function (keys) {
 
             const oMulti = this.byId("moduleFilter");
 
@@ -90,20 +100,24 @@ sap.ui.define([
             const first = keys[0];
             const more = keys.length - 1;
 
-            // ❌ REMOVE ALL TOKENS
-            oMulti.destroyTokens();
-
-            // ✅ ADD CUSTOM TOKEN
             let text = first;
+
             if (more > 0) {
                 text = first + " +" + more + " more";
             }
 
+            // ❌ remove default tokens
+            oMulti.destroyTokens();
+
+            // ✅ add custom token
             oMulti.addToken(new Token({
                 text: text
             }));
         },
 
+        // =========================
+        // 🔥 CHART SETTINGS
+        // =========================
         _applyChartSettings: function () {
 
             var oChart = this.byId("idVizFrame");
