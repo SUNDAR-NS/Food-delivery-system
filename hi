@@ -1,90 +1,145 @@
-<Panel class="moduleFilterBox">
-    
-    <HBox class="filterRow" alignItems="Center" justifyContent="SpaceBetween">
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+    "use strict";
 
-        <!-- MODULE -->
-        <VBox class="filterItem">
-            <Text text="Module" class="filterLabel"/>
-            <MultiComboBox
-                id="moduleFilter"
-                width="180px"
-                selectionFinish="onFilterChange"
-                items="{/allModules}">
-                <core:Item key="{module}" text="{module}" />
-            </MultiComboBox>
-        </VBox>
+    return Controller.extend("mfuanalytics.controller.mfureport", {
 
-        <!-- STATUS -->
-        <VBox class="filterItem">
-            <Text text="Status" class="filterLabel"/>
-            <MultiComboBox
-                id="statusFilter"
-                width="180px"
-                selectionFinish="onFilterChange"
-                items="{/statusList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </VBox>
+        onInit: function () {
 
-        <!-- USER -->
-        <VBox class="filterItem">
-            <Text text="User" class="filterLabel"/>
-            <MultiComboBox
-                id="userFilter"
-                width="180px"
-                selectionFinish="onFilterChange"
-                items="{/userList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </VBox>
+            var data = {
 
-        <!-- DATE -->
-        <VBox class="filterItem">
-            <Text text="Created Date" class="filterLabel"/>
-            <MultiComboBox
-                id="dateFilter"
-                width="200px"
-                selectionFinish="onFilterChange"
-                items="{/dateList}">
-                <core:Item key="{key}" text="{text}" />
-            </MultiComboBox>
-        </VBox>
+                // 🔥 MASTER DATA
+                allModules: [
+                    { module: "NFRP", uploaded: 45, approved: 30, pending: 10, user: "Anand", date: "10D" },
+                    { module: "SCBI", uploaded: 70, approved: 50, pending: 15, user: "Sundar", date: "3M" },
+                    { module: "ESG", uploaded: 25, approved: 15, pending: 5, user: "Kiran", date: "6M" },
+                    { module: "ICON", uploaded: 50, approved: 35, pending: 7, user: "Shivani", date: "1Y" }
+                ],
 
-    </HBox>
+                modules: [],
 
-</Panel>
+                // 🔹 FILTER LISTS
+                statusList: [
+                    { key: "uploaded", text: "Uploaded" },
+                    { key: "approved", text: "Approved" },
+                    { key: "pending", text: "Pending" }
+                ],
 
+                userList: [
+                    { key: "Anand", text: "Anand" },
+                    { key: "Sundar", text: "Sundar" },
+                    { key: "Kiran", text: "Kiran" },
+                    { key: "Shivani", text: "Shivani" }
+                ],
 
+                dateList: [
+                    { key: "10D", text: "Last 10 Days" },
+                    { key: "3M", text: "Last 3 Months" },
+                    { key: "6M", text: "Last 6 Months" },
+                    { key: "1Y", text: "Last 1 Year" }
+                ],
 
-/* FILTER CONTAINER */
-.moduleFilterBox {
-    margin-bottom: 15px;
-    border-radius: 12px;
-    background: white;
-    padding: 15px 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
+                // 🔹 KPI (INITIAL = 0 → WILL CALCULATE)
+                totalUploaded: 0,
+                totalApproved: 0,
+                totalPending: 0,
+                totalTemplates: 0
+            };
 
-/* FORCE SINGLE ROW */
-.filterRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+            // INITIAL LOAD
+            data.modules = data.allModules;
+            this._fullModules = data.allModules;
 
-/* EACH FILTER BLOCK */
-.filterItem {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
+            var oModel = new JSONModel(data);
+            this.getView().setModel(oModel);
 
-/* LABEL */
-.filterLabel {
-    font-weight: 600;
-}
+            // 🔥 INITIAL KPI CALCULATION
+            this._recalculateKPI(data.modules);
+        },
 
-/* DROPDOWN SIZE CONTROL */
-.sapMMultiComboBox {
-    min-width: 150px;
-}
+        // 🔥 FILTER HANDLER (ALL FILTERS)
+        onFilterChange: function () {
+
+            var oView = this.getView();
+            var oModel = oView.getModel();
+
+            var moduleKeys = oView.byId("moduleFilter")?.getSelectedKeys() || [];
+            var statusKeys = oView.byId("statusFilter")?.getSelectedKeys() || [];
+            var userKeys = oView.byId("userFilter")?.getSelectedKeys() || [];
+            var dateKeys = oView.byId("dateFilter")?.getSelectedKeys() || [];
+
+            var baseData = this._fullModules;
+
+            // ✅ STEP 1: APPLY ALL FILTERS
+            var filtered = baseData.filter(item => {
+
+                var moduleMatch = moduleKeys.length === 0 || moduleKeys.includes(item.module);
+                var userMatch = userKeys.length === 0 || userKeys.includes(item.user);
+                var dateMatch = dateKeys.length === 0 || dateKeys.includes(item.date);
+
+                return moduleMatch && userMatch && dateMatch;
+            });
+
+            // ✅ STEP 2: NO DATA CASE
+            if (filtered.length === 0) {
+                oModel.setProperty("/modules", []);
+                this._resetKPI();
+                return;
+            }
+
+            // ✅ STEP 3: APPLY STATUS FILTER
+            var finalData = filtered.map(item => {
+
+                return {
+                    module: item.module,
+                    uploaded: (statusKeys.length === 0 || statusKeys.includes("uploaded")) ? item.uploaded : 0,
+                    approved: (statusKeys.length === 0 || statusKeys.includes("approved")) ? item.approved : 0,
+                    pending: (statusKeys.length === 0 || statusKeys.includes("pending")) ? item.pending : 0
+                };
+            });
+
+            // ✅ STEP 4: UPDATE MODEL (CHART)
+            oModel.setProperty("/modules", finalData);
+
+            // ✅ STEP 5: KPI UPDATE
+            this._recalculateKPI(finalData);
+        },
+
+        // 🔥 KPI CALCULATION (CORRECT MATH)
+        _recalculateKPI: function (data) {
+
+            var totalUploaded = 0,
+                totalApproved = 0,
+                totalPending = 0;
+
+            data.forEach(item => {
+                totalUploaded += item.uploaded || 0;
+                totalApproved += item.approved || 0;
+                totalPending += item.pending || 0;
+            });
+
+            var totalTemplates = totalUploaded + totalApproved + totalPending;
+
+            var oModel = this.getView().getModel();
+
+            oModel.setProperty("/totalUploaded", totalUploaded);
+            oModel.setProperty("/totalApproved", totalApproved);
+            oModel.setProperty("/totalPending", totalPending);
+            oModel.setProperty("/totalTemplates", totalTemplates);
+        },
+
+        // 🔥 RESET KPI
+        _resetKPI: function () {
+
+            var oModel = this.getView().getModel();
+
+            oModel.setProperty("/totalUploaded", 0);
+            oModel.setProperty("/totalApproved", 0);
+            oModel.setProperty("/totalPending", 0);
+            oModel.setProperty("/totalTemplates", 0);
+        }
+
+    });
+});
