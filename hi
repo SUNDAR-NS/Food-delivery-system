@@ -1,4 +1,3 @@
-
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -9,97 +8,95 @@ sap.ui.define([
 
         onInit: function () {
 
-    var oModel = new sap.ui.model.json.JSONModel({
-        allModules: [],
-        modules: [],
-        tableData: [],
-        totalUploaded: 0,
-        totalApproved: 0,
-        totalPending: 0,
-        totalTemplates: 0
-    });
+            var oModel = new JSONModel({
+                allModules: [],
+                modules: [],
+                tableData: [],
+                totalUploaded: 0,
+                totalApproved: 0,
+                totalPending: 0,
+                totalTemplates: 0
+            });
 
-    this.getView().setModel(oModel);
+            this.getView().setModel(oModel);
 
-    // 🔥 LOAD DROPDOWN
-    fetch("/odata/v4/mfu/getModules()")
-        .then(res => res.json())
-        .then(data => {
-            oModel.setProperty("/allModules", data.value);
-        });
+            // 🔥 LOAD DROPDOWN
+            fetch("/odata/v4/mfu/getModules()")
+                .then(res => res.json())
+                .then(data => {
+                    oModel.setProperty("/allModules", data.value);
+                });
 
-    // 🔥 LOAD DASHBOARD
-    this.loadDashboard(null);
-},
-
-
-// =========================
-// 🔥 LOAD DASHBOARD
-// =========================
-loadDashboard: function (module) {
-
-    fetch("/odata/v4/mfu/getDashboardData", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
+            // 🔥 LOAD DASHBOARD
+            this.loadDashboard(null);
         },
-        body: JSON.stringify({
-            module: module
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-
-        console.log("API RESPONSE:", data);
-
-        var result = data; // 🔥 FIXED HERE
-
-        var oModel = this.getView().getModel();
-
-        oModel.setProperty("/modules", result.modules || []);
-        oModel.setProperty("/tableData", result.table || []);
-        oModel.setProperty("/totalUploaded", result.uploaded || 0);
-        oModel.setProperty("/totalApproved", result.approved || 0);
-        oModel.setProperty("/totalPending", result.pending || 0);
-        oModel.setProperty("/totalTemplates", result.totalTemplates || 0);
-
-    })
-    .catch(err => {
-        console.error("API ERROR:", err);
-    });
-},
 
 
-// =========================
-// 🔥 FILTER CHANGE
-// =========================
-onFilterChange: function (oEvent) {
+        // =========================
+        // 🔥 LOAD DASHBOARD
+        // =========================
+        loadDashboard: function (module) {
 
-    const keys = oEvent.getSource().getSelectedKeys();
+            fetch("/odata/v4/mfu/getDashboardData", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    module: module
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
 
-    if (!keys || keys.length === 0) {
-        this.loadDashboard(null);
-    } else {
-        this.loadDashboard(keys[0]); // single select for now
-    }
-},
+                console.log("API RESPONSE:", data);
+
+                var result = data;
+
+                var oModel = this.getView().getModel();
+
+                oModel.setProperty("/modules", result.modules || []);
+                oModel.setProperty("/tableData", result.table || []);
+                oModel.setProperty("/totalUploaded", result.uploaded || 0);
+                oModel.setProperty("/totalApproved", result.approved || 0);
+                oModel.setProperty("/totalPending", result.pending || 0);
+                oModel.setProperty("/totalTemplates", result.totalTemplates || 0);
+
+                // 🔥 APPLY CHART COLORS HERE (CORRECT PLACE)
+                var oChart = this.byId("idVizFrame");
+
+                if (oChart) {
+                    oChart.setVizProperties({
+                        plotArea: {
+                            colorPalette: [
+                                "#0070f2", // Uploaded
+                                "#107e3e", // Approved
+                                "#e9730c"  // Pending
+                            ]
+                        }
+                    });
+                }
+
+            })
+            .catch(err => {
+                console.error("API ERROR:", err);
+            });
+        },
 
 
-setTimeout(function () {
-    var oChart = this.byId("idVizFrame");
+        // =========================
+        // 🔥 FILTER CHANGE
+        // =========================
+        onFilterChange: function (oEvent) {
 
-    if (oChart) {
-        oChart.setVizProperties({
-            plotArea: {
-                colorPalette: [
-                    "#0070f2", // Uploaded (Blue)
-                    "#107e3e", // Approved (Green)
-                    "#e9730c"  // Pending (Orange)
-                ]
+            const keys = oEvent.getSource().getSelectedKeys();
+
+            if (!keys || keys.length === 0) {
+                this.loadDashboard(null);
+            } else {
+                this.loadDashboard(keys[0]);
             }
-        });
-    }
-}.bind(this), 500);
+        }
 
     });
 });
