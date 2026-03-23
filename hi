@@ -1,88 +1,55 @@
-.sapMPage {
-    background-color: #f5f7fa;
-}
+<Panel class="moduleFilterBox">
+    
+    <HBox class="filterRow" justifyContent="Start" alignItems="Center" wrap="Wrap">
 
-/* HEADER */
-.sapBlueHeader .sapMBar {
-    background-color: #0a6ed1 !important;
-    color: white !important;
-}
+        <!-- MODULE -->
+        <HBox alignItems="Center" class="singleFilter">
+            <Text text="Module" class="filterLabel"/>
+            <MultiComboBox
+                id="moduleFilter"
+                width="160px"
+                selectionFinish="onFilterChange"
+                items="{/allModules}">
+                <core:Item key="{module}" text="{module}" />
+            </MultiComboBox>
+        </HBox>
 
-/* 🔥 FIX LEFT SPACE */
-.mainContainer {
-    padding: 20px 30px;
-}
+        <!-- STATUS -->
+        <HBox alignItems="Center" class="singleFilter">
+            <Text text="Status" class="filterLabel"/>
+            <MultiComboBox
+                id="statusFilter"
+                width="160px"
+                selectionFinish="onFilterChange"
+                items="{/statusList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </HBox>
 
-/* FILTER */
-.filterBar {
-    margin: 15px 0;
-    gap: 10px;
-}
+        <!-- USER -->
+        <HBox alignItems="Center" class="singleFilter">
+            <Text text="User" class="filterLabel"/>
+            <MultiComboBox
+                id="userFilter"
+                width="160px"
+                selectionFinish="onFilterChange"
+                items="{/userList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </HBox>
 
-.filterLabel {
-    font-weight: bold;
-}
+        <!-- DATE -->
+        <HBox alignItems="Center" class="singleFilter">
+            <Text text="Created Date" class="filterLabel"/>
+            <MultiComboBox
+                id="dateFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/dateList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </HBox>
 
-/* TOP */
-.topContainer {
-    gap: 20px;
-}
+    </HBox>
 
-/* KPI */
-.kpiRow {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.tile {
-    flex: 1;
-    height: 130px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-/* CHART ROW */
-.chartRow {
-    margin-top: 25px;
-    gap: 15px;
-}
-
-.chartBox {
-    flex: 1;
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-}
-
-/* TITLE */
-.panelTitle {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-
-.moduleFilterBox {
-    margin-bottom: 15px;
-    border-radius: 12px;
-    background: white;
-    padding: 15px 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-.filterRow{
-    gap: 20px;
-    margin-bottom: 10px;
-}
-
-.filterLabel{
-    width: 120px;
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
-/* Optional: nicer dropdown */
-.sapMMultiComboBox {
-    border-radius: 8px !important;
-}
+</Panel>
