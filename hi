@@ -1,3 +1,188 @@
+<mvc:View controllerName="mfuanalytics.controller.mfureport"  
+    xmlns:mvc="sap.ui.core.mvc"  
+    xmlns="sap.m"  
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"  
+    xmlns:viz.data="sap.viz.ui5.data"  
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
+
+<Page title="MFU Dashboard" class="sapBlueHeader">  
+
+<VBox class="mainContainer">  
+
+<Panel class="moduleFilterBox">
+    
+    <HBox class="filterRow" alignItems="Center" justifyContent="SpaceBetween">
+
+        <!-- MODULE -->
+        <VBox class="filterItem">
+            <Text text="Module" class="filterLabel"/>
+            <MultiComboBox
+                id="moduleFilter"
+                width="250px"
+                selectionFinish="onFilterChange"
+                items="{/allModules}">
+    <core:Item key="{module}" text="{module}" />
+</MultiComboBox>
+        </VBox>
+
+        <!-- STATUS -->
+        <VBox class="filterItem">
+            <Text text="Status" class="filterLabel"/>
+            <MultiComboBox
+                id="statusFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/statusList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </VBox>
+
+        <!-- USER -->
+        <VBox class="filterItem">
+            <Text text="User" class="filterLabel"/>
+            <MultiComboBox
+                id="userFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/userList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </VBox>
+
+        <!-- DATE -->
+        <VBox class="filterItem">
+            <Text text="Created Date" class="filterLabel"/>
+            <MultiComboBox
+                id="dateFilter"
+                width="200px"
+                selectionFinish="onFilterChange"
+                items="{/dateList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </VBox>
+
+    </HBox>
+
+</Panel>
+
+
+<!-- 🔥 TOP -->
+<HBox class="topContainer">  
+
+    <!-- KPI -->
+    <VBox width="35%">  
+
+        <HBox class="kpiRow">  
+            <GenericTile header="Total Uploaded" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalUploaded}"/>
+                </TileContent>  
+            </GenericTile>  
+
+            <GenericTile header="Total Approved" class="tile">
+                <TileContent>
+                    <NumericContent value="{/totalApproved}"/>
+                </TileContent>  
+            </GenericTile>  
+        </HBox>  
+
+        <HBox class="kpiRow">  
+            <GenericTile header="Total Rejected" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalRejected}"/>
+                </TileContent>  
+            </GenericTile>  
+
+            <GenericTile header="Total Templates" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalTemplates}"/>
+                </TileContent>  
+            </GenericTile>  
+        </HBox>  
+
+    </VBox>  
+
+    <!-- STACKED CHART -->
+    <Panel width="700px" headerText="MFU Templates by Modules">
+
+        <viz:VizFrame id="idVizFrame" vizType="stacked_column" height="320px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}" />
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}" />
+                        <viz.data:MeasureDefinition name="Rejected" value="{rejected}" />
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure"
+                    values="Uploaded,Approved,Rejected"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
+                    values="Module"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
+
+    </Panel>  
+
+</HBox>  
+
+<!-- 🔥 CHARTS -->
+
+<!-- TABLE -->
+<Panel class="sapUiMediumMarginTop">
+
+    <!-- HEADER TOOLBAR -->
+    <headerToolbar>
+        <Toolbar>
+            <Title text="MFU Details"/>
+            <ToolbarSpacer/>
+            <Text text="Total Records: {/tableData/length}"/>
+        </Toolbar>
+    </headerToolbar>
+
+    <!-- SCROLL CONTAINER -->
+    <ScrollContainer height="300px" vertical="true">
+
+        <Table items="{/tableData}" width="100%">
+
+            <columns>
+                <Column><Text text="Module"/></Column>
+                <Column><Text text="Sub Module"/></Column>
+                <Column><Text text="Load Type"/></Column>
+                <Column><Text text="Template"/></Column>
+                <Column><Text text="Count"/></Column>
+            </columns>
+
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <Text text="{module}"/>
+                        <Text text="{subModule}"/>
+                        <Text text="{loadType}"/>
+                        <Text text="{template}"/>
+                        <Text text="{count}"/>
+                    </cells>
+                </ColumnListItem>
+            </items>
+
+        </Table>
+
+    </ScrollContainer>
+
+</Panel>
+
+</VBox>  
+</Page>  
+</mvc:View>
+
+
 /* PAGE BACKGROUND */
 .sapMPage {
     background-color: #f5f7fa;
