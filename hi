@@ -1,139 +1,65 @@
-/* PAGE BACKGROUND */
-.sapMPage {
-    background-color: #f5f7fa;
-}
-
-/* HEADER */
-.sapBlueHeader .sapMBar {
-    background-color: #0a6ed1 !important;
-    color: white !important;
-}
-
-/* MAIN CONTAINER */
-.mainContainer {
-    padding: 20px 30px;
-}
-
 /* ========================= */
-/* 🔥 FILTER SECTION */
+/* 🔥 KPI TILE ENHANCEMENT */
 /* ========================= */
 
-.moduleFilterBox {
-    margin-bottom: 15px;
-    border-radius: 12px;
-    background: white;
-    padding: 15px 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-.filterRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.filterItem {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.filterLabel {
-    font-weight: 600;
-}
-
-.sapMMultiComboBox {
-    min-width: 150px;
-}
-
-/* ========================= */
-/* 🔥 KPI SECTION */
-/* ========================= */
-
-.topContainer {
-    gap: 20px;
-}
-
-.kpiRow {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
+/* Tile container */
 .tile {
     flex: 1;
     height: 130px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-/* ========================= */
-/* 🔥 CHART SECTION */
-/* ========================= */
-
-.chartRow {
-    margin-top: 25px;
-    gap: 15px;
-}
-
-.chartBox {
-    flex: 1;
-    background: white;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ffffff, #f3f6f9);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    transition: all 0.3s ease-in-out;
     padding: 10px;
-    border-radius: 10px;
 }
 
-.panelTitle {
+/* Hover effect */
+.tile:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+/* Header text */
+.tile .sapMGTHeader {
+    font-weight: 600;
+    font-size: 14px;
+    color: #444;
     text-align: center;
+}
+
+/* Numeric value */
+.tile .sapMNCValue {
+    font-size: 28px;
     font-weight: bold;
+    color: #222;
+}
+
+/* Icon styling */
+.tile .sapUiIcon {
+    font-size: 22px;
     margin-bottom: 5px;
 }
 
 /* ========================= */
-/* 🔥 PROFESSIONAL TABLE UI */
+/* 🔥 COLOR THEMES */
 /* ========================= */
 
-/* Remove LEFT empty column (selection/nav column) */
-.sapMListTblNavCol {
-    display: none !important;
-    width: 0 !important;
+/* Uploaded → Blue */
+.tile:nth-child(1) .sapUiIcon {
+    color: #0070f2;
 }
 
-/* Fix table layout */
-.sapMListTbl {
-    border: 1px solid #c8c8c8;
-    border-radius: 6px;
-    width: 100%;
-    table-layout: fixed;
+/* Approved → Green */
+.tile:nth-child(2) .sapUiIcon {
+    color: #107e3e;
 }
 
-/* Header cells */
-.sapMListTblHeaderCell {
-    border: 1px solid #c8c8c8 !important;
-    background-color: #f4f6f8;
-    font-weight: 600;
-    text-align: center;
+/* Rejected → Red */
+.tile:nth-child(3) .sapUiIcon {
+    color: #bb0000;
 }
 
-/* Data cells */
-.sapMListTblCell {
-    border: 1px solid #e0e0e0 !important;
-    text-align: center;
-}
-
-/* Remove RIGHT extra space */
-.sapMListTblCell:last-child {
-    border-right: none !important;
-}
-
-/* Zebra rows */
-.sapMListTblRow:nth-child(even) {
-    background-color: #fafafa;
-}
-
-/* Hover effect */
-.sapMListTblRow:hover {
-    background-color: #eaf4ff;
-    transition: 0.2s;
+/* Templates → Purple */
+.tile:nth-child(4) .sapUiIcon {
+    color: #6a1b9a;
 }
