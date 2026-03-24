@@ -1,280 +1,54 @@
-<mvc:View controllerName="mfuanalytics.controller.mfureport"  
-    xmlns:mvc="sap.ui.core.mvc"  
-    xmlns="sap.m"  
-    xmlns:core="sap.ui.core"
-    xmlns:viz="sap.viz.ui5.controls"  
-    xmlns:viz.data="sap.viz.ui5.data"  
-    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
+<Page class="sapBlueHeader">
 
-<Page title="MFU Dashboard" class="sapBlueHeader">  
+    <customHeader>
+        <Bar class="customHeaderBar">
 
-<VBox class="mainContainer">  
+            <contentMiddle>
+                <HBox alignItems="Center" gap="10px" justifyContent="Center" width="100%">
+                    
+                    <Icon src="sap-icon://business-objects-experience" size="1.6rem"/>
+                    
+                    <VBox>
+                        <Title text="MFU Dashboard"/>
+                        <Text text="Monitoring & Analytics"/>
+                    </VBox>
 
-<!-- FILTER -->
-<Panel class="moduleFilterBox">
-<HBox class="filterRow" alignItems="Center" justifyContent="SpaceBetween">
+                </HBox>
+            </contentMiddle>
 
-<VBox class="filterItem">
-<Text text="Module" class="filterLabel"/>
-<MultiComboBox id="moduleFilter" width="210px"
-selectionFinish="onFilterChange"
-items="{/allModules}">
-<core:Item key="{module}" text="{module}" />
-</MultiComboBox>
-</VBox>
-
-<VBox class="filterItem">
-<Text text="Status" class="filterLabel"/>
-<MultiComboBox id="statusFilter" width="180px"
-selectionFinish="onFilterChange"
-items="{/statusList}">
-<core:Item key="{key}" text="{text}" />
-</MultiComboBox>
-</VBox>
-
-<VBox class="filterItem">
-<Text text="User" class="filterLabel"/>
-<MultiComboBox id="userFilter" width="180px"
-selectionFinish="onFilterChange"
-items="{/userList}">
-<core:Item key="{key}" text="{text}" />
-</MultiComboBox>
-</VBox>
-
-<VBox class="filterItem">
-<Text text="Created Date" class="filterLabel"/>
-<MultiComboBox id="dateFilter" width="200px"
-selectionFinish="onFilterChange"
-items="{/dateList}">
-<core:Item key="{key}" text="{text}" />
-</MultiComboBox>
-</VBox>
-
-</HBox>
-</Panel>
-
-<!-- KPI + CHART -->
-<HBox class="topContainer">  
-
-<VBox width="35%">  
-
-<HBox class="kpiRow">  
-<GenericTile header="Total Uploaded" class="tile uploadedTile">  
-<TileContent>
-<NumericContent value="{/totalUploaded}" icon="sap-icon://upload" valueColor="Neutral" tooltip=" "/>
-</TileContent>  
-</GenericTile>  
-
-<GenericTile header="Total Approved" class="tile approvedTile">
-<TileContent>
-<NumericContent value="{/totalApproved}" icon="sap-icon://accept" valueColor="Neutral" tooltip=" "/>
-</TileContent>  
-</GenericTile>  
-</HBox>  
-
-<HBox class="kpiRow">  
-<GenericTile header="Total Rejected" class="tile rejectedTile">  
-<TileContent>
-<NumericContent value="{/totalRejected}" icon="sap-icon://decline" valueColor="Neutral" tooltip=" "/>
-</TileContent>  
-</GenericTile>  
-
-<GenericTile header="Total Templates" class="tile templateTile">  
-<TileContent>
-<NumericContent value="{/totalTemplates}" icon="sap-icon://document-text" valueColor="Neutral" tooltip=" "/>
-</TileContent>  
-</GenericTile>  
-</HBox>  
-
-</VBox>  
-
-<Panel width="700px" headerText="MFU Templates by Modules">
-<viz:VizFrame id="idVizFrame" vizType="stacked_column" height="320px" width="100%">
-<viz:dataset>
-<viz.data:FlattenedDataset data="{/modules}">
-<viz.data:dimensions>
-<viz.data:DimensionDefinition name="Module" value="{module}" />
-</viz.data:dimensions>
-<viz.data:measures>
-<viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
-<viz.data:MeasureDefinition name="Approved" value="{approved}" />
-<viz.data:MeasureDefinition name="Rejected" value="{rejected}" />
-</viz.data:measures>
-</viz.data:FlattenedDataset>
-</viz:dataset>
-
-<viz:feeds>
-<viz.feeds:FeedItem uid="valueAxis" type="Measure"
-values="Uploaded,Approved,Rejected"/>
-<viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
-values="Module"/>
-</viz:feeds>
-</viz:VizFrame>
-</Panel>  
-
-</HBox>  
-
-<!-- TABLE -->
-<Panel class="sapUiMediumMarginTop">
-
-<headerToolbar>
-<Toolbar>
-<Title text="MFU Details" icon="sap-icon://table-chart"/>
-<ToolbarSpacer/>
-<Text text="Total Records: {/tableData/length}"/>
-</Toolbar>
-</headerToolbar>
-
-<ScrollContainer height="300px" vertical="true">
-
-<Table sticky="ColumnHeaders" inset="false" items="{/tableData}" width="100%">
-
-<columns>
-<Column><Text text="Module"/></Column>
-<Column><Text text="Sub Module"/></Column>
-<Column><Text text="Load Type"/></Column>
-<Column><Text text="Template"/></Column>
-<Column><Text text="Count"/></Column>
-</columns>
-
-<items>
-<ColumnListItem>
-<cells>
-<Text text="{module}"/>
-<Text text="{subModule}"/>
-<Text text="{loadType}"/>
-<Text text="{template}"/>
-<Text text="{count}"/>
-</cells>
-</ColumnListItem>
-</items>
-
-</Table>
-</ScrollContainer>
-
-</Panel>
-
-</VBox>  
-</Page>  
-</mvc:View>
+        </Bar>
+    </customHeader>
 
 
 
 
-/* PAGE */
-.sapMPage {
-    background-color: #f5f7fa;
-}
+/* ========================= */
+/* 🔥 CLEAN PROFESSIONAL HEADER */
+/* ========================= */
 
-/* HEADER */
-.sapBlueHeader .sapMBar {
-    background-color: #0a6ed1 !important;
-    color: white;
-}
-
-/* MAIN */
-.mainContainer {
-    padding: 20px 30px;
-}
-
-/* FILTER */
-.moduleFilterBox {
-    margin-bottom: 15px;
-    border-radius: 12px;
-    background: white;
-    padding: 15px 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-.filterRow {
+.customHeaderBar {
+    background: linear-gradient(90deg, #0a6ed1, #0854a0);
+    height: 70px;
     display: flex;
-    justify-content: space-between;
+    align-items: center;
 }
 
-.filterItem {
-    display: flex;
-    flex-direction: column;
-}
-
-.filterLabel {
-    font-weight: 600;
-}
-
-/* KPI */
-.topContainer {
-    gap: 20px;
-}
-
-.kpiRow {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.tile {
-    flex: 1;
-    height: 130px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #ffffff, #f3f6f9);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
-    transition: 0.3s;
-}
-
-.tile:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-}
-
-.tile .sapMNCValue {
-    font-size: 28px;
+/* Title */
+.customHeaderBar .sapMTitle {
+    color: white !important;
     font-weight: bold;
-}
-
-/* ICON COLORS */
-.sapMNCIconImage {
-    color: inherit !important;
-}
-
-.uploadedTile .sapMNCIconImage {
-    color: #0070f2 !important;
-}
-
-.approvedTile .sapMNCIconImage {
-    color: #107e3e !important;
-}
-
-.rejectedTile .sapMNCIconImage {
-    color: #bb0000 !important;
-}
-
-.templateTile .sapMNCIconImage {
-    color: #6a1b9a !important;
-}
-
-/* TABLE */
-.sapMListTblNavCol {
-    display: none !important;
-}
-
-.sapMListTbl {
-    border: 1px solid #c8c8c8;
-}
-
-.sapMListTblHeaderCell {
-    border: 1px solid #c8c8c8 !important;
-    background-color: #f4f6f8;
+    font-size: 18px;
     text-align: center;
 }
 
-.sapMListTblCell {
-    border: 1px solid #e0e0e0 !important;
+/* Subtitle */
+.customHeaderBar .sapMText {
+    color: #dbe8ff !important;
+    font-size: 12px;
     text-align: center;
 }
 
-.sapMListTblRow:nth-child(even) {
-    background-color: #fafafa;
-}
-
-.sapMListTblRow:hover {
-    background-color: #eaf4ff;
+/* Icon */
+.customHeaderBar .sapUiIcon {
+    color: white !important;
 }
