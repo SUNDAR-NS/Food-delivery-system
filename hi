@@ -1,3 +1,151 @@
+/* PAGE BACKGROUND */
+.sapMPage {
+    background-color: #f5f7fa;
+}
+
+/* HEADER */
+.sapBlueHeader .sapMBar {
+    background-color: #0a6ed1 !important;
+    color: white !important;
+}
+
+/* MAIN CONTAINER */
+.mainContainer {
+    padding: 20px 30px;
+}
+
+/* ========================= */
+/* 🔥 FILTER SECTION */
+/* ========================= */
+
+/* FILTER CONTAINER */
+.moduleFilterBox {
+    margin-bottom: 15px;
+    border-radius: 12px;
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* FORCE SINGLE ROW */
+.filterRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* EACH FILTER BLOCK */
+.filterItem {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* LABEL */
+.filterLabel {
+    font-weight: 600;
+}
+
+/* DROPDOWN SIZE CONTROL */
+.sapMMultiComboBox {
+    min-width: 150px;
+}
+
+/* ========================= */
+/* 🔥 KPI SECTION */
+/* ========================= */
+
+.topContainer {
+    gap: 20px;
+}
+
+/* KPI ROW */
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* KPI TILE */
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* ========================= */
+/* 🔥 CHART SECTION */
+/* ========================= */
+
+.chartRow {
+    margin-top: 25px;
+    gap: 15px;
+}
+
+/* CHART BOX */
+.chartBox {
+    flex: 1;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* CHART TITLE */
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* ========================= */
+/* 🔥 PROFESSIONAL TABLE UI */
+/* ========================= */
+
+/* Table outer border */
+.sapMTable {
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #ffffff;
+}
+
+/* Header styling */
+.sapMTableTH {
+    background-color: #f4f6f8;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 2px solid #c0c0c0;
+    border-right: 1px solid #d9d9d9;
+    padding: 10px;
+}
+
+/* Cell styling */
+.sapMTableTD {
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
+    padding: 8px;
+}
+
+/* Remove last column border */
+.sapMTableTH:last-child,
+.sapMTableTD:last-child {
+    border-right: none;
+}
+
+/* Zebra rows */
+.sapMListTblRow:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* Hover effect */
+.sapMListTblRow:hover {
+    background-color: #eaf4ff;
+    transition: 0.2s;
+}
+
 /* 🔥 STRONG TABLE GRID BORDERS */
 
 /* Table outer border */
@@ -29,3 +177,5 @@
 .sapMListTblRow:nth-child(even) {
     background-color: #fafafa;
 }
+
+this is my css now, add here and give - remove both the left side and right side empty column and give full code so i copy paste it
