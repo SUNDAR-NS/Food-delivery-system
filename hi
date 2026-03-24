@@ -1,46 +1,31 @@
-/* ========================= */
-/* 🔥 PROFESSIONAL TABLE UI */
-/* ========================= */
+/* 🔥 STRONG TABLE GRID BORDERS */
 
 /* Table outer border */
-.sapMTable {
-    border: 1px solid #d9d9d9;
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: #ffffff;
+.sapMListTbl {
+    border: 1px solid #c8c8c8;
+    border-radius: 6px;
 }
 
-/* Header styling */
-.sapMTableTH {
+/* Header cells */
+.sapMListTblHeaderCell {
+    border: 1px solid #c8c8c8 !important;
     background-color: #f4f6f8;
     font-weight: 600;
     text-align: center;
-    border-bottom: 2px solid #c0c0c0;
-    border-right: 1px solid #d9d9d9;
-    padding: 10px;
 }
 
-/* Cell styling */
-.sapMTableTD {
+/* Data cells */
+.sapMListTblCell {
+    border: 1px solid #e0e0e0 !important;
     text-align: center;
-    border-bottom: 1px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
-    padding: 8px;
 }
 
-/* Remove last column border */
-.sapMTableTH:last-child,
-.sapMTableTD:last-child {
-    border-right: none;
+/* Row hover */
+.sapMListTblRow:hover {
+    background-color: #eaf4ff;
 }
 
 /* Zebra rows */
 .sapMListTblRow:nth-child(even) {
     background-color: #fafafa;
-}
-
-/* Hover effect */
-.sapMListTblRow:hover {
-    background-color: #eaf4ff;
-    transition: 0.2s;
 }
