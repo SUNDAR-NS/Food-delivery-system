@@ -1,3 +1,207 @@
+<mvc:View controllerName="mfuanalytics.controller.mfureport"  
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"  
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"  
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
+
+<Page title="MFU Dashboard" class="sapBlueHeader">  
+
+<VBox class="mainContainer">  
+
+<!-- FILTER -->
+<Panel class="moduleFilterBox">
+<HBox alignItems="Center" justifyContent="SpaceBetween">
+
+<VBox>
+<Text text="Module"/>
+<MultiComboBox id="moduleFilter"
+selectionFinish="onFilterChange"
+items="{/allModules}" showClearIcon="true">
+<core:Item key="{module}" text="{module}" />
+</MultiComboBox>
+</VBox>
+
+</HBox>
+</Panel>
+
+<!-- KPI + CHART -->
+<HBox>  
+
+<VBox width="35%">  
+
+<HBox>  
+<GenericTile header="Total Uploaded">  
+<TileContent>
+<NumericContent value="{/totalUploaded}" icon="sap-icon://upload"/>
+</TileContent>  
+</GenericTile>  
+
+<GenericTile header="Total Approved">
+<TileContent>
+<NumericContent value="{/totalApproved}" icon="sap-icon://accept"/>
+</TileContent>  
+</GenericTile>  
+</HBox>  
+
+<HBox>  
+<GenericTile header="Total Rejected">  
+<TileContent>
+<NumericContent value="{/totalRejected}" icon="sap-icon://decline"/>
+</TileContent>  
+</GenericTile>  
+
+<GenericTile header="Total Templates">  
+<TileContent>
+<NumericContent value="{/totalTemplates}" icon="sap-icon://document-text"/>
+</TileContent>  
+</GenericTile>  
+</HBox>  
+
+</VBox>  
+
+<!-- CHART -->
+<Panel width="700px">
+
+<Toolbar>
+<Title text="MFU Templates by Modules"/>
+<ToolbarSpacer/>
+<Button text="Treemap" press="onToggleChart"/>
+</Toolbar>
+
+<VBox id="vizContainer">
+<viz:VizFrame id="idVizFrame" vizType="stacked_column" height="320px">
+
+<viz:dataset>
+<viz.data:FlattenedDataset data="{/modules}">
+<viz.data:dimensions>
+<viz.data:DimensionDefinition name="Module" value="{module}" />
+</viz.data:dimensions>
+<viz.data:measures>
+<viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
+<viz.data:MeasureDefinition name="Approved" value="{approved}" />
+<viz.data:MeasureDefinition name="Rejected" value="{rejected}" />
+</viz.data:measures>
+</viz.data:FlattenedDataset>
+</viz:dataset>
+
+<viz:feeds>
+<viz.feeds:FeedItem uid="valueAxis" type="Measure"
+values="Uploaded,Approved,Rejected"/>
+<viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
+values="Module"/>
+</viz:feeds>
+
+</viz:VizFrame>
+</VBox>
+
+<VBox id="treemapContainer" visible="false">
+<core:HTML content="<div id='treemapChart' style='height:320px'></div>" />
+</VBox>
+
+</Panel>  
+
+</HBox>  
+
+<!-- PIE + SANKEY -->
+<HBox>
+
+<VBox width="50%">
+<Text text="Templates by Count"/>
+<viz:VizFrame vizType="pie" height="200px">
+
+<viz:dataset>
+<viz.data:FlattenedDataset data="{/pieModules}">
+<viz.data:dimensions>
+<viz.data:DimensionDefinition name="Module" value="{module}"/>
+</viz.data:dimensions>
+<viz.data:measures>
+<viz.data:MeasureDefinition name="Approved" value="{approved}"/>
+</viz.data:measures>
+</viz.data:FlattenedDataset>
+</viz:dataset>
+
+<viz:feeds>
+<viz.feeds:FeedItem uid="size" type="Measure" values="Approved"/>
+<viz.feeds:FeedItem uid="color" type="Dimension" values="Module"/>
+</viz:feeds>
+
+</viz:VizFrame>
+</VBox>
+
+<VBox width="50%">
+<Text text="Top MFU Usage"/>
+<core:HTML content="<div id='sankeyChart' style='height:200px'></div>" />
+</VBox>
+
+</HBox>
+
+<!-- TABLE -->
+<Table items="{/tableData}" mode="SingleSelectMaster">
+
+<columns>
+<Column><Text text="Module"/></Column>
+<Column><Text text="Sub Module"/></Column>
+<Column><Text text="Load Type"/></Column>
+<Column><Text text="Template"/></Column>
+<Column><Text text="Count"/></Column>
+</columns>
+
+<items>
+<ColumnListItem type="Active" press="onRowPress">
+<cells>
+<Text text="{module}"/>
+<Text text="{subModule}"/>
+<Text text="{loadType}"/>
+<Text text="{template}"/>
+<Text text="{count}"/>
+</cells>
+</ColumnListItem>
+</items>
+
+</Table>
+
+</VBox>  
+</Page>  
+
+<!-- DIALOG -->
+<Dialog id="templateDialog" title="Template Details">
+<content>
+
+<ObjectHeader
+title="{detail>/template}"
+intro="{detail>/module}"/>
+
+<Table items="{detail>/rows}">
+<columns>
+<Column><Text text="Property"/></Column>
+<Column><Text text="Value"/></Column>
+</columns>
+
+<items>
+<ColumnListItem>
+<cells>
+<Text text="{detail>key}"/>
+<Text text="{detail>value}"/>
+</cells>
+</ColumnListItem>
+</items>
+
+</Table>
+
+</content>
+
+<endButton>
+<Button text="Close" press="onCloseDialog"/>
+</endButton>
+
+</Dialog>
+
+</mvc:View>
+
+
+
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel"
@@ -8,9 +212,12 @@ sap.ui.define([
 
         onInit: function () {
 
+            this._showTreemap = false;
+
             var oModel = new JSONModel({
                 allModules: [],
                 modules: [],
+                pieModules: [],
                 tableData: [],
                 totalUploaded: 0,
                 totalApproved: 0,
@@ -20,34 +227,25 @@ sap.ui.define([
 
             this.getView().setModel(oModel);
 
-            setTimeout(()=>{
-                document.activeElement.blur();
-            },100)
-
-            // LOAD MODULES
             fetch("/odata/v4/mfu/getModules()")
                 .then(res => res.json())
                 .then(data => {
 
                     oModel.setProperty("/allModules", data.value);
 
-                    const allKeys = data.value.map(m => m.module);
+                    const keys = data.value.map(m => m.module);
+                    this.byId("moduleFilter").setSelectedKeys(keys);
 
-                    this.byId("moduleFilter").setSelectedKeys(allKeys);
-                    this.loadDashboard(allKeys);
+                    this.loadDashboard(keys);
                 });
         },
-        // LOAD DASHBOARD
+
         loadDashboard: function (modules) {
 
             fetch("/odata/v4/mfu/getDashboardData", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    module: modules
-                })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ module: modules })
             })
             .then(res => res.json())
             .then(data => {
@@ -55,478 +253,110 @@ sap.ui.define([
                 var oModel = this.getView().getModel();
 
                 oModel.setProperty("/modules", data.modules || []);
+                oModel.setProperty("/pieModules", data.modules || []);
                 oModel.setProperty("/tableData", data.table || []);
+
                 oModel.setProperty("/totalUploaded", data.uploaded || 0);
                 oModel.setProperty("/totalApproved", data.approved || 0);
                 oModel.setProperty("/totalRejected", data.rejected || 0);
                 oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
 
                 this._applyChartSettings();
-            })
-            .catch(err => {
-                console.error("API ERROR:", err);
+
+                setTimeout(() => this._renderSankey(), 200);
             });
         },
 
-        // FILTER CHANGE
         onFilterChange: function (oEvent) {
-
-            const keys = oEvent.getSource().getSelectedKeys();
-
-            if (!keys || keys.length === 0) {
-                this.loadDashboard([]);
-            } else {
-                this.loadDashboard(keys);
-            }
+            this.loadDashboard(oEvent.getSource().getSelectedKeys());
         },
 
-        // CHART SETTINGS
         _applyChartSettings: function () {
-
             var oChart = this.byId("idVizFrame");
-
             if (oChart) {
                 oChart.setVizProperties({
-
-                    title: {
-                        visible: false
-                    },
-
-                    // ✅ Colors
                     plotArea: {
-                        colorPalette: [
-                            "#0070f2", 
-                            "#107e3e", 
-                            "#bb0000" 
-                        ]
-                    },
-
-                    interaction: {
-                        tooltip: {
-                            visible: true
-                        }
+                        colorPalette: ["#0070f2","#107e3e","#bb0000"]
                     }
                 });
             }
-        }
-
-    });
-});
-
-Above is my code, below is her code if she used any static other than my code means use that, Below is her code
-
-
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-    "use strict";
-
-    return Controller.extend("mfuanalytics.controller.mfureport", {
-        onInit: function () {
-            this._showTreemap = false;
-            var data = {
-                allModules: [
-                    { module: "NFRP", uploaded: 45, approved: 30, pending: 10 },
-                    { module: "SCBI", uploaded: 70, approved: 50, pending: 15 },
-                    { module: "ESG", uploaded: 25, approved: 15, pending: 5 },
-                    { module: "ICON", uploaded: 50, approved: 35, pending: 7 }
-                ],
-                // ✅ DISPLAY DATA (FILTERED)
-                modules: [],
-                pieModules: [],
-                // 🔹 MONTHLY
-                monthly: [
-                    { month: "Jan", value: 10 },
-                    { month: "Feb", value: 20 },
-                    { month: "Mar", value: 15 }
-                ],
-                // 🔹 QUARTERLY
-                quarterly: [
-                    { quarter: "Q1", value: 40 },
-                    { quarter: "Q2", value: 25 },
-                    { quarter: "Q3", value: 30 }
-                ],
-                // 🔹 YEARLY
-                yearly: [
-                    { year: "2022", value: 50 },
-                    { year: "2023", value: 70 },
-                    { year: "2024", value: 60 }
-                ],
-                // 🔹 TABLE
-                tableData: [
-                    { module: "NFRP", subModule: "Mapping master", loadType: "Upload", template: "Temp1", count: 10 },
-                    { module: "SCBI", subModule: "Config master", loadType: "Truncate", template: "Temp2", count: 25 }
-                ],
-                // 🔹 KPI TOTALS (INITIAL)
-                totalUploaded: 190,
-                totalApproved: 130,
-                totalPending: 37,
-                totalTemplates: 4
-            };
-            // ✅ INITIAL LOAD
-            data.modules = data.allModules;
-            data.pieModules = data.allModules; 
-            // ✅ BACKUP
-            this._fullModules = data.allModules;
-            // ✅ MODEL
-            var oModel = new JSONModel(data);
-            this.getView().setModel(oModel);
         },
 
         onToggleChart: function (oEvent) {
+
             this._showTreemap = !this._showTreemap;
+
             this.byId("vizContainer").setVisible(!this._showTreemap);
             this.byId("treemapContainer").setVisible(this._showTreemap);
-            oEvent.getSource().setText(
-                this._showTreemap ? "Chart" : "Treemap"
-            );
+
+            oEvent.getSource().setText(this._showTreemap ? "Chart" : "Treemap");
+
             if (this._showTreemap) {
-                setTimeout(this._renderTreemap.bind(this), 200);
+                setTimeout(() => this._renderTreemap(), 200);
             }
         },
 
         _renderTreemap: function () {
-            var treemapDom = document.getElementById("treemapChart");
-            if (!treemapDom) return;
-            var treemapChart = echarts.init(treemapDom);
-            var option = {
-                tooltip: { formatter: '{b}' },
+
+            var chart = echarts.init(document.getElementById("treemapChart"));
+
+            chart.setOption({
                 series: [{
                     type: "treemap",
-                    nodeClick: "zoomToNode",
-                    leafDepth: 1,
-                    breadcrumb: { show: true },
-                    label: { show: true, formatter: "{b}" },
                     data: [
-                    {
-                        name: "NFRP",
-                        children: [
-                            {
-                                name: "Approved",
-                                children: [
-                                    {
-                                        name: "NFRP_PAYMENT_V1",
-                                        value: 12,
-                                        meta: {
-                                            user: "Rahul Sharma",
-                                            created: "12-Feb-2026",
-                                            approved: "13-Feb-2026",
-                                            module: "NFRP",
-                                            submodule: "Payments",
-                                            status: "Approved"
-                                        }
-                                    },
-                                    {
-                                        name: "NFRP_VENDOR_UPLOAD",
-                                        value: 8,
-                                        meta: {
-                                            user: "Amit Patel",
-                                            created: "10-Feb-2026",
-                                            approved: "11-Feb-2026",
-                                            module: "NFRP",
-                                            submodule: "Vendor",
-                                            status: "Approved"
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                name: "Pending",
-                                children: [
-                                    {
-                                        name: "NFRP_GL_MAPPING",
-                                        value: 5,
-                                        meta: {
-                                            user: "Priya Shah",
-                                            created: "15-Feb-2026",
-                                            approved: "-",
-                                            module: "NFRP",
-                                            submodule: "Finance",
-                                            status: "Pending"
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                name: "Rejected",
-                                children: [
-                                    {
-                                        name: "NFRP_COST_CENTER",
-                                        value: 3,
-                                        meta: {
-                                            user: "Neha Jain",
-                                            created: "08-Feb-2026",
-                                            approved: "-",
-                                            module: "NFRP",
-                                            submodule: "CO",
-                                            status: "Rejected"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-
-                    {
-                        name: "SCBI",
-                        children: [
-                            {
-                                name: "Approved",
-                                children: [
-                                    {
-                                        name: "SCBI_LOAN_TEMPLATE_V2",
-                                        value: 14,
-                                        meta: {
-                                            user: "David Lee",
-                                            created: "01-Feb-2026",
-                                            approved: "02-Feb-2026",
-                                            module: "SCBI",
-                                            submodule: "Loans",
-                                            status: "Approved"
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                name: "Pending",
-                                children: [
-                                    {
-                                        name: "SCBI_CUSTOMER_MASTER",
-                                        value: 6,
-                                        meta: {
-                                            user: "John Miller",
-                                            created: "14-Feb-2026",
-                                            approved: "-",
-                                            module: "SCBI",
-                                            submodule: "Customer",
-                                            status: "Pending"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-
-                    {
-                        name: "ICON",
-                        children: [
-                            {
-                                name: "Approved",
-                                children: [
-                                    {
-                                        name: "ICON_INVOICE_UPLOAD",
-                                        value: 9,
-                                        meta: {
-                                            user: "Arjun Verma",
-                                            created: "05-Feb-2026",
-                                            approved: "06-Feb-2026",
-                                            module: "ICON",
-                                            submodule: "Billing",
-                                            status: "Approved"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-
-                    {
-                        name: "Treasury",
-                        children: [
-                            {
-                                name: "Approved",
-                                children: [
-                                    {
-                                        name: "TRS_CASHFLOW_TEMPLATE",
-                                        value: 7,
-                                        meta: {
-                                            user: "Finance Team",
-                                            created: "03-Feb-2026",
-                                            approved: "04-Feb-2026",
-                                            module: "Treasury",
-                                            submodule: "Cashflow",
-                                            status: "Approved"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-
-                    {
-                        name: "ESG",
-                        children: [
-                            {
-                                name: "Pending",
-                                children: [
-                                    {
-                                        name: "ESG_EMISSION_UPLOAD",
-                                        value: 4,
-                                        meta: {
-                                            user: "ESG Team",
-                                            created: "16-Feb-2026",
-                                            approved: "-",
-                                            module: "ESG",
-                                            submodule: "Emissions",
-                                            status: "Pending"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
+                        { name: "Approved", value: 100 },
+                        { name: "Rejected", value: 40 }
                     ]
                 }]
-            };
-            treemapChart.setOption(option);
-
-            var that = this;
-            treemapChart.on("click", function (params) {
-                if (params.data && params.data.meta) {
-                    var meta = params.data.meta;
-                    var statusState = "None";
-                    if (meta.status === "Approved") statusState = "Success";
-                    if (meta.status === "Pending") statusState = "Warning";
-                    if (meta.status === "Rejected") statusState = "Error";
-                    var oModel = new sap.ui.model.json.JSONModel({
-                        template: params.data.name,
-                        module: meta.module,
-                        submodule: meta.submodule,
-                        user: meta.user,
-                        status: meta.status,
-                        statusState: statusState,
-                        rows: [
-                            { key: "Created At", value: meta.created },
-                            { key: "Approved At", value: meta.approved },
-                            // { key: "Module", value: meta.module },
-                            // { key: "SubModule", value: meta.submodule },
-                            // { key: "User", value: meta.user }
-                        ]
-                    });
-                    that.getView().setModel(oModel, "detail");
-                    that.byId("templateDialog").open();
-                }
             });
+
+            chart.on("click", (e) => {
+                this.getView().setModel(new JSONModel({
+                    template: e.name,
+                    module: "MFU",
+                    rows: [{ key: "Info", value: "Static" }]
+                }), "detail");
+
+                this.byId("templateDialog").open();
+            });
+        },
+
+        _renderSankey: function () {
+
+            var chart = echarts.init(document.getElementById("sankeyChart"));
+
+            chart.setOption({
+                series: [{
+                    type: "sankey",
+                    data: [
+                        { name: "Uploaded" },
+                        { name: "Approved" },
+                        { name: "Rejected" }
+                    ],
+                    links: [
+                        { source: "Uploaded", target: "Approved", value: 50 },
+                        { source: "Uploaded", target: "Rejected", value: 20 }
+                    ]
+                }]
+            });
+        },
+
+        onRowPress: function (oEvent) {
+
+            var d = oEvent.getSource().getBindingContext().getObject();
+
+            this.getView().setModel(new JSONModel({
+                template: d.template,
+                module: d.module,
+                rows: [{ key: "Count", value: d.count }]
+            }), "detail");
+
+            this.byId("templateDialog").open();
         },
 
         onCloseDialog: function () {
             this.byId("templateDialog").close();
-        },
-
-        onAfterRendering: function () {
-            var chartDom = document.getElementById("sankeyChart");
-            if (!chartDom) return;
-            var chart = echarts.init(chartDom);
-            var option = {
-                tooltip: {
-                    trigger: "item"
-                },
-                series: [
-                    {
-                        type: "sankey",
-                        nodeAlign: "left",
-                        data: [
-                            /* Period */
-                            { name: "Monthly" },
-                            { name: "Quarterly" },
-                            { name: "Yearly" },
-                            /* Modules */
-                            { name: "NFRP" },
-                            { name: "SCBI" },
-                            { name: "ICON" },
-                            /* NFRP MFU */
-                            { name: "MFU-A" },
-                            { name: "MFU-B" },
-                            { name: "MFU-C" },
-                            /* SCBI MFU */
-                            { name: "MFU-D" },
-                            { name: "MFU-E" },
-                            { name: "MFU-F" },
-                            /* ICON MFU */
-                            { name: "MFU-G" },
-                            { name: "MFU-H" },
-                            { name: "MFU-I" }
-                        ],
-                        links: [
-                            /* Period → Module */
-                            { source: "Monthly", target: "NFRP", value: 120 },
-                            { source: "Monthly", target: "SCBI", value: 90 },
-                            { source: "Monthly", target: "ICON", value: 70 },
-                            { source: "Quarterly", target: "NFRP", value: 80 },
-                            { source: "Quarterly", target: "SCBI", value: 60 },
-                            { source: "Quarterly", target: "ICON", value: 40 },
-                            { source: "Yearly", target: "NFRP", value: 50 },
-                            { source: "Yearly", target: "SCBI", value: 30 },
-                            { source: "Yearly", target: "ICON", value: 20 },
-                            /* NFRP Top 3 MFU */
-                            { source: "NFRP", target: "MFU-A", value: 60 },
-                            { source: "NFRP", target: "MFU-B", value: 40 },
-                            { source: "NFRP", target: "MFU-C", value: 20 },
-                            /* SCBI Top 3 MFU */
-                            { source: "SCBI", target: "MFU-D", value: 50 },
-                            { source: "SCBI", target: "MFU-E", value: 30 },
-                            { source: "SCBI", target: "MFU-F", value: 10 },
-                            /* ICON Top 3 MFU */
-                            { source: "ICON", target: "MFU-G", value: 45 },
-                            { source: "ICON", target: "MFU-H", value: 25 },
-                            { source: "ICON", target: "MFU-I", value: 15 }
-                        ],
-                        lineStyle: {
-                            curveness: 0.5
-                        },
-                        emphasis: {
-                            focus: "adjacency"
-                        }
-                    }
-                ]
-            };
-            chart.setOption(option);
-        },
-
-        onFilterChange: function (oEvent) {
-            var selectedKeys = oEvent.getSource().getSelectedKeys();
-            var oModel = this.getView().getModel();
-            // 👉 RESET
-            if (selectedKeys.length === 0) {
-                oModel.setProperty("/modules", this._fullModules);
-                oModel.setProperty("/pieModules", this._fullModules); 
-                oModel.setProperty("/totalUploaded", 190);
-                oModel.setProperty("/totalApproved", 130);
-                oModel.setProperty("/totalPending", 37);
-                oModel.setProperty("/totalTemplates", 4);
-                return;
-            }
-            // 👉 FILTER
-            var filtered = this._fullModules.filter(item =>
-                selectedKeys.includes(item.module)
-            );
-            // 👉 CALCULATE
-            var totalUploaded = 0,
-                totalApproved = 0,
-                totalPending = 0;
-            filtered.forEach(item => {
-                totalUploaded += item.uploaded;
-                totalApproved += item.approved;
-                totalPending += item.pending;
-            });
-            // 👉 UPDATE UI
-            oModel.setProperty("/modules", filtered);
-            oModel.setProperty("/pieModules", this._fullModules); 
-            oModel.setProperty("/totalUploaded", totalUploaded);
-            oModel.setProperty("/totalApproved", totalApproved);
-            oModel.setProperty("/totalPending", totalPending);
-            oModel.setProperty("/totalTemplates", filtered.length);
-        },
-
-        onNewPress: function(){
-            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
-            oRouter.navTo("new");
         }
+
     });
 });
-
-
-Now give me the full xml code and controller code so i copy paste it
-
-
