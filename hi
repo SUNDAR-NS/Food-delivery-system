@@ -1,140 +1,101 @@
-<mvc:View controllerName="mfuanalytics.controller.mfureport"  
-    xmlns:mvc="sap.ui.core.mvc"  
-    xmlns="sap.m"  
-    xmlns:core="sap.ui.core"
-    xmlns:viz="sap.viz.ui5.controls"  
-    xmlns:viz.data="sap.viz.ui5.data"  
-    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
+/* Custom style for the file upload section */
+.file-upload-container .file-upload-box {
+  border: 2px dashed #ccc; /* Dotted border for drag and drop */
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+  background-color: #f9f9f9; /* Light background for visibility */
+}
 
-<Page title="MFU Dashboard" class="sapBlueHeader">  
+/* Optional: Add hover effect to make it visually responsive during drag */
+.file-upload-container .file-upload-box:hover {
+  border-color: #007acc; /* Change border color on hover */
+  background-color: #e6f7ff; /* Slight background change on hover */
+}
 
-<VBox class="mainContainer">  
+.card-container {
+  background-color: #fff; /* White background */
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 8px; /* Rounded corners */
+  padding: 16px; /* Padding inside the card */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for 3D effect */
+  transition: box-shadow 0.3s ease-in-out; /* Smooth shadow transition on hover */
+}
 
-<!-- FILTER -->
-<Panel class="moduleFilterBox">
-    <HBox class="filterRow" alignItems="Center" justifyContent="SpaceBetween">
+.card-container:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Darker shadow on hover */
+}
 
-        <VBox class="filterItem">
-            <Text text="Module" class="filterLabel"/>
-            <MultiComboBox
-                id="moduleFilter"
-                width="200px"
-                selectionFinish="onFilterChange"
-                items="{/allModules}">
-                <core:Item key="{module}" text="{module}" />
-            </MultiComboBox>
-        </VBox>
+.customTableWithStickyHeader {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 9 !important;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 2px -2px gray;
+}
 
-    </HBox>
-</Panel>
+.dialogGrid {
+  border: 1px solid #ccc;
+  padding: 10px;
+}
 
-<!-- KPI + CHART -->
-<HBox class="topContainer">  
+.gridItem {
+  border: 1px solid #ccc;
+  padding: 8px;
+  margin: 2px;
+  box-sizing: border-box;
+}
 
-    <VBox width="35%">  
+.pkContainer .sapMSwtText
+{
+  opacity: 0.3;
+  font-size: 0.01px !important;
+}
 
-        <HBox class="kpiRow">  
-            <GenericTile header="Total Uploaded" class="tile">  
-                <TileContent>
-                    <NumericContent value="{/totalUploaded}"/>
-                </TileContent>  
-            </GenericTile>  
 
-            <GenericTile header="Total Approved" class="tile">
-                <TileContent>
-                    <NumericContent value="{/totalApproved}"/>
-                </TileContent>  
-            </GenericTile>  
-        </HBox>  
+.submitBtnSpacing{
+  margin-top: 20px;
+}
 
-        <HBox class="kpiRow">  
-            <GenericTile header="Total Rejected" class="tile">  
-                <TileContent>
-                    <NumericContent value="{/totalRejected}"/>
-                </TileContent>  
-            </GenericTile>  
 
-            <GenericTile header="Total Templates" class="tile">  
-                <TileContent>
-                    <NumericContent value="{/totalTemplates}"/>
-                </TileContent>  
-            </GenericTile>  
-        </HBox>  
+/*  ------------------------------------------------------------- */
 
-    </VBox>  
+.sideNavigationToggleButton {
+    border-radius: 8px;
+    background: rgba(0, 122, 255, 0.1);
+  }
+  
+  .sideNavigationToggleButton .sapMBtnIcon {
+    color: #007aff !important;
+  }
+  
+  .gradientTitle {
+    text-align: center;
+    width: 100%;
+    color: #0070f2;
+    font-weight: bold;
+    display: block;
 
-    <Panel width="700px" headerText="MFU Templates by Modules">
-
-        <viz:VizFrame id="idVizFrame" vizType="stacked_column" height="320px" width="100%">
-            <viz:dataset>
-                <viz.data:FlattenedDataset data="{/modules}">
-                    <viz.data:dimensions>
-                        <viz.data:DimensionDefinition name="Module" value="{module}" />
-                    </viz.data:dimensions>
-                    <viz.data:measures>
-                        <viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
-                        <viz.data:MeasureDefinition name="Approved" value="{approved}" />
-                        <viz.data:MeasureDefinition name="Rejected" value="{rejected}" />
-                    </viz.data:measures>
-                </viz.data:FlattenedDataset>
-            </viz:dataset>
-
-            <viz:feeds>
-                <viz.feeds:FeedItem uid="valueAxis" type="Measure"
-                    values="Uploaded,Approved,Rejected"/>
-                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
-                    values="Module"/>
-            </viz:feeds>
-
-        </viz:VizFrame>
-
-    </Panel>  
-
-</HBox>  
-
-<!-- 🔥 MFU DETAILS TABLE -->
-<Panel class="sapUiMediumMarginTop">
-
-    <!-- HEADER TOOLBAR -->
-    <headerToolbar>
-        <Toolbar>
-            <Title text="MFU Details"/>
-            <ToolbarSpacer/>
-            <Text text="Total Records: {/tableData/length}"/>
-        </Toolbar>
-    </headerToolbar>
-
-    <!-- SCROLL CONTAINER -->
-    <ScrollContainer height="300px" vertical="true">
-
-        <Table items="{/tableData}" width="100%">
-
-            <columns>
-                <Column><Text text="Module"/></Column>
-                <Column><Text text="Sub Module"/></Column>
-                <Column><Text text="Load Type"/></Column>
-                <Column><Text text="Template"/></Column>
-                <Column><Text text="Count"/></Column>
-            </columns>
-
-            <items>
-                <ColumnListItem>
-                    <cells>
-                        <Text text="{module}"/>
-                        <Text text="{subModule}"/>
-                        <Text text="{loadType}"/>
-                        <Text text="{template}"/>
-                        <Text text="{count}"/>
-                    </cells>
-                </ColumnListItem>
-            </items>
-
-        </Table>
-
-    </ScrollContainer>
-
-</Panel>
-
-</VBox>  
-</Page>  
-</mvc:View>
+  }
+  
+  
+  .iconbtns {
+    background-color: #007aff !important;
+  
+  } 
+  
+  .sapMFlexItemAlignAuto {
+    margin-left: 10px;
+  
+  }
+  
+  
+  .logo {
+    height: 40px !important;
+  }
+  
+  .navListIcon .sapTntNLIIcon,
+  .navListIcon .sapMText {
+    color: #007aff !important;
+  }
+  
