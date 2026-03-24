@@ -1,3 +1,326 @@
+<mvc:View controllerName="mfuanalytics.controller.mfureport"  
+    xmlns:mvc="sap.ui.core.mvc"  
+    xmlns="sap.m"  
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"  
+    xmlns:viz.data="sap.viz.ui5.data"  
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
+
+<Page title="MFU Dashboard" class="sapBlueHeader">  
+
+<VBox class="mainContainer">  
+
+<Panel class="moduleFilterBox">
+    
+    <HBox class="filterRow" alignItems="Center" justifyContent="SpaceBetween">
+
+        <!-- MODULE -->
+        <VBox class="filterItem">
+            <Text text="Module" class="filterLabel"/>
+            <MultiComboBox
+                id="moduleFilter"
+                width="210px"
+                selectionFinish="onFilterChange"
+                items="{/allModules}">
+    <core:Item key="{module}" text="{module}" />
+</MultiComboBox>
+        </VBox>
+
+        <!-- STATUS -->
+        <VBox class="filterItem">
+            <Text text="Status" class="filterLabel"/>
+            <MultiComboBox
+                id="statusFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/statusList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </VBox>
+
+        <!-- USER -->
+        <VBox class="filterItem">
+            <Text text="User" class="filterLabel"/>
+            <MultiComboBox
+                id="userFilter"
+                width="180px"
+                selectionFinish="onFilterChange"
+                items="{/userList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </VBox>
+
+        <!-- DATE -->
+        <VBox class="filterItem">
+            <Text text="Created Date" class="filterLabel"/>
+            <MultiComboBox
+                id="dateFilter"
+                width="200px"
+                selectionFinish="onFilterChange"
+                items="{/dateList}">
+                <core:Item key="{key}" text="{text}" />
+            </MultiComboBox>
+        </VBox>
+
+    </HBox>
+
+</Panel>
+
+
+<!-- 🔥 TOP -->
+<HBox class="topContainer">  
+
+    <!-- KPI -->
+    <VBox width="35%">  
+
+        <HBox class="kpiRow">  
+            <GenericTile header="Total Uploaded" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalUploaded}" icon="sap-icon://upload" valueColor="Neutral" tooltip=" "/>
+                </TileContent>  
+            </GenericTile>  
+
+            <GenericTile header="Total Approved" class="tile">
+                <TileContent>
+                    <NumericContent value="{/totalApproved}" icon="sap-icon://accept" valueColor="Neutral" tooltip=" "/>
+                </TileContent>  
+            </GenericTile>  
+        </HBox>  
+
+        <HBox class="kpiRow">  
+            <GenericTile header="Total Rejected" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalRejected}" icon="sap-icon://decline" valueColor="Neutral" tooltip=" "/>
+                </TileContent>  
+            </GenericTile>  
+
+            <GenericTile header="Total Templates" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalTemplates}" icon="sap-icon://document-text" valueColor="Neutral" tooltip=" "/>
+                </TileContent>  
+            </GenericTile>  
+        </HBox>  
+
+    </VBox>  
+
+    <!-- STACKED CHART -->
+    <Panel width="700px" headerText="MFU Templates by Modules">
+
+        <viz:VizFrame id="idVizFrame" vizType="stacked_column" height="320px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}" />
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}" />
+                        <viz.data:MeasureDefinition name="Rejected" value="{rejected}" />
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
+
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure"
+                    values="Uploaded,Approved,Rejected"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
+                    values="Module"/>
+            </viz:feeds>
+
+        </viz:VizFrame>
+
+    </Panel>  
+
+</HBox>  
+
+<!-- TABLE -->
+<Panel class="sapUiMediumMarginTop">
+
+    <!-- HEADER TOOLBAR -->
+    <headerToolbar>
+        <Toolbar>
+            <Title text="MFU Details" icon="sap-icon://table-chart"/>
+            <ToolbarSpacer/>
+            <Text text="Total Records: {/tableData/length}"/>
+        </Toolbar>
+    </headerToolbar>
+
+    <!-- SCROLL CONTAINER -->
+    <ScrollContainer height="300px" vertical="true">
+
+        <Table sticky="ColumnHeaders" inset="false" items="{/tableData}" width="100%">
+
+            <columns>
+                <Column><Text text="Module"/></Column>
+                <Column><Text text="Sub Module"/></Column>
+                <Column><Text text="Load Type"/></Column>
+                <Column><Text text="Template"/></Column>
+                <Column><Text text="Count"/></Column>
+            </columns>
+
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <Text text="{module}"/>
+                        <Text text="{subModule}"/>
+                        <Text text="{loadType}"/>
+                        <Text text="{template}"/>
+                        <Text text="{count}"/>
+                    </cells>
+                </ColumnListItem>
+            </items>
+
+        </Table>
+
+    </ScrollContainer>
+
+</Panel>
+
+</VBox>  
+</Page>  
+</mvc:View>
+
+
+/* PAGE BACKGROUND */
+.sapMPage {
+    background-color: #f5f7fa;
+}
+
+/* HEADER */
+.sapBlueHeader .sapMBar {
+    background-color: #0a6ed1 !important;
+    color: white;
+}
+
+/* MAIN CONTAINER */
+.mainContainer {
+    padding: 20px 30px;
+}
+
+/* ========================= */
+/* 🔥 FILTER SECTION */
+/* ========================= */
+
+.moduleFilterBox {
+    margin-bottom: 15px;
+    border-radius: 12px;
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.filterRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filterItem {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filterLabel {
+    font-weight: 600;
+}
+
+.sapMMultiComboBox {
+    min-width: 150px;
+}
+
+/* ========================= */
+/* 🔥 KPI SECTION */
+/* ========================= */
+
+.topContainer {
+    gap: 20px;
+}
+
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* ========================= */
+/* 🔥 CHART SECTION */
+/* ========================= */
+
+.chartRow {
+    margin-top: 25px;
+    gap: 15px;
+}
+
+.chartBox {
+    flex: 1;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* ========================= */
+/* 🔥 PROFESSIONAL TABLE UI */
+/* ========================= */
+
+/* Remove LEFT empty column (selection/nav column) */
+.sapMListTblNavCol {
+    display: none !important;
+    width: 0 !important;
+}
+
+/* Fix table layout */
+.sapMListTbl {
+    border: 1px solid #c8c8c8;
+    border-radius: 6px;
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* Header cells */
+.sapMListTblHeaderCell {
+    border: 1px solid #c8c8c8 !important;
+    background-color: #f4f6f8;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Data cells */
+.sapMListTblCell {
+    border: 1px solid #e0e0e0 !important;
+    text-align: center;
+}
+
+/* Remove RIGHT extra space */
+.sapMListTblCell:last-child {
+    border-right: none !important;
+}
+
+/* Zebra rows */
+.sapMListTblRow:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* Hover effect */
+.sapMListTblRow:hover {
+    background-color: #eaf4ff;
+    transition: 0.2s;
+}
+
 /* ========================= */
 /* 🔥 KPI TILE ENHANCEMENT */
 /* ========================= */
@@ -44,22 +367,142 @@
 /* 🔥 COLOR THEMES */
 /* ========================= */
 
+.sapMNCIconImage{
+    color: inherit !important;
+}
+
 /* Uploaded → Blue */
-.tile:nth-child(1) .sapUiIcon {
-    color: #0070f2;
+.tile:nth-child(1) .sapMNCIconImage {
+    color: #00f251 !important;
 }
 
 /* Approved → Green */
-.tile:nth-child(2) .sapUiIcon {
-    color: #107e3e;
+.tile:nth-child(2) .sapMNCIconImage {
+    color: #107e3e !important;
 }
 
 /* Rejected → Red */
-.tile:nth-child(3) .sapUiIcon {
-    color: #bb0000;
+.tile:nth-child(3) .sapMNCIconImage {
+    color: #bb0000 !important;
 }
 
 /* Templates → Purple */
-.tile:nth-child(4) .sapUiIcon {
-    color: #6a1b9a;
+.tile:nth-child(4) .sapMNCIconImage {
+    color: #6a1b9a !important;
 }
+
+
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+    "use strict";
+
+    return Controller.extend("mfuanalytics.controller.mfureport", {
+
+        onInit: function () {
+
+            var oModel = new JSONModel({
+                allModules: [],
+                modules: [],
+                tableData: [],
+                totalUploaded: 0,
+                totalApproved: 0,
+                totalRejected: 0,
+                totalTemplates: 0
+            });
+
+            this.getView().setModel(oModel);
+
+            setTimeout(()=>{
+                document.activeElement.blur();
+            },100)
+
+            // LOAD MODULES
+            fetch("/odata/v4/mfu/getModules()")
+                .then(res => res.json())
+                .then(data => {
+
+                    oModel.setProperty("/allModules", data.value);
+
+                    const allKeys = data.value.map(m => m.module);
+
+                    this.byId("moduleFilter").setSelectedKeys(allKeys);
+                    this.loadDashboard(allKeys);
+                });
+        },
+        // LOAD DASHBOARD
+        loadDashboard: function (modules) {
+
+            fetch("/odata/v4/mfu/getDashboardData", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    module: modules
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                var oModel = this.getView().getModel();
+
+                oModel.setProperty("/modules", data.modules || []);
+                oModel.setProperty("/tableData", data.table || []);
+                oModel.setProperty("/totalUploaded", data.uploaded || 0);
+                oModel.setProperty("/totalApproved", data.approved || 0);
+                oModel.setProperty("/totalRejected", data.rejected || 0);
+                oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
+
+                this._applyChartSettings();
+            })
+            .catch(err => {
+                console.error("API ERROR:", err);
+            });
+        },
+
+        // FILTER CHANGE
+        onFilterChange: function (oEvent) {
+
+            const keys = oEvent.getSource().getSelectedKeys();
+
+            if (!keys || keys.length === 0) {
+                this.loadDashboard([]);
+            } else {
+                this.loadDashboard(keys);
+            }
+        },
+
+        // CHART SETTINGS
+        _applyChartSettings: function () {
+
+            var oChart = this.byId("idVizFrame");
+
+            if (oChart) {
+                oChart.setVizProperties({
+
+                    title: {
+                        visible: false
+                    },
+
+                    // ✅ Colors
+                    plotArea: {
+                        colorPalette: [
+                            "#0070f2", 
+                            "#107e3e", 
+                            "#bb0000" 
+                        ]
+                    },
+
+                    interaction: {
+                        tooltip: {
+                            visible: true
+                        }
+                    }
+                });
+            }
+        }
+
+    });
+});
