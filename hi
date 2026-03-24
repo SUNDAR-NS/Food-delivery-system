@@ -20,6 +20,7 @@ sap.ui.define([
 
             this.getView().setModel(oModel);
 
+            // 🔥 LOAD MODULES
             fetch("/odata/v4/mfu/getModules()")
                 .then(res => res.json())
                 .then(data => {
@@ -27,18 +28,11 @@ sap.ui.define([
                     oModel.setProperty("/allModules", data.value);
 
                     const allKeys = data.value.map(m => m.module);
-                    const oMulti = this.byId("moduleFilter");
 
-                    // ✅ Select all by default
-                    oMulti.setSelectedKeys(allKeys);
+                    // ✅ Select all by default (STANDARD UI5 BEHAVIOR)
+                    this.byId("moduleFilter").setSelectedKeys(allKeys);
 
-                    // ✅ FIX: Apply compact view after rendering
-                    this.getView().addEventDelegate({
-                        onAfterRendering: () => {
-                            this._applyCompactView();
-                        }
-                    });
-
+                    // ✅ Load dashboard with all modules
                     this.loadDashboard(allKeys);
                 });
         },
@@ -71,6 +65,9 @@ sap.ui.define([
                 oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
 
                 this._applyChartSettings();
+            })
+            .catch(err => {
+                console.error("API ERROR:", err);
             });
         },
 
@@ -82,45 +79,10 @@ sap.ui.define([
 
             const keys = oEvent.getSource().getSelectedKeys();
 
-            // ✅ Re-apply compact view after selection
-            setTimeout(() => {
-                this._applyCompactView();
-            }, 0);
-
             if (!keys || keys.length === 0) {
                 this.loadDashboard([]);
             } else {
                 this.loadDashboard(keys);
-            }
-        },
-
-
-        // =========================
-        // 🔥 COMPACT VIEW (+more)
-        // =========================
-        _applyCompactView: function () {
-
-            const oMulti = this.byId("moduleFilter");
-            const tokens = oMulti.getTokens();
-
-            if (!tokens || tokens.length <= 1) return;
-
-            const firstToken = tokens[0];
-            const moreCount = tokens.length - 1;
-
-            // hide extra tokens
-            tokens.forEach((t, i) => {
-                if (i > 0) {
-                    const dom = t.getDomRef();
-                    if (dom) {
-                        dom.style.display = "none";
-                    }
-                }
-            });
-
-            // update first token text
-            if (firstToken && moreCount > 0) {
-                firstToken.setText(firstToken.getText() + " +" + moreCount + " more");
             }
         },
 
@@ -135,8 +97,12 @@ sap.ui.define([
             if (oChart) {
                 oChart.setVizProperties({
 
-                    title: { visible: false },
+                    // ❌ Remove default chart title
+                    title: {
+                        visible: false
+                    },
 
+                    // ✅ Colors
                     plotArea: {
                         colorPalette: [
                             "#0070f2", // Uploaded
@@ -145,6 +111,7 @@ sap.ui.define([
                         ]
                     },
 
+                    // ✅ Tooltip on hover
                     interaction: {
                         tooltip: {
                             visible: true
