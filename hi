@@ -1,125 +1,140 @@
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-    "use strict";
+<mvc:View controllerName="mfuanalytics.controller.mfureport"  
+    xmlns:mvc="sap.ui.core.mvc"  
+    xmlns="sap.m"  
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"  
+    xmlns:viz.data="sap.viz.ui5.data"  
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
 
-    return Controller.extend("mfuanalytics.controller.mfureport", {
+<Page title="MFU Dashboard" class="sapBlueHeader">  
 
-        onInit: function () {
+<VBox class="mainContainer">  
 
-            var oModel = new JSONModel({
-                allModules: [],
-                modules: [],
-                tableData: [],
-                totalUploaded: 0,
-                totalApproved: 0,
-                totalRejected: 0,
-                totalTemplates: 0
-            });
+<!-- FILTER -->
+<Panel class="moduleFilterBox">
+    <HBox class="filterRow" alignItems="Center" justifyContent="SpaceBetween">
 
-            this.getView().setModel(oModel);
+        <VBox class="filterItem">
+            <Text text="Module" class="filterLabel"/>
+            <MultiComboBox
+                id="moduleFilter"
+                width="200px"
+                selectionFinish="onFilterChange"
+                items="{/allModules}">
+                <core:Item key="{module}" text="{module}" />
+            </MultiComboBox>
+        </VBox>
 
-            // 🔥 LOAD MODULES
-            fetch("/odata/v4/mfu/getModules()")
-                .then(res => res.json())
-                .then(data => {
+    </HBox>
+</Panel>
 
-                    oModel.setProperty("/allModules", data.value);
+<!-- KPI + CHART -->
+<HBox class="topContainer">  
 
-                    const allKeys = data.value.map(m => m.module);
+    <VBox width="35%">  
 
-                    // ✅ Select all by default (STANDARD UI5 BEHAVIOR)
-                    this.byId("moduleFilter").setSelectedKeys(allKeys);
+        <HBox class="kpiRow">  
+            <GenericTile header="Total Uploaded" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalUploaded}"/>
+                </TileContent>  
+            </GenericTile>  
 
-                    // ✅ Load dashboard with all modules
-                    this.loadDashboard(allKeys);
-                });
-        },
+            <GenericTile header="Total Approved" class="tile">
+                <TileContent>
+                    <NumericContent value="{/totalApproved}"/>
+                </TileContent>  
+            </GenericTile>  
+        </HBox>  
 
+        <HBox class="kpiRow">  
+            <GenericTile header="Total Rejected" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalRejected}"/>
+                </TileContent>  
+            </GenericTile>  
 
-        // =========================
-        // 🔥 LOAD DASHBOARD
-        // =========================
-        loadDashboard: function (modules) {
+            <GenericTile header="Total Templates" class="tile">  
+                <TileContent>
+                    <NumericContent value="{/totalTemplates}"/>
+                </TileContent>  
+            </GenericTile>  
+        </HBox>  
 
-            fetch("/odata/v4/mfu/getDashboardData", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    module: modules
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
+    </VBox>  
 
-                var oModel = this.getView().getModel();
+    <Panel width="700px" headerText="MFU Templates by Modules">
 
-                oModel.setProperty("/modules", data.modules || []);
-                oModel.setProperty("/tableData", data.table || []);
-                oModel.setProperty("/totalUploaded", data.uploaded || 0);
-                oModel.setProperty("/totalApproved", data.approved || 0);
-                oModel.setProperty("/totalRejected", data.rejected || 0);
-                oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
+        <viz:VizFrame id="idVizFrame" vizType="stacked_column" height="320px" width="100%">
+            <viz:dataset>
+                <viz.data:FlattenedDataset data="{/modules}">
+                    <viz.data:dimensions>
+                        <viz.data:DimensionDefinition name="Module" value="{module}" />
+                    </viz.data:dimensions>
+                    <viz.data:measures>
+                        <viz.data:MeasureDefinition name="Uploaded" value="{uploaded}" />
+                        <viz.data:MeasureDefinition name="Approved" value="{approved}" />
+                        <viz.data:MeasureDefinition name="Rejected" value="{rejected}" />
+                    </viz.data:measures>
+                </viz.data:FlattenedDataset>
+            </viz:dataset>
 
-                this._applyChartSettings();
-            })
-            .catch(err => {
-                console.error("API ERROR:", err);
-            });
-        },
+            <viz:feeds>
+                <viz.feeds:FeedItem uid="valueAxis" type="Measure"
+                    values="Uploaded,Approved,Rejected"/>
+                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension"
+                    values="Module"/>
+            </viz:feeds>
 
+        </viz:VizFrame>
 
-        // =========================
-        // 🔥 FILTER CHANGE
-        // =========================
-        onFilterChange: function (oEvent) {
+    </Panel>  
 
-            const keys = oEvent.getSource().getSelectedKeys();
+</HBox>  
 
-            if (!keys || keys.length === 0) {
-                this.loadDashboard([]);
-            } else {
-                this.loadDashboard(keys);
-            }
-        },
+<!-- 🔥 MFU DETAILS TABLE -->
+<Panel class="sapUiMediumMarginTop">
 
+    <!-- HEADER TOOLBAR -->
+    <headerToolbar>
+        <Toolbar>
+            <Title text="MFU Details"/>
+            <ToolbarSpacer/>
+            <Text text="Total Records: {/tableData/length}"/>
+        </Toolbar>
+    </headerToolbar>
 
-        // =========================
-        // 🔥 CHART SETTINGS
-        // =========================
-        _applyChartSettings: function () {
+    <!-- SCROLL CONTAINER -->
+    <ScrollContainer height="300px" vertical="true">
 
-            var oChart = this.byId("idVizFrame");
+        <Table items="{/tableData}" width="100%">
 
-            if (oChart) {
-                oChart.setVizProperties({
+            <columns>
+                <Column><Text text="Module"/></Column>
+                <Column><Text text="Sub Module"/></Column>
+                <Column><Text text="Load Type"/></Column>
+                <Column><Text text="Template"/></Column>
+                <Column><Text text="Count"/></Column>
+            </columns>
 
-                    // ❌ Remove default chart title
-                    title: {
-                        visible: false
-                    },
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <Text text="{module}"/>
+                        <Text text="{subModule}"/>
+                        <Text text="{loadType}"/>
+                        <Text text="{template}"/>
+                        <Text text="{count}"/>
+                    </cells>
+                </ColumnListItem>
+            </items>
 
-                    // ✅ Colors
-                    plotArea: {
-                        colorPalette: [
-                            "#0070f2", // Uploaded
-                            "#107e3e", // Approved
-                            "#bb0000"  // Rejected
-                        ]
-                    },
+        </Table>
 
-                    // ✅ Tooltip on hover
-                    interaction: {
-                        tooltip: {
-                            visible: true
-                        }
-                    }
-                });
-            }
-        }
+    </ScrollContainer>
 
-    });
-});
+</Panel>
+
+</VBox>  
+</Page>  
+</mvc:View>
