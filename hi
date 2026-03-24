@@ -1,138 +1,100 @@
-/* Custom style for the file upload section */
-.file-upload-container .file-upload-box {
-  border: 2px dashed #ccc;
-  border-radius: 6px;
-  padding: 20px;
-  text-align: center;
-  background-color: #f9f9f9;
+/* PAGE BACKGROUND */
+.sapMPage {
+    background-color: #f5f7fa;
 }
 
-.file-upload-container .file-upload-box:hover {
-  border-color: #007acc;
-  background-color: #e6f7ff;
+/* HEADER */
+.sapBlueHeader .sapMBar {
+    background-color: #0a6ed1 !important;
+    color: white !important;
 }
 
-.card-container {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+/* MAIN CONTAINER */
+.mainContainer {
+    padding: 20px 30px;
 }
 
-.card-container:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+/* ========================= */
+/* 🔥 FILTER SECTION */
+/* ========================= */
+
+/* FILTER CONTAINER */
+.moduleFilterBox {
+    margin-bottom: 15px;
+    border-radius: 12px;
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
-.customTableWithStickyHeader {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 9 !important;
-  background-color: #f9f9f9;
-  box-shadow: 0 2px 2px -2px gray;
+/* FORCE SINGLE ROW */
+.filterRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.dialogGrid {
-  border: 1px solid #ccc;
-  padding: 10px;
+/* EACH FILTER BLOCK */
+.filterItem {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
-.gridItem {
-  border: 1px solid #ccc;
-  padding: 8px;
-  margin: 2px;
-  box-sizing: border-box;
+/* LABEL */
+.filterLabel {
+    font-weight: 600;
 }
 
-.pkContainer .sapMSwtText {
-  opacity: 0.3;
-  font-size: 0.01px !important;
+/* DROPDOWN SIZE CONTROL */
+.sapMMultiComboBox {
+    min-width: 150px;
 }
 
-.submitBtnSpacing {
-  margin-top: 20px;
+/* ========================= */
+/* 🔥 KPI SECTION */
+/* ========================= */
+
+.topContainer {
+    gap: 20px;
 }
 
-/* ------------------------------------------------------------- */
-
-.sideNavigationToggleButton {
-  border-radius: 8px;
-  background: rgba(0, 122, 255, 0.1);
+/* KPI ROW */
+.kpiRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
 }
 
-.sideNavigationToggleButton .sapMBtnIcon {
-  color: #007aff !important;
+/* KPI TILE */
+.tile {
+    flex: 1;
+    height: 130px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
-.gradientTitle {
-  text-align: center;
-  width: 100%;
-  color: #0070f2;
-  font-weight: bold;
-  display: block;
+/* ========================= */
+/* 🔥 CHART SECTION */
+/* ========================= */
+
+.chartRow {
+    margin-top: 25px;
+    gap: 15px;
 }
 
-.iconbtns {
-  background-color: #007aff !important;
+/* CHART BOX */
+.chartBox {
+    flex: 1;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
 }
 
-.sapMFlexItemAlignAuto {
-  margin-left: 10px;
-}
-
-.logo {
-  height: 40px !important;
-}
-
-.navListIcon .sapTntNLIIcon,
-.navListIcon .sapMText {
-  color: #007aff !important;
-}
-
-/* ========================================================= */
-/* 🔥 NEW: PROFESSIONAL TABLE STYLING */
-/* ========================================================= */
-
-/* Table outer border */
-.sapMTable {
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-/* Header cells */
-.sapMTableTH {
-  border-right: 1px solid #d9d9d9;
-  border-bottom: 2px solid #c0c0c0;
-  background-color: #f5f7fa;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* Data cells */
-.sapMTableTD {
-  border-right: 1px solid #e0e0e0;
-  border-bottom: 1px solid #e0e0e0;
-  text-align: center;
-}
-
-/* Remove last column right border */
-.sapMTableTH:last-child,
-.sapMTableTD:last-child {
-  border-right: none;
-}
-
-/* Zebra rows */
-.sapMListTblRow:nth-child(even) {
-  background-color: #fafafa;
-}
-
-/* Hover effect */
-.sapMListTblRow:hover {
-  background-color: #eaf4ff;
-}
-
-/* Compact padding */
-.sapMTableTD {
-  padding: 0.5rem;
+/* CHART TITLE */
+.panelTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
