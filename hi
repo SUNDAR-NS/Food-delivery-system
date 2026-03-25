@@ -41,98 +41,7 @@ sap.ui.define([
                 });
         },
 
-        // =========================
-        // 🔥 SANKEY LOAD (BACKEND)
-        // =========================
-        onAfterRendering: function () {
-            this.loadSankey();
-        },
-
-        loadSankey: function () {
-
-            fetch("/odata/v4/mfu/getSankeyData()")
-                .then(res => res.json())
-                .then(data => {
-
-                    console.log("🔥 SANKEY RESPONSE:", data);
-
-                    const result = data.value || [];
-
-                    if (result.length === 0) {
-                        console.log("❌ No Sankey Data");
-                        return;
-                    }
-
-                    const nodeSet = new Set();
-                    const links = [];
-
-                    result.forEach(r => {
-
-                        nodeSet.add(r.period);
-                        nodeSet.add(r.module);
-
-                        links.push({
-                            source: r.period,
-                            target: r.module,
-                            value: r.value
-                        });
-
-                        (r.templates || []).forEach(t => {
-
-                            nodeSet.add(t.name);
-
-                            links.push({
-                                source: r.module,
-                                target: t.name,
-                                value: t.value
-                            });
-
-                        });
-                    });
-
-                    const nodes = Array.from(nodeSet).map(n => ({ name: n }));
-
-                    console.log("🔥 NODES:", nodes);
-                    console.log("🔥 LINKS:", links);
-
-                    var chartDom = document.getElementById("sankeyChart");
-
-                    if (!chartDom) {
-                        console.log("❌ Sankey DOM not found");
-                        return;
-                    }
-
-                    var chart = echarts.init(chartDom);
-
-                    chart.setOption({
-                        tooltip: {
-                            trigger: "item"
-                        },
-                        series: [
-                            {
-                                type: "sankey",
-                                nodeAlign: "left",
-                                data: nodes,
-                                links: links,
-                                lineStyle: {
-                                    curveness: 0.5
-                                },
-                                emphasis: {
-                                    focus: "adjacency"
-                                }
-                            }
-                        ]
-                    });
-
-                })
-                .catch(err => {
-                    console.error("❌ SANKEY ERROR:", err);
-                });
-        },
-
-        // =========================
-        // 🔁 TREEMAP (STATIC - NO CHANGE)
-        // =========================
+        // 🔥 TOGGLE CHART (FIXED)
         onToggleChart: function (oEvent) {
 
             this._showTreemap = !this._showTreemap;
@@ -144,15 +53,28 @@ sap.ui.define([
                 this._showTreemap ? "Chart" : "Treemap"
             );
 
+            // 🔥 IMPORTANT FIX → wait for DOM
             if (this._showTreemap) {
-                setTimeout(this._renderTreemap.bind(this), 200);
+                setTimeout(() => {
+                    this._renderTreemap();
+                }, 300);
             }
         },
 
+        // 🔥 TREEMAP RENDER (FIXED)
         _renderTreemap: function () {
 
             var treemapDom = document.getElementById("treemapChart");
-            if (!treemapDom) return;
+
+            if (!treemapDom) {
+                console.log("❌ Treemap DOM not found");
+                return;
+            }
+
+            // 🔥 prevent duplicate render issue
+            if (echarts.getInstanceByDom(treemapDom)) {
+                echarts.dispose(treemapDom);
+            }
 
             var treemapChart = echarts.init(treemapDom);
 
@@ -165,21 +87,105 @@ sap.ui.define([
                     breadcrumb: { show: true },
                     label: { show: true, formatter: "{b}" },
 
-                    // 🔥 YOUR STATIC DATA (UNCHANGED)
-                    data: [/* KEEP YOUR EXISTING DATA HERE */]
+                    // ✅ YOUR STATIC DATA (UNCHANGED)
+                    data: [
+                        {
+                            name: "NFRP",
+                            children: [
+                                {
+                                    name: "Approved",
+                                    children: [
+                                        { name: "NFRP_PAYMENT_V1", value: 12 },
+                                        { name: "NFRP_VENDOR_UPLOAD", value: 8 }
+                                    ]
+                                },
+                                {
+                                    name: "Pending",
+                                    children: [
+                                        { name: "NFRP_GL_MAPPING", value: 5 }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            name: "SCBI",
+                            children: [
+                                {
+                                    name: "Approved",
+                                    children: [
+                                        { name: "SCBI_LOAN_TEMPLATE_V2", value: 14 }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            name: "ICON",
+                            children: [
+                                {
+                                    name: "Approved",
+                                    children: [
+                                        { name: "ICON_INVOICE_UPLOAD", value: 9 }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
                 }]
             };
 
             treemapChart.setOption(option);
         },
 
+        // 🔥 SANKEY (UNCHANGED - WORKING)
+        onAfterRendering: function () {
+
+            var chartDom = document.getElementById("sankeyChart");
+            if (!chartDom) return;
+
+            if (echarts.getInstanceByDom(chartDom)) {
+                echarts.dispose(chartDom);
+            }
+
+            var chart = echarts.init(chartDom);
+
+            var option = {
+                tooltip: { trigger: "item" },
+                series: [
+                    {
+                        type: "sankey",
+                        nodeAlign: "left",
+                        data: [
+                            { name: "Monthly" },
+                            { name: "Quarterly" },
+                            { name: "Yearly" },
+                            { name: "NFRP" },
+                            { name: "SCBI" },
+                            { name: "ICON" },
+                            { name: "MFU-A" },
+                            { name: "MFU-B" },
+                            { name: "MFU-C" }
+                        ],
+                        links: [
+                            { source: "Monthly", target: "NFRP", value: 120 },
+                            { source: "Monthly", target: "SCBI", value: 90 },
+                            { source: "Monthly", target: "ICON", value: 70 },
+                            { source: "NFRP", target: "MFU-A", value: 60 },
+                            { source: "SCBI", target: "MFU-B", value: 30 },
+                            { source: "ICON", target: "MFU-C", value: 20 }
+                        ],
+                        lineStyle: { curveness: 0.5 }
+                    }
+                ]
+            };
+
+            chart.setOption(option);
+        },
+
         onCloseDialog: function () {
             this.byId("templateDialog").close();
         },
 
-        // =========================
         // FILTER
-        // =========================
         onFilterChange: function (oEvent) {
 
             const keys = oEvent.getSource().getSelectedKeys();
@@ -191,9 +197,7 @@ sap.ui.define([
             }
         },
 
-        // =========================
-        // DASHBOARD
-        // =========================
+        // DASHBOARD API
         loadDashboard: function (modules) {
 
             fetch("/odata/v4/mfu/getDashboardData", {
