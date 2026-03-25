@@ -1,88 +1,200 @@
-using com.scb.fileupload.master as db from '../db/schema';
+const cds = require('@sap/cds');
 
-service MFUService {
+module.exports = cds.service.impl(async function () {
 
-    action getDashboardData(module: array of String) returns {
-        uploaded        : Integer;
-        approved        : Integer;
-        rejected        : Integer;
-        totalTemplates  : Integer;
-        modules         : array of {
-            module   : String;
-            uploaded : Integer;
-            approved : Integer; 
-            rejected : Integer;
+    const { ReportFileStorage, TemplateStorage } = cds.entities('com.scb.fileupload.master');
+
+    // =========================
+    // MODULE DROPDOWN
+    // =========================
+    this.on('getModules', async () => {
+
+        const data = await cds.run(
+            SELECT.distinct.from(TemplateStorage).columns('MODULE_NAME').orderBy('MODULE_NAME')
+        );
+
+        return data.map(d => ({
+            module: d.MODULE_NAME
+        }));
+    });
+
+    // =========================
+    // DASHBOARD
+    // =========================
+    this.on('getDashboardData', async (req) => {
+
+        let modules = req.data.module || [];
+
+        if (typeof modules === "string") {
+            modules = [modules];
+        }
+
+        let reportData = [];
+        let templateData = [];
+
+        if (modules.length > 0) {
+            reportData = await cds.run(
+                SELECT.from(ReportFileStorage).where({ MODULE_NAME: { in: modules } })
+            );
+            templateData = await cds.run(
+                SELECT.from(TemplateStorage).where({ MODULE_NAME: { in: modules } })
+            );
+        } else {
+            reportData = await cds.run(SELECT.from(ReportFileStorage));
+            templateData = await cds.run(SELECT.from(TemplateStorage));
+        }
+
+        let uploaded = 0, approved = 0, rejected = 0;
+
+        reportData.forEach(r => {
+            if (r.STATUS === 'uploaded') uploaded++;
+            if (r.STATUS === 'approved') approved++;
+            if (r.STATUS === 'rejected') rejected++;
+        });
+
+        const moduleMap = {};
+
+        reportData.forEach(r => {
+
+            if (!moduleMap[r.MODULE_NAME]) {
+                moduleMap[r.MODULE_NAME] = {
+                    module: r.MODULE_NAME,
+                    uploaded: 0,
+                    approved: 0,
+                    rejected: 0
+                };
+            }
+
+            if (r.STATUS === 'uploaded') moduleMap[r.MODULE_NAME].uploaded++;
+            if (r.STATUS === 'approved') moduleMap[r.MODULE_NAME].approved++;
+            if (r.STATUS === 'rejected') moduleMap[r.MODULE_NAME].rejected++;
+        });
+
+        const modulesData = Object.values(moduleMap);
+
+        const tableMap = {};
+
+        reportData.forEach(r => {
+
+            const key = `${r.MODULE_NAME}_${r.SUB_MODULE_NAME}_${r.LOAD_TYPE}_${r.LOAD_TEMPLATE}`;
+
+            if (!tableMap[key]) {
+                tableMap[key] = {
+                    module: r.MODULE_NAME,
+                    subModule: r.SUB_MODULE_NAME,
+                    loadType: r.LOAD_TYPE,
+                    template: r.LOAD_TEMPLATE,
+                    count: 0
+                };
+            }
+
+            tableMap[key].count++;
+        });
+
+        const table = Object.values(tableMap);
+
+        return {
+            uploaded,
+            approved,
+            rejected,
+            totalTemplates: templateData.length,
+            modules: modulesData,
+            table
         };
-        table           : array of {
-            module    : String;
-            subModule : String;
-            loadType  : String;
-            template  : String;
-            count     : Integer;
-        };
-    };
+    });
 
-    function getModules() returns array of {
-        module : String;
-    };
+    // =========================
+    // 🔥 SANKEY DATA (FINAL FIXED)
+    // =========================
+    this.on('getSankeyData', async () => {
 
-    // 🔥 ADD THIS (MAIN FIX)
-    function getSankeyData() returns array of {
-        period    : String;
-        module    : String;
-        value     : Integer;
-        templates : array of {
-            name  : String;
-            value : Integer;
-        };
-    };
-}
+        const reportData = await cds.run(SELECT.from(ReportFileStorage));
 
+        // ✅ SAFE DATE PARSER
+        function parseDate(d) {
+            if (!d) return null;
+            return new Date(d.toString().replace(" ", "T"));
+        }
 
+        // 🔥 FIND LATEST DATE IN DB
+        const validDates = reportData
+            .map(r => parseDate(r.CREATEDAT))
+            .filter(d => d);
 
+        if (validDates.length === 0) return [];
 
+        const latestDate = new Date(Math.max(...validDates));
 
-loadSankey: function () {
+        // 🔥 DYNAMIC PERIODS
+        const startOfMonth = new Date(latestDate.getFullYear(), latestDate.getMonth(), 1);
 
-    fetch("/odata/v4/mfu/getSankeyData()")
-        .then(res => res.json())
-        .then(data => {
+        const startOfQuarter = new Date(latestDate);
+        startOfQuarter.setMonth(latestDate.getMonth() - 2);
+        startOfQuarter.setDate(1);
 
-            const result = data.value || []; // ✅ FIX
+        const startOfYear = new Date(latestDate);
+        startOfYear.setFullYear(latestDate.getFullYear() - 1);
 
-            const nodesSet = new Set();
-            const links = [];
+        function filterData(startDate) {
+            return reportData.filter(r => {
+                const d = parseDate(r.CREATEDAT);
+                return d && d >= startDate;
+            });
+        }
 
-            result.forEach(item => {
+        function process(data, periodName) {
 
-                nodesSet.add(item.period);
-                nodesSet.add(item.module);
+            const moduleMap = {};
 
-                links.push({
-                    source: item.period,
-                    target: item.module,
-                    value: item.value
-                });
+            data.forEach(r => {
 
-                (item.templates || []).forEach(t => {
+                const module = r.MODULE_NAME;
+                const template = r.LOAD_TEMPLATE;
 
-                    nodesSet.add(t.name);
+                if (!moduleMap[module]) {
+                    moduleMap[module] = {
+                        count: 0,
+                        templates: {}
+                    };
+                }
 
-                    links.push({
-                        source: item.module,
-                        target: t.name,
-                        value: t.value
-                    });
+                moduleMap[module].count++;
 
-                });
+                if (!moduleMap[module].templates[template]) {
+                    moduleMap[module].templates[template] = 0;
+                }
 
+                moduleMap[module].templates[template]++;
             });
 
-            const nodes = Array.from(nodesSet).map(n => ({ name: n }));
+            const topModules = Object.entries(moduleMap)
+                .sort((a, b) => b[1].count - a[1].count)
+                .slice(0, 3);
 
-            this._renderSankey(nodes, links);
-        })
-        .catch(err => {
-            console.error("SANKEY ERROR:", err);
-        });
-}
+            return topModules.map(([moduleName, moduleData]) => {
+
+                const topTemplates = Object.entries(moduleData.templates)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3)
+                    .map(([name, value]) => ({
+                        name,
+                        value
+                    }));
+
+                return {
+                    period: periodName,
+                    module: moduleName,
+                    value: moduleData.count,
+                    templates: topTemplates
+                };
+            });
+        }
+
+        return [
+            ...process(filterData(startOfMonth), "Monthly"),
+            ...process(filterData(startOfQuarter), "Quarterly"),
+            ...process(filterData(startOfYear), "Yearly")
+        ];
+    });
+
+});
