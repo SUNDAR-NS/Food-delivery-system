@@ -5,7 +5,7 @@ module.exports = cds.service.impl(async function () {
     const { ReportFileStorage, TemplateStorage } = cds.entities('com.scb.fileupload.master');
 
     // =========================
-    // MODULE DROPDOWN
+    // GET MODULES
     // =========================
     this.on('getModules', async () => {
 
@@ -19,7 +19,7 @@ module.exports = cds.service.impl(async function () {
     });
 
     // =========================
-    // DASHBOARD
+    // MAIN DASHBOARD
     // =========================
     this.on('getDashboardData', async (req) => {
 
@@ -34,10 +34,13 @@ module.exports = cds.service.impl(async function () {
 
         if (modules.length > 0) {
             reportData = await cds.run(
-                SELECT.from(ReportFileStorage).where({ MODULE_NAME: { in: modules } })
+                SELECT.from(ReportFileStorage)
+                    .where({ MODULE_NAME: { in: modules } })
             );
+
             templateData = await cds.run(
-                SELECT.from(TemplateStorage).where({ MODULE_NAME: { in: modules } })
+                SELECT.from(TemplateStorage)
+                    .where({ MODULE_NAME: { in: modules } })
             );
         } else {
             reportData = await cds.run(SELECT.from(ReportFileStorage));
@@ -92,40 +95,57 @@ module.exports = cds.service.impl(async function () {
         });
 
         const table = Object.values(tableMap);
+        const totalTemplates = templateData.length;
 
         return {
             uploaded,
             approved,
             rejected,
-            totalTemplates: templateData.length,
+            totalTemplates,
             modules: modulesData,
             table
         };
     });
 
     // =========================
-    // 🔥 SANKEY DATA (FINAL FIXED)
+    // 🔥 SANKEY DATA (FINAL)
     // =========================
     this.on('getSankeyData', async () => {
 
         const reportData = await cds.run(SELECT.from(ReportFileStorage));
 
-        // ✅ SAFE DATE PARSER
+        console.log("🔥 TOTAL RECORDS:", reportData.length);
+
+        // ✅ DATE PARSE FIX
         function parseDate(d) {
             if (!d) return null;
-            return new Date(d.toString().replace(" ", "T"));
+
+            try {
+                const formatted = d.replace(" ", "T").split(".")[0];
+                return new Date(formatted);
+            } catch (e) {
+                console.log("❌ DATE PARSE ERROR:", d);
+                return null;
+            }
         }
 
-        // 🔥 FIND LATEST DATE IN DB
-        const validDates = reportData
-            .map(r => parseDate(r.CREATEDAT))
-            .filter(d => d);
+        // ✅ FIND LATEST DATE (IMPORTANT FIX)
+        let latestDate = null;
 
-        if (validDates.length === 0) return [];
+        reportData.forEach(r => {
+            const d = parseDate(r.CREATEDAT);
 
-        const latestDate = new Date(Math.max(...validDates));
+            console.log("RAW DATE:", r.CREATEDAT);
+            console.log("PARSED DATE:", d);
 
-        // 🔥 DYNAMIC PERIODS
+            if (d && (!latestDate || d > latestDate)) {
+                latestDate = d;
+            }
+        });
+
+        console.log("🔥 LATEST DATE:", latestDate);
+
+        // 🔥 PERIOD CALCULATION
         const startOfMonth = new Date(latestDate.getFullYear(), latestDate.getMonth(), 1);
 
         const startOfQuarter = new Date(latestDate);
@@ -135,13 +155,35 @@ module.exports = cds.service.impl(async function () {
         const startOfYear = new Date(latestDate);
         startOfYear.setFullYear(latestDate.getFullYear() - 1);
 
-        function filterData(startDate) {
-            return reportData.filter(r => {
-                const d = parseDate(r.CREATEDAT);
-                return d && d >= startDate;
-            });
-        }
+        console.log("START MONTH:", startOfMonth);
+        console.log("START QUARTER:", startOfQuarter);
+        console.log("START YEAR:", startOfYear);
 
+        // =========================
+        // FILTER DATA
+        // =========================
+        const monthly = reportData.filter(r => {
+            const d = parseDate(r.CREATEDAT);
+            return d && d >= startOfMonth;
+        });
+
+        const quarterly = reportData.filter(r => {
+            const d = parseDate(r.CREATEDAT);
+            return d && d >= startOfQuarter;
+        });
+
+        const yearly = reportData.filter(r => {
+            const d = parseDate(r.CREATEDAT);
+            return d && d >= startOfYear;
+        });
+
+        console.log("✅ MONTHLY COUNT:", monthly.length);
+        console.log("✅ QUARTERLY COUNT:", quarterly.length);
+        console.log("✅ YEARLY COUNT:", yearly.length);
+
+        // =========================
+        // PROCESS LOGIC
+        // =========================
         function process(data, periodName) {
 
             const moduleMap = {};
@@ -171,29 +213,33 @@ module.exports = cds.service.impl(async function () {
                 .sort((a, b) => b[1].count - a[1].count)
                 .slice(0, 3);
 
-            return topModules.map(([moduleName, moduleData]) => {
+            const result = [];
+
+            topModules.forEach(([moduleName, moduleData]) => {
 
                 const topTemplates = Object.entries(moduleData.templates)
                     .sort((a, b) => b[1] - a[1])
-                    .slice(0, 3)
-                    .map(([name, value]) => ({
-                        name,
-                        value
-                    }));
+                    .slice(0, 3);
 
-                return {
+                result.push({
                     period: periodName,
                     module: moduleName,
                     value: moduleData.count,
-                    templates: topTemplates
-                };
+                    templates: topTemplates.map(t => ({
+                        name: t[0],
+                        value: t[1]
+                    }))
+                });
+
             });
+
+            return result;
         }
 
         return [
-            ...process(filterData(startOfMonth), "Monthly"),
-            ...process(filterData(startOfQuarter), "Quarterly"),
-            ...process(filterData(startOfYear), "Yearly")
+            ...process(monthly, "Monthly"),
+            ...process(quarterly, "Quarterly"),
+            ...process(yearly, "Yearly")
         ];
     });
 
