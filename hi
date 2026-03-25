@@ -1,45 +1,211 @@
-using { com.scb.fileupload.master as db } from '../db/schema';
+using com.scb.fileupload.master as db from '../db/schema';
 
 service MFUService {
 
-    entity ReportFileStorage as projection on db.ReportFileStorage;
-    entity TemplateStorage as projection on db.TemplateStorage;
+    // 🔥 MAIN DASHBOARD
+    action getDashboardData(module: array of String) returns {
+        uploaded        : Integer;
+        approved        : Integer;
+        pending         : Integer;
+        totalTemplates  : Integer;
+        modules         : array of {
+            module   : String;
+            uploaded : Integer;
+            approved : Integer; 
+            pending  : Integer;
+        };
+        table           : array of {
+            module      : String;
+            subModule   : String;
+            template    : String;
+            status      : String;
+            user        : String;
+        };
+    };
 
     function getModules() returns array of {
         module : String;
     };
 
-    function getDashboardData(module : array of String) returns {
-        uploaded        : Integer;
-        approved        : Integer;
-        rejected        : Integer;
-        totalTemplates  : Integer;
-        modules         : array of {
-            module   : String;
-            uploaded : Integer;
-            approved : Integer;
-            rejected : Integer;
-        };
-        table           : array of {
-            module    : String;
-            subModule : String;
-            loadType  : String;
-            template  : String;
-            count     : Integer;
-        };
-    };
-
-    // 🔥 NEW SANKY FUNCTION
-    function getSankeyData() returns array of {
-        period    : String;
-        module    : String;
-        value     : Integer;
-        templates : array of {
-            name  : String;
-            value : Integer;
-        };
-    };
 }
+
+
+
+
+
+
+
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel"
+], function (Controller, JSONModel) {
+    "use strict";
+
+    return Controller.extend("mfuanalytics.controller.mfureport", {
+
+        onInit: function () {
+
+            this._showTreemap = false;
+
+            var oModel = new JSONModel({
+                allModules: [],
+                modules: [],
+                tableData: [],
+                totalUploaded: 0,
+                totalApproved: 0,
+                totalRejected: 0,
+                totalTemplates: 0
+            });
+
+            this.getView().setModel(oModel);
+
+            setTimeout(() => {
+                document.activeElement.blur();
+            }, 100);
+
+            fetch("/odata/v4/mfu/getModules()")
+                .then(res => res.json())
+                .then(data => {
+
+                    oModel.setProperty("/allModules", data.value);
+
+                    const allKeys = data.value.map(m => m.module);
+
+                    this.byId("_IDGenMultiComboBox1").setSelectedKeys(allKeys);
+
+                    this.loadDashboard(allKeys);
+                    this.loadSankey(); // 🔥 ADD THIS
+                });
+        },
+
+        // 🔥 SANKEY LOAD
+        loadSankey: function () {
+
+            fetch("/odata/v4/mfu/getSankeyData()")
+                .then(res => res.json())
+                .then(data => {
+
+                    const result = data.value;
+
+                    const nodesSet = new Set();
+                    const links = [];
+
+                    result.forEach(item => {
+
+                        nodesSet.add(item.period);
+                        nodesSet.add(item.module);
+
+                        links.push({
+                            source: item.period,
+                            target: item.module,
+                            value: item.value
+                        });
+
+                        item.templates.forEach(t => {
+
+                            nodesSet.add(t.name);
+
+                            links.push({
+                                source: item.module,
+                                target: t.name,
+                                value: t.value
+                            });
+
+                        });
+
+                    });
+
+                    const nodes = Array.from(nodesSet).map(n => ({ name: n }));
+
+                    this._renderSankey(nodes, links);
+                });
+        },
+
+        _renderSankey: function (nodes, links) {
+
+            var chartDom = document.getElementById("sankeyChart");
+            if (!chartDom) return;
+
+            var chart = echarts.init(chartDom);
+
+            var option = {
+                tooltip: {
+                    trigger: "item"
+                },
+                series: [
+                    {
+                        type: "sankey",
+                        data: nodes,
+                        links: links,
+                        nodeAlign: "left",
+                        lineStyle: {
+                            curveness: 0.5
+                        },
+                        emphasis: {
+                            focus: "adjacency"
+                        }
+                    }
+                ]
+            };
+
+            chart.setOption(option);
+        },
+
+        onToggleChart: function (oEvent) {
+
+            this._showTreemap = !this._showTreemap;
+
+            this.byId("vizContainer").setVisible(!this._showTreemap);
+            this.byId("treemapContainer").setVisible(this._showTreemap);
+
+            oEvent.getSource().setText(
+                this._showTreemap ? "Chart" : "Treemap"
+            );
+
+            if (this._showTreemap) {
+                setTimeout(this._renderTreemap.bind(this), 200);
+            }
+        },
+
+        onFilterChange: function (oEvent) {
+
+            const keys = oEvent.getSource().getSelectedKeys();
+
+            if (!keys || keys.length === 0) {
+                this.loadDashboard([]);
+            } else {
+                this.loadDashboard(keys);
+            }
+        },
+
+        loadDashboard: function (modules) {
+
+            fetch("/odata/v4/mfu/getDashboardData", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    module: modules
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                var oModel = this.getView().getModel();
+
+                oModel.setProperty("/modules", data.modules || []);
+                oModel.setProperty("/tableData", data.table || []);
+                oModel.setProperty("/totalUploaded", data.uploaded || 0);
+                oModel.setProperty("/totalApproved", data.approved || 0);
+                oModel.setProperty("/totalRejected", data.rejected || 0);
+                oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
+            });
+        }
+
+    });
+});
+
 
 
 
@@ -50,9 +216,7 @@ module.exports = cds.service.impl(async function () {
 
     const { ReportFileStorage, TemplateStorage } = cds.entities('com.scb.fileupload.master');
 
-    // =========================
-    // MODULE DROPDOWN
-    // =========================
+    // GET MODULE DROPDOWN
     this.on('getModules', async () => {
 
         const data = await cds.run(
@@ -64,9 +228,7 @@ module.exports = cds.service.impl(async function () {
         }));
     });
 
-    // =========================
-    // DASHBOARD
-    // =========================
+    // MAIN DASHBOARD
     this.on('getDashboardData', async (req) => {
 
         let modules = req.data.module || [];
@@ -79,18 +241,22 @@ module.exports = cds.service.impl(async function () {
         let templateData = [];
 
         if (modules.length > 0) {
+
             reportData = await cds.run(
-                SELECT.from(ReportFileStorage).where({ MODULE_NAME: { in: modules } })
+                SELECT.from(ReportFileStorage)
+                    .where({ MODULE_NAME: { in: modules } })
             );
+
             templateData = await cds.run(
-                SELECT.from(TemplateStorage).where({ MODULE_NAME: { in: modules } })
+                SELECT.from(TemplateStorage)
+                    .where({ MODULE_NAME: { in: modules } })
             );
+
         } else {
             reportData = await cds.run(SELECT.from(ReportFileStorage));
             templateData = await cds.run(SELECT.from(TemplateStorage));
         }
 
-        // KPI
         let uploaded = 0, approved = 0, rejected = 0;
 
         reportData.forEach(r => {
@@ -99,10 +265,10 @@ module.exports = cds.service.impl(async function () {
             if (r.STATUS === 'rejected') rejected++;
         });
 
-        // CHART
         const moduleMap = {};
 
         reportData.forEach(r => {
+
             if (!moduleMap[r.MODULE_NAME]) {
                 moduleMap[r.MODULE_NAME] = {
                     module: r.MODULE_NAME,
@@ -119,10 +285,10 @@ module.exports = cds.service.impl(async function () {
 
         const modulesData = Object.values(moduleMap);
 
-        // TABLE
         const tableMap = {};
 
         reportData.forEach(r => {
+
             const key = `${r.MODULE_NAME}_${r.SUB_MODULE_NAME}_${r.LOAD_TYPE}_${r.LOAD_TEMPLATE}`;
 
             if (!tableMap[key]) {
@@ -139,129 +305,95 @@ module.exports = cds.service.impl(async function () {
         });
 
         const table = Object.values(tableMap);
+        const totalTemplates = templateData.length;
 
         return {
             uploaded,
             approved,
             rejected,
-            totalTemplates: templateData.length,
+            totalTemplates,
             modules: modulesData,
             table
         };
     });
 
-    // =========================
-    // 🔥 SANKY BACKEND
-    // =========================
+    // 🔥 SANKEY DATA (NEW)
     this.on('getSankeyData', async () => {
 
-        const data = await cds.run(SELECT.from(ReportFileStorage));
+        const today = new Date();
 
-        const now = new Date();
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const startOfQuarter = new Date();
-        startOfQuarter.setMonth(now.getMonth() - 3);
+        const startOfQuarter = new Date(today);
+        startOfQuarter.setMonth(today.getMonth() - 2);
+        startOfQuarter.setDate(1);
 
-        const startOfYear = new Date();
-        startOfYear.setFullYear(now.getFullYear() - 1);
+        const startOfYear = new Date(today);
+        startOfYear.setFullYear(today.getFullYear() - 1);
 
-        function filterByDate(startDate) {
-            return data.filter(d => new Date(d.CREATEDAT) >= startDate);
-        }
+        const reportData = await cds.run(SELECT.from(ReportFileStorage));
 
-        function process(periodName, records) {
+        function process(data, periodName) {
 
-            const moduleCount = {};
-            const templateCount = {};
+            const moduleMap = {};
 
-            records.forEach(r => {
+            data.forEach(r => {
 
                 const module = r.MODULE_NAME;
                 const template = r.LOAD_TEMPLATE;
 
-                moduleCount[module] = (moduleCount[module] || 0) + 1;
+                if (!moduleMap[module]) {
+                    moduleMap[module] = {
+                        count: 0,
+                        templates: {}
+                    };
+                }
 
-                if (!templateCount[module]) templateCount[module] = {};
-                templateCount[module][template] = (templateCount[module][template] || 0) + 1;
+                moduleMap[module].count++;
+
+                if (!moduleMap[module].templates[template]) {
+                    moduleMap[module].templates[template] = 0;
+                }
+
+                moduleMap[module].templates[template]++;
             });
 
-            const topModules = Object.entries(moduleCount)
-                .sort((a, b) => b[1] - a[1])
+            const topModules = Object.entries(moduleMap)
+                .sort((a, b) => b[1].count - a[1].count)
                 .slice(0, 3);
 
-            return topModules.map(([module, count]) => {
+            const result = [];
 
-                const templates = Object.entries(templateCount[module] || {})
+            topModules.forEach(([moduleName, moduleData]) => {
+
+                const topTemplates = Object.entries(moduleData.templates)
                     .sort((a, b) => b[1] - a[1])
-                    .slice(0, 3)
-                    .map(([name, value]) => ({ name, value }));
+                    .slice(0, 3);
 
-                return {
+                result.push({
                     period: periodName,
-                    module,
-                    value: count,
-                    templates
-                };
+                    module: moduleName,
+                    value: moduleData.count,
+                    templates: topTemplates.map(t => ({
+                        name: t[0],
+                        value: t[1]
+                    }))
+                });
+
             });
+
+            return result;
         }
 
+        const monthly = reportData.filter(r => new Date(r.CREATEDAT) >= startOfMonth);
+        const quarterly = reportData.filter(r => new Date(r.CREATEDAT) >= startOfQuarter);
+        const yearly = reportData.filter(r => new Date(r.CREATEDAT) >= startOfYear);
+
         return [
-            ...process("Monthly", filterByDate(startOfMonth)),
-            ...process("Quarterly", filterByDate(startOfQuarter)),
-            ...process("Yearly", filterByDate(startOfYear))
+            ...process(monthly, "Monthly"),
+            ...process(quarterly, "Quarterly"),
+            ...process(yearly, "Yearly")
         ];
     });
 
 });
-
-
-
-
-onAfterRendering: function () {
-
-    fetch("/odata/v4/mfu/getSankeyData()")
-        .then(res => res.json())
-        .then(data => {
-
-            const result = data.value || [];
-
-            const nodes = [];
-            const links = [];
-
-            nodes.push({ name: "Monthly" }, { name: "Quarterly" }, { name: "Yearly" });
-
-            result.forEach(r => {
-
-                nodes.push({ name: r.module });
-
-                links.push({
-                    source: r.period,
-                    target: r.module,
-                    value: r.value
-                });
-
-                r.templates.forEach(t => {
-                    nodes.push({ name: t.name });
-
-                    links.push({
-                        source: r.module,
-                        target: t.name,
-                        value: t.value
-                    });
-                });
-            });
-
-            const chart = echarts.init(document.getElementById("sankeyChart"));
-
-            chart.setOption({
-                series: [{
-                    type: "sankey",
-                    data: nodes,
-                    links: links,
-                    emphasis: { focus: "adjacency" }
-                }]
-            });
-
-        });
-}
