@@ -7,13 +7,13 @@ service MFUService {
         approved        : Integer;
         rejected        : Integer;
         totalTemplates  : Integer;
-        modules         : array of {
+        modules         : many {
             module   : String;
             uploaded : Integer;
             approved : Integer; 
             rejected : Integer;
         };
-        table           : array of {
+        table           : many {
             module    : String;
             subModule : String;
             loadType  : String;
@@ -22,24 +22,24 @@ service MFUService {
         };
     };
 
-    function getModules() returns array of {
+    function getModules() returns many {
         module : String;
     };
 
-    // 🔥 ONLY FOR SANKEY
-    function getSankeyData() returns array of {
+    // 🔥 SANKEY
+    function getSankeyData() returns many {
         period    : String;
         module    : String;
         value     : Integer;
-        templates : array of {
+        templates : many {
             name  : String;
             value : Integer;
         };
+    };
 
+    // 🔥 PIE (FIXED)
     function getPieData() returns many {
-    user  : String;
-    count : Integer;
-};
-
+        user  : String;
+        count : Integer;
     };
 }
