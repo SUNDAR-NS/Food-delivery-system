@@ -1,11 +1,45 @@
-[ERROR] srv/service.cds:39:14-24: Mismatched ‹Identifier›, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
-[ERROR] srv/service.cds:39:24-25: Mismatched ‘(’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
-[ERROR] srv/service.cds:39:35-40: Mismatched ‘array’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
-[ERROR] srv/service.cds:39:41-43: Extraneous ‘of’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
+using com.scb.fileupload.master as db from '../db/schema';
 
-        ___________________________
- 
-[ERROR] srv/service.cds:39:14-24: Mismatched ‹Identifier›, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
-[ERROR] srv/service.cds:39:24-25: Mismatched ‘(’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
-[ERROR] srv/service.cds:39:35-40: Mismatched ‘array’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
-[ERROR] srv/service.cds:39:41-43: Extraneous ‘of’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
+service MFUService {
+
+    action getDashboardData(module: array of String) returns {
+        uploaded        : Integer;
+        approved        : Integer;
+        rejected        : Integer;
+        totalTemplates  : Integer;
+        modules         : array of {
+            module   : String;
+            uploaded : Integer;
+            approved : Integer; 
+            rejected : Integer;
+        };
+        table           : array of {
+            module    : String;
+            subModule : String;
+            loadType  : String;
+            template  : String;
+            count     : Integer;
+        };
+    };
+
+    function getModules() returns array of {
+        module : String;
+    };
+
+    // 🔥 ONLY FOR SANKEY
+    function getSankeyData() returns array of {
+        period    : String;
+        module    : String;
+        value     : Integer;
+        templates : array of {
+            name  : String;
+            value : Integer;
+        };
+
+    function getPieData() returns many {
+    user  : String;
+    count : Integer;
+};
+
+    };
+}
