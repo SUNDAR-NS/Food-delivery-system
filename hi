@@ -1,216 +1,258 @@
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-    "use strict";
+<mvc:View controllerName="mfuanalytics.controller.mfureport"  
+    xmlns:mvc="sap.ui.core.mvc"  
+    xmlns="sap.m"  
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"  
+    xmlns:viz.data="sap.viz.ui5.data"  
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">  
+    <Page id="_IDGenPage" title="MFU Dashboard" class="sapHeader">  
+        <VBox id="_IDGenVBox" class="mainContainer">  
+            <Panel id="_IDGenPanel2"  class="moduleFilterBox">
+                <VBox id="_IDGenVBox6" class="filterContainer">
+                    <HBox id="_IDGenHBox" alignItems="Center" class="filterRow">
+                        <Text id="_IDGenText" text="Module" class="filterLable"/>
+                        <MultiComboBox id="_IDGenMultiComboBox1"
+                            width="210px"
+                            selectionFinish="onFilterChange"
+                            items="{/allModules}"
+                            showClearIcon="true">
+                            <core:Item id="_IDGenItem" key="{module}" text="{module}" />
+                        </MultiComboBox>
+                    </HBox>
+                </VBox>
+            </Panel>
 
-    return Controller.extend("mfuanalytics.controller.mfureport", {
+            <HBox id="_IDGenHBox3" class="topContainer">  
+                <VBox id="_IDGenVBox1" width="35%">  
+                    <HBox id="_IDGenHBox4" class="kpiRow">  
+                        <GenericTile id="_IDGenGenericTile" header="Total Uploaded" class="tile">  
+                            <TileContent id="_IDGenTileContent">
+                                <NumericContent id="_IDGenNumericContent" value="{/totalUploaded}"
+                                icon="sap-icon://upload"
+                                valueColor="None"/>
+                            </TileContent>  
+                        </GenericTile>  
+                        <GenericTile id="_IDGenGenericTile1" header="Total Approved" class="tile">  
+                            <TileContent id="_IDGenTileContent1">
+                                <NumericContent id="_IDGenNumericContent1" value="{/totalApproved}"
+                                icon="sap-icon://accept"
+                                valueColor="Good"/>
+                            </TileContent>  
+                        </GenericTile>  
+                    </HBox>  
+                    <HBox id="_IDGenHBox5" class="kpiRow">  
+                        <GenericTile id="_IDGenGenericTile2" header="Total Rejected" class="tile">  
+                            <TileContent id="_IDGenTileContent2">
+                                <NumericContent id="_IDGenNumericContent2" value="{/totalRejected}" 
+                                icon="sap-icon://decline"
+                                valueColor="Critical"/>
+                            </TileContent>  
+                        </GenericTile>  
+                        <GenericTile id="_IDGenGenericTile3" header="Total Templates" class="tile">  
+                            <TileContent id="_IDGenTileContent3">
+                                <NumericContent id="_IDGenNumericContent3" value="{/totalTemplates}"
+                                icon="sap-icon://document-text"
+                                valueColor="Neutral"/>
+                            </TileContent>  
+                        </GenericTile>  
+                    </HBox>  
+                </VBox>  
+                <Panel id="_IDGenPanel" width="800px">
+                    <Toolbar class="panelTitle">
+                            <Title text="MFU Templates by Modules" />
+                        <ToolbarSpacer/>
+                            <Button 
+                                text="Treemap"
+                                icon="sap-icon://switch-views"
+                                press="onToggleChart"/>
+                    </Toolbar>
+                    <VBox id="vizContainer" visible="true">
+                        <viz:VizFrame id="_IDGenVizFrame" vizType="stacked_column" height="320px" width="100%"
+                            vizProperties='{
+                                "title": { "visible": false },
+                                "legend": {
+                                "visible": true,
+                                "position":"right"
+                                },
+                                "plotArea": {
+                                    "dataLabel": { 
+                                        "visible": false,
+                                        "showTotal": true
+                                    },
+                                    "dataLabelTotal": {
+                                        "visible": true
+                                    },
+                                    
+                                    "drawingEffect": "glossy",
+                                    "colorPalette":[
+                                        "#0a6ed1",
+                                        "#107e3e",
+                                        "#e9730c"
+                                    ],
+                                    "animation":{
+                                    "dataLoading":true
+                                    }
+                                },
+                                "valueAxis":{
+                                "title":{"visible":true}
+                                },
+                                "categoryAxis":{
+                                "title":{"visible":true}
+                                },
+                                "interaction": {
+                                    "selectability": {
+                                        "mode": "MULTIPLE"
+                                    }
+                                }
+                            }'
+                            >
+                            <viz:dataset>
+                                <viz.data:FlattenedDataset id="_IDGenFlattenedDataset" data="{/modules}">
+                                    <viz.data:dimensions>
+                                        <viz.data:DimensionDefinition id="_IDGenDimensionDefinition" name="Module" value="{module}" />
+                                    </viz.data:dimensions>
+                                    <viz.data:measures>
+                                        <viz.data:MeasureDefinition id="_IDGenMeasureDefinition" name="Uploaded" value="{uploaded}" />
+                                        <viz.data:MeasureDefinition id="_IDGenMeasureDefinition1" name="Approved" value="{approved}" />
+                                        <viz.data:MeasureDefinition id="_IDGenMeasureDefinition2" name="Rejected" value="{rejected}" />
+                                    </viz.data:measures>
+                                </viz.data:FlattenedDataset>
+                            </viz:dataset>
+                            <viz:feeds>
+                                <viz.feeds:FeedItem id="_IDGenFeedItem" uid="valueAxis" type="Measure"
+                                    values="Uploaded,Approved,Rejected"/>
+                                <viz.feeds:FeedItem id="_IDGenFeedItem1" uid="categoryAxis" type="Dimension"
+                                    values="Module"/>
+                            </viz:feeds>
+                        </viz:VizFrame>
+                    </VBox>
+                    <VBox id="treemapContainer" visible="false">
+                        <core:HTML
+                            content="&lt;div id='treemapChart' style='width:100%;height:320px'&gt;&lt;/div&gt;" />
+                    </VBox>
+                </Panel> 
+            </HBox> 
 
-        onInit: function () {
+            <HBox id="_IDGenHBox6" class="chartRow">
+                <VBox id="_IDGenVBox2" class="chartBox">
+                    <Text id="_IDGenText1" text="Templates by Count" class="panelTitle"/>
+                    <viz:VizFrame id="_IDGenVizFrame1" vizType="pie" height="200px" width="100%">
+    <viz:dataset>
+        <viz.data:FlattenedDataset data="{/pieModules}">
 
-            this._showTreemap = false;
+            <viz.data:dimensions>
+                <!-- 🔥 USER -->
+                <viz.data:DimensionDefinition name="User" value="{user}"/>
+            </viz.data:dimensions>
 
-            var oModel = new JSONModel({
-                allModules: [],
-                modules: [],
-                tableData: [],
-                pieModules: [],   // 🔥 IMPORTANT
-                totalUploaded: 0,
-                totalApproved: 0,
-                totalRejected: 0,
-                totalTemplates: 0
-            });
+            <viz.data:measures>
+                <!-- 🔥 COUNT -->
+                <viz.data:MeasureDefinition name="Templates" value="{count}"/>
+            </viz.data:measures>
 
-            this.getView().setModel(oModel);
+        </viz.data:FlattenedDataset>
+    </viz:dataset>
 
-            setTimeout(() => {
-                document.activeElement.blur();
-            }, 100);
+    <viz:feeds>
+        <!-- 🔥 SIZE -->
+        <viz.feeds:FeedItem uid="size" type="Measure" values="Templates"/>
 
-            // 🔥 LOAD MODULES
-            fetch("/odata/v4/mfu/getModules()")
-                .then(res => res.json())
-                .then(data => {
+        <!-- 🔥 COLOR -->
+        <viz.feeds:FeedItem uid="color" type="Dimension" values="User"/>
+    </viz:feeds>
+</viz:VizFrame>
+                </VBox>
+                <VBox id="_IDGenVBox7" class="chartBox" height="300px">
+                    <Text id="_IDGenText99" text="Top MFU Usage" class="panelTitle"/>
+                    <core:HTML
+                        id="sankeyHtml"
+                        content="&lt;div id='sankeyChart' style='width:770px;height:250px'&gt;&lt;/div&gt;" />
+                </VBox>
+            </HBox>
+            
+            <Panel id="_IDGenPanel1" class="sapUiMediumMarginTop mfuTablePanel">
 
-                    oModel.setProperty("/allModules", data.value);
+    <Toolbar class="panelTitle">
+        <Title text="MFU Details" />
+        <ToolbarSpacer/>
+    </Toolbar>
 
-                    const allKeys = data.value.map(m => m.module);
+    <!-- 🔥 SCROLLABLE BOX -->
+    <ScrollContainer height="300px" vertical="true" class="tableScrollBox">
 
-                    this.byId("_IDGenMultiComboBox1").setSelectedKeys(allKeys);
+        <Table id="_IDGenTable" items="{/tableData}" width="100%" sticky="ColumnHeaders">
 
-                    this.loadDashboard(allKeys);
-                });
+            <columns>
+                <Column><Text text="Module"/></Column>
+                <Column><Text text="Sub Module"/></Column>
+                <Column><Text text="Load Type"/></Column>
+                <Column><Text text="Template"/></Column>
+                <Column><Text text="Count"/></Column>
+            </columns>
 
-            // 🔥 STATIC DONUT DATA
-            this._setStaticPie();
-        },
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <Text text="{module}"/>
+                        <Text text="{subModule}"/>
+                        <Text text="{loadType}"/>
+                        <Text text="{template}"/>
+                        <Text text="{count}"/>
+                    </cells>
+                </ColumnListItem>
+            </items>
 
-        // =========================
-        // 🔥 STATIC DONUT DATA
-        // =========================
-        _setStaticPie: function () {
+        </Table>
 
-            const pieData = [
-                { user: "N S Anand", count: 25 },
-                { user: "Kiran S Y", count: 18 },
-                { user: "Sethukumar Shivani", count: 12 },
-                { user: "Sundar N S", count: 20 }
-            ];
+    </ScrollContainer>
 
-            console.log("🔥 STATIC DONUT DATA:", pieData);
+</Panel>
+        </VBox> 
+    </Page>  
 
-            const oModel = this.getView().getModel();
-            oModel.setProperty("/pieModules", pieData);
-        },
-
-        // =========================
-        // 🔥 SANKEY
-        // =========================
-        onAfterRendering: function () {
-            this.loadSankey();
-        },
-
-        loadSankey: function () {
-
-            fetch("/odata/v4/mfu/getSankeyData()")
-                .then(res => res.json())
-                .then(data => {
-
-                    const result = data.value || [];
-
-                    if (result.length === 0) return;
-
-                    const nodeSet = new Set();
-                    const links = [];
-
-                    result.forEach(r => {
-
-                        nodeSet.add(r.period);
-                        nodeSet.add(r.module);
-
-                        links.push({
-                            source: r.period,
-                            target: r.module,
-                            value: r.value
-                        });
-
-                        (r.templates || []).forEach(t => {
-
-                            nodeSet.add(t.name);
-
-                            links.push({
-                                source: r.module,
-                                target: t.name,
-                                value: t.value
-                            });
-
-                        });
-                    });
-
-                    const nodes = Array.from(nodeSet).map(n => ({ name: n }));
-
-                    var chartDom = document.getElementById("sankeyChart");
-                    if (!chartDom) return;
-
-                    var chart = echarts.init(chartDom);
-
-                    chart.setOption({
-                        tooltip: { trigger: "item" },
-                        series: [{
-                            type: "sankey",
-                            nodeAlign: "left",
-                            data: nodes,
-                            links: links,
-                            lineStyle: { curveness: 0.5 },
-                            emphasis: { focus: "adjacency" }
-                        }]
-                    });
-
-                })
-                .catch(err => console.error("SANKEY ERROR:", err));
-        },
-
-        // =========================
-        // 🔁 TREEMAP (STATIC)
-        // =========================
-        onToggleChart: function (oEvent) {
-
-            this._showTreemap = !this._showTreemap;
-
-            this.byId("vizContainer").setVisible(!this._showTreemap);
-            this.byId("treemapContainer").setVisible(this._showTreemap);
-
-            oEvent.getSource().setText(
-                this._showTreemap ? "Chart" : "Treemap"
-            );
-
-            if (this._showTreemap) {
-                setTimeout(this._renderTreemap.bind(this), 200);
-            }
-        },
-
-        _renderTreemap: function () {
-            var dom = document.getElementById("treemapChart");
-            if (!dom) return;
-
-            var chart = echarts.init(dom);
-
-            chart.setOption({
-                series: [{
-                    type: "treemap",
-                    data: [
-                        { name: "NFRP", value: 20 },
-                        { name: "SCBI", value: 15 },
-                        { name: "ICON", value: 10 }
-                    ]
-                }]
-            });
-        },
-
-        onCloseDialog: function () {
-            this.byId("templateDialog").close();
-        },
-
-        // =========================
-        // FILTER
-        // =========================
-        onFilterChange: function (oEvent) {
-
-            const keys = oEvent.getSource().getSelectedKeys();
-
-            if (!keys || keys.length === 0) {
-                this.loadDashboard([]);
-            } else {
-                this.loadDashboard(keys);
-            }
-        },
-
-        // =========================
-        // DASHBOARD
-        // =========================
-        loadDashboard: function (modules) {
-
-            fetch("/odata/v4/mfu/getDashboardData", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ module: modules })
-            })
-            .then(res => res.json())
-            .then(data => {
-
-                var oModel = this.getView().getModel();
-
-                oModel.setProperty("/modules", data.modules || []);
-                oModel.setProperty("/tableData", data.table || []);
-                oModel.setProperty("/totalUploaded", data.uploaded || 0);
-                oModel.setProperty("/totalApproved", data.approved || 0);
-                oModel.setProperty("/totalRejected", data.rejected || 0);
-                oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
-            })
-            .catch(err => console.error("API ERROR:", err));
-        }
-
-    });
-});
+    <Dialog
+        id="templateDialog"
+        contentWidth="600px"
+        contentHeight="auto"
+        draggable="true"
+        resizable="true"
+        title="Template Details">
+        <content>
+            <ObjectHeader
+                title="{detail>/template}"
+                number="{detail>/status}"
+                numberState="{detail>/statusState}"
+                intro="{detail>/module}"
+                icon="sap-icon://document-text">
+                <attributes>
+                    <ObjectAttribute title="User" text="{detail>/user}"/>
+                    <ObjectAttribute title="SubModule" text="{detail>/submodule}"/>
+                </attributes>
+            </ObjectHeader>
+            <Table
+                inset="false"
+                class="sapUiSmallMarginTop"
+                items="{detail>/rows}">
+                <columns>
+                    <Column>
+                        <Text text="Property"/>
+                    </Column>
+                    <Column>
+                        <Text text="Value"/>
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{detail>key}"/>
+                            <Text text="{detail>value}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+        <endButton>
+            <Button text="Close" type="Emphasized" press=".onCloseDialog"/>
+        </endButton>
+    </Dialog>
+</mvc:View>
