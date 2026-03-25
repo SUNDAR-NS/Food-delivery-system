@@ -1,165 +1,301 @@
-[odata] - GET /odata/v4/mfu/getSankeyData() 
-[odata] - POST /odata/v4/mfu/getDashboardData 
-🔥 TOTAL RECORDS: 74
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-RAW DATE: undefined
-PARSED DATE: null
-🔥 LATEST DATE: null
-[cds] - ❗️Uncaught TypeError: Cannot read properties of null (reading 'getFullYear')
-    at ApplicationService.<anonymous> (/home/user/projects/MFUAnalytics (3) (2)/srv/service.js:149:50)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async next (/home/user/projects/MFUAnalytics (3) (2)/node_modules/@sap/cds/lib/srv/srv-dispatch.js:64:17)
-    at async ApplicationService.handle (/home/user/projects/MFUAnalytics (3) (2)/node_modules/@sap/cds/lib/srv/srv-dispatch.js:62:10)
-    at async ApplicationService.handle (/home/user/projects/MFUAnalytics (3) (2)/node_modules/@sap/cds/libx/_runtime/common/Service.js:81:16)
+loadSankey: function () {
+
+    fetch("/odata/v4/mfu/getSankeyData()")
+        .then(res => res.json())
+        .then(data => {
+
+            const result = data.value || [];
+
+            const nodes = new Set();
+            const links = [];
+
+            result.forEach(r => {
+
+                nodes.add(r.period);
+                nodes.add(r.module);
+
+                links.push({
+                    source: r.period,
+                    target: r.module,
+                    value: r.value
+                });
+
+                (r.templates || []).forEach(t => {
+
+                    nodes.add(t.name);
+
+                    links.push({
+                        source: r.module,
+                        target: t.name,
+                        value: t.value
+                    });
+                });
+            });
+
+            const finalNodes = Array.from(nodes).map(n => ({ name: n }));
+
+            const chart = echarts.init(document.getElementById("sankeyChart"));
+
+            chart.setOption({
+                series: [{
+                    type: "sankey",
+                    data: finalNodes,
+                    links: links
+                }]
+            });
+        });
+}
 
 
-Note: Leave the treemap chart , dont do that keep its as static , we just want to do for sankey logic
 
 
-ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,MODULE_NAME,SUB_MODULE_NAME,LOAD_TEMPLATE,FILE_NAME,FILE_MIME_TYPE,FILE_SIZE,FILE_CONTENT,STATUS,COMMENTS,JSON_DATA,LOAD_STATUS,LOAD_TYPE,EXPIRY_DATE,ACTION_BY
-18e48038-d864-4be2-9416-b28322e2607b,2026-02-17 09:52:43.243000000,8227668,2026-02-17 09:55:13.603000000,8227668,NFRP,CONFIG,MFU_CONFIG_BUDGET,NFRP_CONFIG_MASTER_MFU_CONFIG_BUDGET.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,9759,504B030414000600080000002100A90F68387F01000002050000130008025B436F6E74656E745F54797065735D2E786D6C20A2040228A000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000AC54CB4EC33010BC23F10F91AF2871E180106ACA818784C44B023E6089378D55C7B6BC0BB47FCFC60584506941F4122BF1EECC64BCE3F1C9BC77C50B26B2C1D76ABF1AA9027D138CF5D35A3D3E5C9447AA20066FC0058FB55A20A993C9EECEF86111910AE9F654AB8E391E6B4D4D873D5015227AD96943EA81E5354D7584660653D407A3D1A16E8267F45CF280A126E3336CE1D971713E97CF4B25091DA9E274593870D50A6274B60116A5FAC59B6F2CE53B43259DB9863A1B694F6428BD9261D8F999E0BDEF56AC49D6607107896FA017197AEEF46B48B3A71066D57A90152A43DBDA064D689E7B71A0A298100C7588DCBB2AAF550FD67FE85EC39F8B49E7657FCB4286FFCBC01B74B09C37EAFCFCBF840CB3819078E190B66D7B06DDC4DC414273CF4992B175015FB1D7E990B9B94606030CFA0A9ED05DFA36FCC28D9ECAE5E0558D03222B339833E2068CCF90AC1A3661BC4B21926436E1DF7DFF08E5D05D4601C2C4167FC72879FFF741E370A318342BB875BEC1266F000000FFFF0300504B030414000600080000002100311D89CD22010000DE0200000B0008025F72656C732F2E72656C7320A2040228A000020000000000000000000000000000000000000000000000,approved,ok,[{"SCENARIO":"W_BRYY","LAYER_ID":"L800","LAYER_NAME":"Restricted Adj","E_BOOK":"NEWF - BR - Restricted"},{"SCENARIO":"W_BRYY","LAYER_ID":"L061","LAYER_NAME":"Post-GPR Adjustment Layer","E_BOOK":"NEWF - BR"},{"SCENARIO":"W_BRYY","LAYER_ID":"L100","LAYER_NAME":"GFPA Contingency Adj","E_BOOK":"NEWF - BR"},{"SCENARIO":"W_BRYY","LAYER_ID":"L0801","LAYER_NAME":"GFPA Central Adj 1","E_BOOK":"NEWF - BR - GRP ADJ"},{"SCENARIO":"W_BRYY","LAYER_ID":"L0803","LAYER_NAME":"GFPA Central Adj 2","E_BOOK":"NEWF - BR"},{"SCENARIO":"W_BRYY","LAYER_ID":"L0804","LAYER_NAME":"GFPA Central Adj 3","E_BOOK":"NEWF - BR"},{"SCENARIO":"W_BRYY","LAYER_ID":"LG1","LAYER_NAME":"Post GPR Adj","E_BOOK":"NEWF - BR - GRP ADJ"},{"SCENARIO":"W_BRYY","LAYER_ID":"L000","LAYER_NAME":"Core Input","E_BOOK":"NEWF - BR"},{"SCENARIO":"W_BRYY","LAYER_ID":"L001","LAYER_NAME":"Core Input Adj","E_BOOK":"NEWF - BR"},{"SCENARIO":"W_BRYY","LAYER_ID":"L002","LAYER_NAME":"Islamic Banking Input","E_BOOK":"NEWF - BR"},{"SCENARIO":"W_BRYY","LAYER_ID":"L011","LAYER_NA,,TRUNCATE,2026-03-14,8227668
+const cds = require('@sap/cds');
+
+module.exports = cds.service.impl(async function () {
+
+    const { ReportFileStorage, TemplateStorage } = cds.entities('com.scb.fileupload.master');
+
+    // =========================
+    // MODULES
+    // =========================
+    this.on('getModules', async () => {
+
+        const data = await cds.run(
+            SELECT.distinct.from(TemplateStorage).columns('MODULE_NAME').orderBy('MODULE_NAME')
+        );
+
+        return data.map(d => ({
+            module: d.MODULE_NAME
+        }));
+    });
+
+    // =========================
+    // DASHBOARD (UNCHANGED)
+    // =========================
+    this.on('getDashboardData', async (req) => {
+
+        let modules = req.data.module || [];
+
+        if (typeof modules === "string") {
+            modules = [modules];
+        }
+
+        let reportData = [];
+        let templateData = [];
+
+        if (modules.length > 0) {
+            reportData = await cds.run(
+                SELECT.from(ReportFileStorage).where({ MODULE_NAME: { in: modules } })
+            );
+            templateData = await cds.run(
+                SELECT.from(TemplateStorage).where({ MODULE_NAME: { in: modules } })
+            );
+        } else {
+            reportData = await cds.run(SELECT.from(ReportFileStorage));
+            templateData = await cds.run(SELECT.from(TemplateStorage));
+        }
+
+        let uploaded = 0, approved = 0, rejected = 0;
+
+        reportData.forEach(r => {
+            if (r.STATUS === 'uploaded') uploaded++;
+            if (r.STATUS === 'approved') approved++;
+            if (r.STATUS === 'rejected') rejected++;
+        });
+
+        const moduleMap = {};
+
+        reportData.forEach(r => {
+
+            if (!moduleMap[r.MODULE_NAME]) {
+                moduleMap[r.MODULE_NAME] = {
+                    module: r.MODULE_NAME,
+                    uploaded: 0,
+                    approved: 0,
+                    rejected: 0
+                };
+            }
+
+            if (r.STATUS === 'uploaded') moduleMap[r.MODULE_NAME].uploaded++;
+            if (r.STATUS === 'approved') moduleMap[r.MODULE_NAME].approved++;
+            if (r.STATUS === 'rejected') moduleMap[r.MODULE_NAME].rejected++;
+        });
+
+        const modulesData = Object.values(moduleMap);
+
+        const tableMap = {};
+
+        reportData.forEach(r => {
+
+            const key = `${r.MODULE_NAME}_${r.SUB_MODULE_NAME}_${r.LOAD_TYPE}_${r.LOAD_TEMPLATE}`;
+
+            if (!tableMap[key]) {
+                tableMap[key] = {
+                    module: r.MODULE_NAME,
+                    subModule: r.SUB_MODULE_NAME,
+                    loadType: r.LOAD_TYPE,
+                    template: r.LOAD_TEMPLATE,
+                    count: 0
+                };
+            }
+
+            tableMap[key].count++;
+        });
+
+        return {
+            uploaded,
+            approved,
+            rejected,
+            totalTemplates: templateData.length,
+            modules: modulesData,
+            table: Object.values(tableMap)
+        };
+    });
+
+    // =========================
+    // 🔥 SANKEY (FINAL FIXED)
+    // =========================
+    this.on('getSankeyData', async () => {
+
+        const data = await cds.run(SELECT.from(ReportFileStorage));
+
+        console.log("🔥 TOTAL:", data.length);
+        console.log("🔥 SAMPLE:", data[0]);
+
+        // ✅ IMPORTANT → FIELD NAME FIX
+        function getDate(row) {
+            return row.createdAt || row.CREATEDAT || null;
+        }
+
+        function parseDate(d) {
+            if (!d) return null;
+            return new Date(d.toString().replace(" ", "T").split(".")[0]);
+        }
+
+        let latest = null;
+
+        data.forEach(r => {
+            const d = parseDate(getDate(r));
+
+            console.log("DATE RAW:", getDate(r));
+            console.log("DATE PARSED:", d);
+
+            if (d && (!latest || d > latest)) {
+                latest = d;
+            }
+        });
+
+        if (!latest) {
+            console.log("❌ NO VALID DATE");
+            return [];
+        }
+
+        console.log("🔥 LATEST:", latest);
+
+        const startMonth = new Date(latest.getFullYear(), latest.getMonth(), 1);
+
+        const startQuarter = new Date(latest);
+        startQuarter.setMonth(latest.getMonth() - 2);
+        startQuarter.setDate(1);
+
+        const startYear = new Date(latest);
+        startYear.setFullYear(latest.getFullYear() - 1);
+
+        function filter(start) {
+            return data.filter(r => {
+                const d = parseDate(getDate(r));
+                return d && d >= start;
+            });
+        }
+
+        function process(rows, period) {
+
+            const map = {};
+
+            rows.forEach(r => {
+
+                const m = r.MODULE_NAME;
+                const t = r.LOAD_TEMPLATE;
+
+                if (!map[m]) {
+                    map[m] = { count: 0, templates: {} };
+                }
+
+                map[m].count++;
+
+                map[m].templates[t] = (map[m].templates[t] || 0) + 1;
+            });
+
+            return Object.entries(map)
+                .sort((a, b) => b[1].count - a[1].count)
+                .slice(0, 3)
+                .map(([m, val]) => ({
+                    period,
+                    module: m,
+                    value: val.count,
+                    templates: Object.entries(val.templates)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 3)
+                        .map(([name, value]) => ({ name, value }))
+                }));
+        }
+
+        const monthly = filter(startMonth);
+        const quarterly = filter(startQuarter);
+        const yearly = filter(startYear);
+
+        console.log("MONTH:", monthly.length);
+        console.log("QUARTER:", quarterly.length);
+        console.log("YEAR:", yearly.length);
+
+        return [
+            ...process(monthly, "Monthly"),
+            ...process(quarterly, "Quarterly"),
+            ...process(yearly, "Yearly")
+        ];
+    });
+
+});
+
+
+
+
+using com.scb.fileupload.master as db from '../db/schema';
+
+service MFUService {
+
+    action getDashboardData(module: array of String) returns {
+        uploaded        : Integer;
+        approved        : Integer;
+        rejected        : Integer;
+        totalTemplates  : Integer;
+        modules         : array of {
+            module   : String;
+            uploaded : Integer;
+            approved : Integer; 
+            rejected : Integer;
+        };
+        table           : array of {
+            module    : String;
+            subModule : String;
+            loadType  : String;
+            template  : String;
+            count     : Integer;
+        };
+    };
+
+    function getModules() returns array of {
+        module : String;
+    };
+
+    // 🔥 ONLY FOR SANKEY
+    function getSankeyData() returns array of {
+        period    : String;
+        module    : String;
+        value     : Integer;
+        templates : array of {
+            name  : String;
+            value : Integer;
+        };
+    };
+}
