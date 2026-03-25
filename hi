@@ -1,82 +1,11 @@
-function getPieData() returns array of {
-    user  : String;
-    count : Integer;
-};
+[ERROR] srv/service.cds:39:14-24: Mismatched ‹Identifier›, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
+[ERROR] srv/service.cds:39:24-25: Mismatched ‘(’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
+[ERROR] srv/service.cds:39:35-40: Mismatched ‘array’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
+[ERROR] srv/service.cds:39:41-43: Extraneous ‘of’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
 
-
-
-this.on('getPieData', async () => {
-
-    const data = await cds.run(SELECT.from(ReportFileStorage));
-
-    const userMap = {};
-
-    data.forEach(r => {
-
-        const user = r.CREATEDBY || "Unknown";
-
-        if (!userMap[user]) {
-            userMap[user] = 0;
-        }
-
-        userMap[user]++;
-    });
-
-    // 🔥 Optional → Top 5 users
-    return Object.entries(userMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([user, count]) => ({
-            user,
-            count
-        }));
-});
-
-
-
-
-loadPieChart: function () {
-
-    fetch("/odata/v4/mfu/getPieData()")
-        .then(res => res.json())
-        .then(data => {
-
-            console.log("🔥 PIE DATA:", data);
-
-            const oModel = this.getView().getModel();
-            oModel.setProperty("/pieModules", data.value || []);
-        })
-        .catch(err => {
-            console.error("❌ PIE ERROR:", err);
-        });
-}
-
-
-
-
-
-<viz:VizFrame id="_IDGenVizFrame1" vizType="pie" height="200px" width="100%">
-    <viz:dataset>
-        <viz.data:FlattenedDataset data="{/pieModules}">
-
-            <viz.data:dimensions>
-                <!-- 🔥 USER -->
-                <viz.data:DimensionDefinition name="User" value="{user}"/>
-            </viz.data:dimensions>
-
-            <viz.data:measures>
-                <!-- 🔥 COUNT -->
-                <viz.data:MeasureDefinition name="Templates" value="{count}"/>
-            </viz.data:measures>
-
-        </viz.data:FlattenedDataset>
-    </viz:dataset>
-
-    <viz:feeds>
-        <!-- 🔥 SIZE -->
-        <viz.feeds:FeedItem uid="size" type="Measure" values="Templates"/>
-
-        <!-- 🔥 COLOR -->
-        <viz.feeds:FeedItem uid="color" type="Dimension" values="User"/>
-    </viz:feeds>
-</viz:VizFrame>
+        ___________________________
+ 
+[ERROR] srv/service.cds:39:14-24: Mismatched ‹Identifier›, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
+[ERROR] srv/service.cds:39:24-25: Mismatched ‘(’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
+[ERROR] srv/service.cds:39:35-40: Mismatched ‘array’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
+[ERROR] srv/service.cds:39:41-43: Extraneous ‘of’, expecting ‘:’, ‘;’, ‘{’, ‘@’, ‘=’
