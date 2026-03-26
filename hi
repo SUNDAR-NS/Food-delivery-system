@@ -1,297 +1,130 @@
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
-    "use strict";
-
-    return Controller.extend("mfuanalytics.controller.mfureport", {
-
-        onInit: function () {
-
-            this._showTreemap = false;
-
-            var oModel = new JSONModel({
-                allModules: [],
-                modules: [],
-                tableData: [],
-                totalUploaded: 0,
-                totalApproved: 0,
-                totalRejected: 0,
-                totalTemplates: 0
-            });
-
-            this.getView().setModel(oModel);
-
-            setTimeout(() => {
-                document.activeElement.blur();
-            }, 100);
-
-            // 🔥 LOAD MODULES
-            fetch("/odata/v4/mfu/getModules()")
-                .then(res => res.json())
-                .then(data => {
-
-                    oModel.setProperty("/allModules", data.value);
-
-                    const allKeys = data.value.map(m => m.module);
-
-                    this.byId("_IDGenMultiComboBox1").setSelectedKeys(allKeys);
-
-                    this.loadDashboard(allKeys);
-                });
-        },
-
-        // =========================
-        // 🔁 TREEMAP TOGGLE
-        // =========================
-        onToggleChart: function (oEvent) {
-
-            this._showTreemap = !this._showTreemap;
-
-            this.byId("vizContainer").setVisible(!this._showTreemap);
-            this.byId("treemapContainer").setVisible(this._showTreemap);
-
-            oEvent.getSource().setText(
-                this._showTreemap ? "Chart" : "Treemap"
-            );
-
-            if (this._showTreemap) {
-                setTimeout(this._renderTreemap.bind(this), 200);
-            }
-        },
-
-        // =========================
-        // 🌳 TREEMAP (STATIC)
-        // =========================
-        _renderTreemap: function () {
-
-            var treemapDom = document.getElementById("treemapChart");
-
-            if (!treemapDom) return;
-
-            var treemapChart = echarts.init(treemapDom);
-
-            var option = {
-                tooltip: { formatter: '{b}' },
-                series: [{
-                    type: "treemap",
-                    nodeClick: "zoomToNode",
-                    leafDepth: 1,
-                    breadcrumb: { show: true },
-                    label: { show: true, formatter: "{b}" },
-                    data: [
-                        {
-                            name: "NFRP",
-                            children: [
-                                {
-                                    name: "Approved",
-                                    children: [
-                                        { name: "MFU_BUD_AIEA_AIBL", value: 12 },
-                                        { name: "MFU_FPNA_CIB_FY", value: 8 }
-                                    ]
-                                },
-                                {
-                                    name: "Pending",
-                                    children: [
-                                        { name: "MFU_ENTITY_XLATE", value: 5 }
-                                    ]
-                                },
-                                {
-                                    name: "Rejected",
-                                    children: [
-                                        { name: "MFU_CONFIG_TARGET_SETTING", value: 3 }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }]
-            };
-
-            treemapChart.setOption(option);
-        },
-
-        onCloseDialog: function () {
-            this.byId("templateDialog").close();
-        },
-
-        // =========================
-        // 🔥 SANKEY
-        // =========================
-        onAfterRendering: function () {
-            this.loadSankey();
-        },
-
-        loadSankey: function () {
-
-            fetch("/odata/v4/mfu/getSankeyData()")
-                .then(res => res.json())
-                .then(data => {
-
-                    const result = data.value || [];
-
-                    if (result.length === 0) return;
-
-                    const nodeSet = new Set();
-                    const links = [];
-
-                    result.forEach(r => {
-
-                        nodeSet.add(r.period);
-                        nodeSet.add(r.module);
-
-                        links.push({
-                            source: r.period,
-                            target: r.module,
-                            value: r.value
-                        });
-
-                        (r.templates || []).forEach(t => {
-
-                            nodeSet.add(t.name);
-
-                            links.push({
-                                source: r.module,
-                                target: t.name,
-                                value: t.value
-                            });
-
-                        });
-                    });
-
-                    const nodes = Array.from(nodeSet).map(n => ({ name: n }));
-
-                    var chartDom = document.getElementById("sankeyChart");
-
-                    if (!chartDom) return;
-
-                    var chart = echarts.init(chartDom);
-
-                    chart.setOption({
-                        tooltip: { trigger: "item" },
-                        series: [{
-                            type: "sankey",
-                            nodeAlign: "left",
-                            data: nodes,
-                            links: links,
-                            lineStyle: { curveness: 0.5 },
-                            emphasis: { focus: "adjacency" }
-                        }]
-                    });
-
-                })
-                .catch(err => {
-                    console.error("SANKEY ERROR:", err);
-                });
-        },
-
-        // =========================
-        // 🔍 FILTER
-        // =========================
-        onFilterChange: function (oEvent) {
-
-            const keys = oEvent.getSource().getSelectedKeys();
-
-            if (!keys || keys.length === 0) {
-                this.loadDashboard([]);
-            } else {
-                this.loadDashboard(keys);
-            }
-        },
-
-        // =========================
-        // 📊 DASHBOARD
-        // =========================
-        loadDashboard: function (modules) {
-
-            fetch("/odata/v4/mfu/getDashboardData", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ module: modules })
-            })
-            .then(res => res.json())
-            .then(data => {
-
-                var oModel = this.getView().getModel();
-
-                oModel.setProperty("/modules", data.modules || []);
-                oModel.setProperty("/tableData", data.table || []);
-                oModel.setProperty("/totalUploaded", data.uploaded || 0);
-                oModel.setProperty("/totalApproved", data.approved || 0);
-                oModel.setProperty("/totalRejected", data.rejected || 0);
-                oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
-            })
-            .catch(err => {
-                console.error("API ERROR:", err);
-            });
-        },
-
-        // =========================
-        // 📦 DIALOGS
-        // =========================
-        onCloseUploadDialog: function () {
-            this._uploadedDialog.close();
-        },
-
-        onUploadedTilePress: async function () {
-
-            var modules = this.byId("_IDGenMultiComboBox1").getSelectedKeys();
-
-            if (!this._uploadedDialog) {
-                this._uploadedDialog = await this.loadFragment({
-                    name: "mfuanalytics.view.fragments.uploaded"
-                });
-                this.getView().addDependent(this._uploadedDialog);
-            }
-
-            fetch("/odata/v4/mfu/getDashboardData", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ module: modules })
-            })
-            .then(res => res.json())
-            .then(data => {
-
-                var oJson = new sap.ui.model.json.JSONModel({
-                    items: data.uploadedmodules
-                });
-
-                this._uploadedDialog.setModel(oJson, "uploaded");
-                this._uploadedDialog.open();
-            });
-        },
-
-        onCloseTileDialog: function () {
-            this._approvedDialog.close();
-        },
-
-        onApprovedPress: async function () {
-
-            var modules = this.byId("_IDGenMultiComboBox1").getSelectedKeys();
-
-            if (!this._approvedDialog) {
-                this._approvedDialog = await this.loadFragment({
-                    name: "mfuanalytics.view.fragments.approved"
-                });
-                this.getView().addDependent(this._approvedDialog);
-            }
-
-            fetch("/odata/v4/mfu/getDashboardData", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ module: modules })
-            })
-            .then(res => res.json())
-            .then(data => {
-
-                var oJson = new sap.ui.model.json.JSONModel({
-                    items: data.approvedmodules
-                });
-
-                this._approvedDialog.setModel(oJson, "approved");
-                this._approvedDialog.open();
-            });
+{
+  "_version": "1.83.0",
+  "sap.app": {
+    "id": "mfuanalytics",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.21.0",
+      "toolsId": "1766712f-0979-40be-a69b-d9bcdfc37c41"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/service/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "4.01"
         }
-
-    });
-});
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.145.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.viz": {},
+        "sap.suite.ui.commons":{},
+      "sap.ui.layout": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "mfuanalytics.i18n.i18n"
+        }
+      },
+      "ODataModel": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "mfuanalytics.view",
+        "async": true,
+        "viewPath": "mfuanalytics.view"
+      },
+      "routes": [
+        {
+          "name": "Routemfureport",
+          "pattern": ":?query:",
+          "target": [
+            "Targetmfureport"
+          ]
+        }
+        ,
+        {
+          "pattern": "mfureport",
+          "name": "mfureport",
+          "target": "mfureport"
+        }
+      ],
+      "targets": {
+        "Targetmfureport": {
+          "id": "mfureport",
+          "name": "mfureport"
+        },
+        "mfureport": {
+          "id": "mfureport",
+          "name": "mfureport"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "mfuanalytics.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  }
+}
