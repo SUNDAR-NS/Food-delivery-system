@@ -1,8 +1,48 @@
-onAfterRendering: function () {
+<columns>
 
-    this.loadSankey();
+    <Column>
+        <VBox>
+            <Text text="Module"/>
+            <Input liveChange="onTableFilter" placeholder="module"/>
+        </VBox>
+    </Column>
+
+    <Column>
+        <VBox>
+            <Text text="Sub Module"/>
+            <Input liveChange="onTableFilter" placeholder="subModule"/>
+        </VBox>
+    </Column>
+
+    <Column>
+        <VBox>
+            <Text text="Load Type"/>
+            <Input liveChange="onTableFilter" placeholder="loadType"/>
+        </VBox>
+    </Column>
+
+    <Column>
+        <VBox>
+            <Text text="Template"/>
+            <Input liveChange="onTableFilter" placeholder="template"/>
+        </VBox>
+    </Column>
+
+    <Column>
+        <Text text="Load Count"/>
+    </Column>
+
+</columns>
+
+
+
+
+onTableFilter: function () {
 
     var oTable = this.byId("_IDGenTable");
+    var oBinding = oTable.getBinding("items");
+
+    var aFilters = [];
 
     oTable.getColumns().forEach(col => {
 
@@ -10,20 +50,21 @@ onAfterRendering: function () {
 
         if (header instanceof sap.m.VBox) {
 
-            var text = header.getItems()[0];
+            var input = header.getItems()[1];
+            var value = input.getValue();
 
-            text.addEventDelegate({
-                ondblclick: () => {
-                    this.onEnableFilter();
-                }
-            });
+            if (value) {
+
+                var field = input.getPlaceholder();
+
+                aFilters.push(new sap.ui.model.Filter(
+                    field,
+                    sap.ui.model.FilterOperator.Contains,
+                    value
+                ));
+            }
         }
     });
-},
 
-
-
-
-.sapMText {
-    cursor: pointer;
+    oBinding.filter(aFilters);
 }
