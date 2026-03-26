@@ -1,7 +1,9 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], function (Controller, JSONModel, Filter, FilterOperator) {
     "use strict";
 
     return Controller.extend("mfuanalytics.controller.mfureport", {
@@ -14,6 +16,7 @@ sap.ui.define([
                 allModules: [],
                 modules: [],
                 tableData: [],
+                pieModules: [],
                 totalUploaded: 0,
                 totalApproved: 0,
                 totalRejected: 0,
@@ -22,10 +25,11 @@ sap.ui.define([
 
             this.getView().setModel(oModel);
 
-            var oViewModel = new sap.ui.model.json.JSONModel({
-    filterMode: false
-});
-this.getView().setModel(oViewModel, "view");
+            // 🔥 FILTER MODEL
+            var oViewModel = new JSONModel({
+                filterMode: false
+            });
+            this.getView().setModel(oViewModel, "view");
 
             setTimeout(() => {
                 document.activeElement.blur();
@@ -43,47 +47,58 @@ this.getView().setModel(oViewModel, "view");
                     this.byId("_IDGenMultiComboBox1").setSelectedKeys(allKeys);
 
                     this.loadPieChart();
-
                     this.loadDashboard(allKeys);
                 });
         },
 
+        // =========================
+        // 🔍 ENABLE FILTER
+        // =========================
         onEnableFilter: function () {
-    this.getView().getModel("view").setProperty("/filterMode", true);
-},
+            this.getView().getModel("view").setProperty("/filterMode", true);
+        },
 
+        // =========================
+        // 🔍 TABLE FILTER LOGIC
+        // =========================
+        onTableFilter: function () {
 
-onTableFilter: function () {
+            var oTable = this.byId("_IDGenTable");
+            var oBinding = oTable.getBinding("items");
 
-    var oTable = this.byId("_IDGenTable");
-    var oBinding = oTable.getBinding("items");
+            var aFilters = [];
 
-    var aFilters = [];
+            oTable.getColumns().forEach(col => {
 
-    var columns = oTable.getColumns();
-    var fields = ["module", "subModule", "loadType", "template"];
+                var header = col.getHeader();
 
-    columns.forEach((col, index) => {
+                if (header instanceof sap.m.VBox) {
 
-        var header = col.getHeader();
+                    var input = header.getItems()[1];
+                    var value = input.getValue();
 
-        if (header instanceof sap.m.VBox) {
+                    if (value) {
 
-            var input = header.getItems()[1];
-            var value = input.getValue();
+                        // 🔥 get field dynamically
+                        var field = input.getPlaceholder()
+                            .replace("Search ", "")
+                            .trim();
 
-            if (value) {
-                aFilters.push(new sap.ui.model.Filter(
-                    fields[index],
-                    sap.ui.model.FilterOperator.Contains,
-                    value
-                ));
-            }
-        }
-    });
+                        aFilters.push(new Filter(
+                            field,
+                            FilterOperator.Contains,
+                            value
+                        ));
+                    }
+                }
+            });
 
-    oBinding.filter(aFilters);
-},
+            // 🔥 OR FILTER (better UX)
+            oBinding.filter(new Filter({
+                filters: aFilters,
+                and: false
+            }));
+        },
 
         // =========================
         // 🔁 TREEMAP TOGGLE
@@ -105,54 +120,28 @@ onTableFilter: function () {
         },
 
         // =========================
-        // 🌳 TREEMAP (STATIC)
+        // 🌳 TREEMAP
         // =========================
         _renderTreemap: function () {
 
-            var treemapDom = document.getElementById("treemapChart");
+            var dom = document.getElementById("treemapChart");
+            if (!dom) return;
 
-            if (!treemapDom) return;
+            var chart = echarts.init(dom);
 
-            var treemapChart = echarts.init(treemapDom);
-
-            var option = {
+            chart.setOption({
                 tooltip: { formatter: '{b}' },
                 series: [{
                     type: "treemap",
-                    nodeClick: "zoomToNode",
-                    leafDepth: 1,
-                    breadcrumb: { show: true },
-                    label: { show: true, formatter: "{b}" },
-                    data: [
-                        {
-                            name: "NFRP",
-                            children: [
-                                {
-                                    name: "Approved",
-                                    children: [
-                                        { name: "MFU_BUD_AIEA_AIBL", value: 12 },
-                                        { name: "MFU_FPNA_CIB_FY", value: 8 }
-                                    ]
-                                },
-                                {
-                                    name: "Pending",
-                                    children: [
-                                        { name: "MFU_ENTITY_XLATE", value: 5 }
-                                    ]
-                                },
-                                {
-                                    name: "Rejected",
-                                    children: [
-                                        { name: "MFU_CONFIG_TARGET_SETTING", value: 3 }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
+                    data: [{
+                        name: "NFRP",
+                        children: [
+                            { name: "Approved", children: [{ name: "A", value: 10 }] },
+                            { name: "Pending", children: [{ name: "B", value: 5 }] }
+                        ]
+                    }]
                 }]
-            };
-
-            treemapChart.setOption(option);
+            });
         },
 
         onCloseDialog: function () {
@@ -173,8 +162,7 @@ onTableFilter: function () {
                 .then(data => {
 
                     const result = data.value || [];
-
-                    if (result.length === 0) return;
+                    if (!result.length) return;
 
                     const nodeSet = new Set();
                     const links = [];
@@ -199,48 +187,28 @@ onTableFilter: function () {
                                 target: t.name,
                                 value: t.value
                             });
-
                         });
                     });
 
-                    const nodes = Array.from(nodeSet).map(n => ({ name: n }));
-
-                    var chartDom = document.getElementById("sankeyChart");
-
-                    if (!chartDom) return;
-
-                    var chart = echarts.init(chartDom);
+                    var chart = echarts.init(document.getElementById("sankeyChart"));
 
                     chart.setOption({
-                        tooltip: { trigger: "item" },
                         series: [{
                             type: "sankey",
-                            nodeAlign: "left",
-                            data: nodes,
-                            links: links,
-                            lineStyle: { curveness: 0.5 },
-                            emphasis: { focus: "adjacency" }
+                            data: Array.from(nodeSet).map(n => ({ name: n })),
+                            links: links
                         }]
                     });
-
-                })
-                .catch(err => {
-                    console.error("SANKEY ERROR:", err);
                 });
         },
 
         // =========================
-        // 🔍 FILTER
+        // 🔍 FILTER CHANGE
         // =========================
         onFilterChange: function (oEvent) {
 
             const keys = oEvent.getSource().getSelectedKeys();
-
-            if (!keys || keys.length === 0) {
-                this.loadDashboard([]);
-            } else {
-                this.loadDashboard(keys);
-            }
+            this.loadDashboard(keys);
         },
 
         // =========================
@@ -264,94 +232,26 @@ onTableFilter: function () {
                 oModel.setProperty("/totalApproved", data.approved || 0);
                 oModel.setProperty("/totalRejected", data.rejected || 0);
                 oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
-            })
-            .catch(err => {
-                console.error("API ERROR:", err);
             });
         },
 
         // =========================
-        // 📦 DIALOGS
+        // 🍩 PIE CHART
         // =========================
-        onCloseUploadDialog: function () {
-            this._uploadedDialog.close();
-        },
-
-        onUploadedTilePress: async function () {
-
-            var modules = this.byId("_IDGenMultiComboBox1").getSelectedKeys();
-
-            if (!this._uploadedDialog) {
-                this._uploadedDialog = await this.loadFragment({
-                    name: "mfuanalytics.view.fragments.uploaded"
-                });
-                this.getView().addDependent(this._uploadedDialog);
-            }
-
-            fetch("/odata/v4/mfu/getDashboardData", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ module: modules })
-            })
-            .then(res => res.json())
-            .then(data => {
-
-                var oJson = new sap.ui.model.json.JSONModel({
-                    items: data.uploadedmodules
-                });
-
-                this._uploadedDialog.setModel(oJson, "uploaded");
-                this._uploadedDialog.open();
-            });
-        },
-
-        onCloseTileDialog: function () {
-            this._approvedDialog.close();
-        },
-
-        onApprovedPress: async function () {
-
-            var modules = this.byId("_IDGenMultiComboBox1").getSelectedKeys();
-
-            if (!this._approvedDialog) {
-                this._approvedDialog = await this.loadFragment({
-                    name: "mfuanalytics.view.fragments.approved"
-                });
-                this.getView().addDependent(this._approvedDialog);
-            }
-
-            fetch("/odata/v4/mfu/getDashboardData", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ module: modules })
-            })
-            .then(res => res.json())
-            .then(data => {
-
-                var oJson = new sap.ui.model.json.JSONModel({
-                    items: data.approvedmodules
-                });
-
-                this._approvedDialog.setModel(oJson, "approved");
-                this._approvedDialog.open();
-            });
-        },
-
         loadPieChart: function () {
 
-    fetch("/odata/v4/mfu/getPieData()")
-        .then(res => res.json())
-        .then(data => {
+            fetch("/odata/v4/mfu/getPieData()")
+                .then(res => res.json())
+                .then(data => {
 
-            console.log("PIE DATA:", data);
+                    console.log("PIE DATA:", data);
 
-            this.getView().getModel().setProperty("/pieModules", data.value || []);
-
-        })
-        .catch(err => {
-            console.error("PIE ERROR:", err);
-        });
-}
+                    this.getView().getModel().setProperty(
+                        "/pieModules",
+                        data.value || []
+                    );
+                });
+        }
 
     });
 });
