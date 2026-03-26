@@ -1,230 +1,463 @@
-const cds = require('@sap/cds');
+<mvc:View
+    controllerName="mfuanalytics.controller.mfureport"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+>
+    <Page
+        id="_IDGenPage"
+        title="MFU Dashboard"
+        class="sapHeader"
+    >
+        <VBox
+            id="_IDGenVBox"
+            class="mainContainer"
+        >
+            <Panel
+                id="_IDGenPanel2"
+                class="moduleFilterBox"
+            >
+                <VBox
+                    id="_IDGenVBox6"
+                    class="filterContainer"
+                >
+                    <HBox
+                        id="_IDGenHBox"
+                        alignItems="Center"
+                        class="filterRow"
+                    >
+                        <Text
+                            id="_IDGenText"
+                            text="Module"
+                            class="filterLable"
+                        />
+                        <MultiComboBox
+                            id="_IDGenMultiComboBox1"
+                            width="210px"
+                            selectionFinish="onFilterChange"
+                            items="{/allModules}"
+                            showClearIcon="true"
+                        >
+                            <core:Item
+                                id="_IDGenItem"
+                                key="{module}"
+                                text="{module}"
+                            />
+                        </MultiComboBox>
+                    </HBox>
+                </VBox>
+            </Panel>
 
-module.exports = cds.service.impl(async function () {
+            <HBox
+                id="_IDGenHBox3"
+                class="topContainer"
+            >
+                <VBox
+                    id="_IDGenVBox1"
+                    width="35%"
+                >
+                    <HBox
+                        id="_IDGenHBox4"
+                        class="kpiRow"
+                    >
+                        <GenericTile
+                            id="_IDGenGenericTile"
+                            header="Total Uploaded"
+                            class="tile"
+                            press="onUploadedTilePress"
+                        >
+                            <customData>
+                                <core:CustomData
+                                    key="type"
+                                    value="uploaded"
+                                />
+                            </customData>
+                            <TileContent id="_IDGenTileContent">
+                                <NumericContent
+                                    id="_IDGenNumericContent"
+                                    value="{/totalUploaded}"
+                                    icon="sap-icon://upload"
+                                    valueColor="None"
+                                />
+                            </TileContent>
+                        </GenericTile>
+                        <GenericTile
+                            id="_IDGenGenericTile1"
+                            header="Total Approved"
+                            class="tile"
+                            press="onApprovedPress"
+                        >
+                            <customData>
+                                <core:CustomData
+                                    key="type"
+                                    value="approved"
+                                />
+                            </customData>
+                            <TileContent id="_IDGenTileContent1">
+                                <NumericContent
+                                    id="_IDGenNumericContent1"
+                                    value="{/totalApproved}"
+                                    icon="sap-icon://accept"
+                                    valueColor="Good"
+                                />
+                            </TileContent>
+                        </GenericTile>
+                    </HBox>
+                    <HBox
+                        id="_IDGenHBox5"
+                        class="kpiRow"
+                    >
+                        <GenericTile
+                            id="_IDGenGenericTile2"
+                            header="Total Rejected"
+                            class="tile"
+                            press="onRejectedTilePress"
+                        >
+                            <customData>
+                                <core:CustomData
+                                    key="type"
+                                    value="rejected"
+                                />
+                            </customData>
+                            <TileContent id="_IDGenTileContent2">
+                                <NumericContent
+                                    id="_IDGenNumericContent2"
+                                    value="{/totalRejected}"
+                                    icon="sap-icon://decline"
+                                    valueColor="Critical"
+                                />
+                            </TileContent>
+                        </GenericTile>
+                        <GenericTile
+                            id="_IDGenGenericTile3"
+                            header="Total Templates"
+                            class="tile"
+                            press="onTotalTilePress"
+                        >
+                            <customData>
+                                <core:CustomData
+                                    key="type"
+                                    value="total"
+                                />
+                            </customData>
+                            <TileContent id="_IDGenTileContent3">
+                                <NumericContent
+                                    id="_IDGenNumericContent3"
+                                    value="{/totalTemplates}"
+                                    icon="sap-icon://document-text"
+                                    valueColor="Neutral"
+                                />
+                            </TileContent>
+                        </GenericTile>
+                    </HBox>
+                </VBox>
+                <Panel
+                    id="_IDGenPanel"
+                    width="800px"
+                >
+                    <Toolbar class="panelTitle">
+                        <Title text="MFU Templates by Modules" />
+                        <ToolbarSpacer />
+                        <Button
+                            text="Treemap"
+                            icon="sap-icon://switch-views"
+                            press="onToggleChart"
+                        />
+                    </Toolbar>
+                    <VBox
+                        id="vizContainer"
+                        visible="true"
+                    >
+                        <viz:VizFrame
+                            id="_IDGenVizFrame"
+                            vizType="stacked_column"
+                            height="320px"
+                            width="100%"
+                            vizProperties='{
+                                "title": { "visible": false },
+                                "legend": {
+                                "visible": true,
+                                "position":"right"
+                                },
+                                "plotArea": {
+                                    "dataLabel": { 
+                                        "visible": false,
+                                        "showTotal": true
+                                    },
+                                    "dataLabelTotal": {
+                                        "visible": true
+                                    },
+                                    
+                                    "drawingEffect": "glossy",
+                                    "colorPalette":[
+                                        "#0a6ed1",
+                                        "#107e3e",
+                                        "#e9730c"
+                                    ],
+                                    "animation":{
+                                    "dataLoading":true
+                                    }
+                                },
+                                "valueAxis":{
+                                "title":{"visible":true}
+                                },
+                                "categoryAxis":{
+                                "title":{"visible":true}
+                                },
+                                "interaction": {
+                                    "selectability": {
+                                        "mode": "MULTIPLE"
+                                    }
+                                }
+                            }'
+                        >
+                            <viz:dataset>
+                                <viz.data:FlattenedDataset
+                                    id="_IDGenFlattenedDataset"
+                                    data="{/modules}"
+                                >
+                                    <viz.data:dimensions>
+                                        <viz.data:DimensionDefinition
+                                            id="_IDGenDimensionDefinition"
+                                            name="Module"
+                                            value="{module}"
+                                        />
+                                    </viz.data:dimensions>
+                                    <viz.data:measures>
+                                        <viz.data:MeasureDefinition
+                                            id="_IDGenMeasureDefinition"
+                                            name="Uploaded"
+                                            value="{uploaded}"
+                                        />
+                                        <viz.data:MeasureDefinition
+                                            id="_IDGenMeasureDefinition1"
+                                            name="Approved"
+                                            value="{approved}"
+                                        />
+                                        <viz.data:MeasureDefinition
+                                            id="_IDGenMeasureDefinition2"
+                                            name="Rejected"
+                                            value="{rejected}"
+                                        />
+                                    </viz.data:measures>
+                                </viz.data:FlattenedDataset>
+                            </viz:dataset>
+                            <viz:feeds>
+                                <viz.feeds:FeedItem
+                                    id="_IDGenFeedItem"
+                                    uid="valueAxis"
+                                    type="Measure"
+                                    values="Uploaded,Approved,Rejected"
+                                />
+                                <viz.feeds:FeedItem
+                                    id="_IDGenFeedItem1"
+                                    uid="categoryAxis"
+                                    type="Dimension"
+                                    values="Module"
+                                />
+                            </viz:feeds>
+                        </viz:VizFrame>
+                    </VBox>
+                    <VBox
+                        id="treemapContainer"
+                        visible="false"
+                    >
+                        <core:HTML
+                            content="&lt;div id='treemapChart' style='width:100%;height:320px'&gt;&lt;/div&gt;"
+                        />
+                    </VBox>
+                </Panel>
+            </HBox>
 
-    const { ReportFileStorage, TemplateStorage } = cds.entities('com.scb.fileupload.master');
+            <HBox
+                id="_IDGenHBox6"
+                class="chartRow"
+            >
+                <VBox
+                    id="_IDGenVBox2"
+                    class="chartBox"
+                >
+                    <Text
+                        id="_IDGenText1"
+                        text="Templates by Count"
+                        class="panelTitle"
+                    />
+                    <viz:VizFrame
+                        id="_IDGenVizFrame1"
+                        vizType="pie"
+                        height="200px"
+                        width="100%"
+                        vizProperties='{"title":{"visible":false}}'
+                    >
+                        <viz:dataset>
+                            <viz.data:FlattenedDataset
+                                id="_IDGenFlattenedDataset1"
+                                data="{/pieModules}"
+                            >
+                                <viz.data:dimensions>
+                                    <viz.data:DimensionDefinition
+                                        id="_IDGenDimensionDefinition1"
+                                        name="Module"
+                                        value="{module}"
+                                    />
+                                </viz.data:dimensions>
+                                <viz.data:measures>
+                                    <viz.data:MeasureDefinition
+                                        id="_IDGenMeasureDefinition3"
+                                        name="Approved"
+                                        value="{approved}"
+                                    />
+                                </viz.data:measures>
+                            </viz.data:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <viz.feeds:FeedItem
+                                id="_IDGenFeedItem2"
+                                uid="size"
+                                type="Measure"
+                                values="Approved"
+                            />
+                            <viz.feeds:FeedItem
+                                id="_IDGenFeedItem3"
+                                uid="color"
+                                type="Dimension"
+                                values="Module"
+                            />
+                        </viz:feeds>
+                    </viz:VizFrame>
+                </VBox>
+                <VBox
+                    id="_IDGenVBox7"
+                    class="chartBox"
+                >
+                    <Text
+                        id="_IDGenText99"
+                        text="Top MFU Usage"
+                        class="panelTitle"
+                    />
+                    <core:HTML
+                        id="sankeyHtml"
+                        content="&lt;div id='sankeyChart' style='width:800px;height:200px'&gt;&lt;/div&gt;"
+                    />
+                </VBox>
+            </HBox>
 
-    // =========================
-    // MODULES
-    // =========================
-    this.on('getModules', async () => {
+            <Panel
+                id="_IDGenPanel1"
+                class="sapUiMediumMarginTop mfuTablePanel"
+            >
+                <Toolbar class="panelTitle">
+                    <Title text="MFU Details" />
+                    <ToolbarSpacer />
+                    <Text text="Total Records: {/tableData/length}" />
+                </Toolbar>
 
-        const data = await cds.run(
-            SELECT.distinct.from(TemplateStorage).columns('MODULE_NAME').orderBy('MODULE_NAME')
-        );
+                <!-- 🔥 SCROLLABLE BOX -->
+                <ScrollContainer
+                    height="300px"
+                    vertical="true"
+                    class="tableScrollBox"
+                >
+                    <Table
+                        id="_IDGenTable"
+                        items="{/tableData}"
+                        width="100%"
+                        sticky="ColumnHeaders"
+                    >
+                        <columns>
+                            <Column>
+                                <Text text="Module" />
+                            </Column>
+                            <Column>
+                                <Text text="Sub Module" />
+                            </Column>
+                            <Column>
+                                <Text text="Load Type" />
+                            </Column>
+                            <Column>
+                                <Text text="Template" />
+                            </Column>
+                            <Column>
+                                <Text text="Count" />
+                            </Column>
+                        </columns>
 
-        return data.map(d => ({
-            module: d.MODULE_NAME
-        }));
-    });
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <Text text="{module}" />
+                                    <Text text="{subModule}" />
+                                    <Text text="{loadType}" />
+                                    <Text text="{template}" />
+                                    <Text text="{count}" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </ScrollContainer>
+            </Panel>
+        </VBox>
+    </Page>
 
-    // =========================
-    // DASHBOARD
-    // =========================
-    this.on('getDashboardData', async (req) => {
-
-        let modules = req.data.module || [];
-
-        if (typeof modules === "string") {
-            modules = [modules];
-        }
-
-        let reportData = [];
-        let templateData = [];
-
-        if (modules.length > 0) {
-            reportData = await cds.run(
-                SELECT.from(ReportFileStorage).where({ MODULE_NAME: { in: modules } })
-            );
-            templateData = await cds.run(
-                SELECT.from(TemplateStorage).where({ MODULE_NAME: { in: modules } })
-            );
-        } else {
-            reportData = await cds.run(SELECT.from(ReportFileStorage));
-            templateData = await cds.run(SELECT.from(TemplateStorage));
-        }
-
-        let uploaded = 0, approved = 0, rejected = 0;
-
-        reportData.forEach(r => {
-            if (r.STATUS === 'uploaded') uploaded++;
-            if (r.STATUS === 'approved') approved++;
-            if (r.STATUS === 'rejected') rejected++;
-        });
-
-        const moduleMap = {};
-
-        reportData.forEach(r => {
-
-            if (!moduleMap[r.MODULE_NAME]) {
-                moduleMap[r.MODULE_NAME] = {
-                    module: r.MODULE_NAME,
-                    uploaded: 0,
-                    approved: 0,
-                    rejected: 0
-                };
-            }
-
-            if (r.STATUS === 'uploaded') moduleMap[r.MODULE_NAME].uploaded++;
-            if (r.STATUS === 'approved') moduleMap[r.MODULE_NAME].approved++;
-            if (r.STATUS === 'rejected') moduleMap[r.MODULE_NAME].rejected++;
-        });
-
-        const modulesData = Object.values(moduleMap);
-
-        const tableMap = {};
-
-        reportData.forEach(r => {
-
-            const key = `${r.MODULE_NAME}_${r.SUB_MODULE_NAME}_${r.LOAD_TYPE}_${r.LOAD_TEMPLATE}`;
-
-            if (!tableMap[key]) {
-                tableMap[key] = {
-                    module: r.MODULE_NAME,
-                    subModule: r.SUB_MODULE_NAME,
-                    loadType: r.LOAD_TYPE,
-                    template: r.LOAD_TEMPLATE,
-                    count: 0
-                };
-            }
-
-            tableMap[key].count++;
-        });
-
-        return {
-            uploaded,
-            approved,
-            rejected,
-            totalTemplates: templateData.length,
-            modules: modulesData,
-            table: Object.values(tableMap)
-        };
-    });
-
-    // =========================
-    // 🔥 PIE DATA (NEW)
-    // =========================
-    this.on('getPieData', async () => {
-
-        const data = await cds.run(SELECT.from(ReportFileStorage));
-
-        const userMap = {};
-
-        data.forEach(r => {
-
-            const user = r.CREATEDBY || r.createdBy || "Unknown";
-
-            if (!userMap[user]) {
-                userMap[user] = 0;
-            }
-
-            userMap[user]++;
-        });
-
-        return Object.entries(userMap).map(([user, count]) => ({
-            user,
-            count
-        }));
-    });
-
-    // =========================
-    // 🔥 SANKEY (NO CHANGE)
-    // =========================
-    this.on('getSankeyData', async () => {
-
-        const data = await cds.run(SELECT.from(ReportFileStorage));
-
-        function getDate(row) {
-            return row.createdAt || row.CREATEDAT || null;
-        }
-
-        function parseDate(d) {
-            if (!d) return null;
-            return new Date(d.toString().replace(" ", "T").split(".")[0]);
-        }
-
-        let latest = null;
-
-        data.forEach(r => {
-            const d = parseDate(getDate(r));
-            if (d && (!latest || d > latest)) {
-                latest = d;
-            }
-        });
-
-        if (!latest) return [];
-
-        const startMonth = new Date(latest.getFullYear(), latest.getMonth(), 1);
-
-        const startQuarter = new Date(latest);
-        startQuarter.setMonth(latest.getMonth() - 2);
-        startQuarter.setDate(1);
-
-        const startYear = new Date(latest);
-        startYear.setFullYear(latest.getFullYear() - 1);
-
-        function filter(start) {
-            return data.filter(r => {
-                const d = parseDate(getDate(r));
-                return d && d >= start;
-            });
-        }
-
-        function process(rows, period) {
-
-            const map = {};
-
-            rows.forEach(r => {
-
-                const m = r.MODULE_NAME;
-                const t = r.LOAD_TEMPLATE;
-
-                if (!map[m]) {
-                    map[m] = { count: 0, templates: {} };
-                }
-
-                map[m].count++;
-                map[m].templates[t] = (map[m].templates[t] || 0) + 1;
-            });
-
-            return Object.entries(map)
-                .sort((a, b) => b[1].count - a[1].count)
-                .slice(0, 3)
-                .map(([m, val]) => ({
-                    period,
-                    module: m,
-                    value: val.count,
-                    templates: Object.entries(val.templates)
-                        .sort((a, b) => b[1] - a[1])
-                        .slice(0, 3)
-                        .map(([name, value]) => ({ name, value }))
-                }));
-        }
-
-        return [
-            ...process(filter(startMonth), "Monthly"),
-            ...process(filter(startQuarter), "Quarterly"),
-            ...process(filter(startYear), "Yearly")
-        ];
-    });
-
-});
-
-
-
-
-loadPieChart: function () {
-
-    fetch("/odata/v4/mfu/getPieData()")
-        .then(res => res.json())
-        .then(data => {
-
-            console.log("🔥 PIE DATA:", data);
-
-            const oModel = this.getView().getModel();
-            oModel.setProperty("/pieModules", data.value || []);
-        })
-        .catch(err => {
-            console.error("PIE ERROR:", err);
-        });
-}
+    <Dialog
+        id="templateDialog"
+        contentWidth="600px"
+        contentHeight="auto"
+        draggable="true"
+        resizable="true"
+        title="Template Details"
+    >
+        <content>
+            <ObjectHeader
+                title="{detail>/template}"
+                number="{detail>/status}"
+                numberState="{detail>/statusState}"
+                intro="{detail>/module}"
+                icon="sap-icon://document-text"
+            >
+                <attributes>
+                    <ObjectAttribute
+                        title="User"
+                        text="{detail>/user}"
+                    />
+                    <ObjectAttribute
+                        title="SubModule"
+                        text="{detail>/submodule}"
+                    />
+                </attributes>
+            </ObjectHeader>
+            <Table
+                inset="false"
+                class="sapUiSmallMarginTop"
+                items="{detail>/rows}"
+            >
+                <columns>
+                    <Column>
+                        <Text text="Property" />
+                    </Column>
+                    <Column>
+                        <Text text="Value" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{detail>key}" />
+                            <Text text="{detail>value}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+        <endButton>
+            <Button
+                text="Close"
+                type="Emphasized"
+                press=".onCloseDialog"
+            />
+        </endButton>
+    </Dialog>
+</mvc:View>
