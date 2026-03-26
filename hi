@@ -1,64 +1,22 @@
-<viz:VizFrame
-    id="_IDGenVizFrame1"
-    vizType="donut"
-    height="230px"
-    width="100%"
-    vizProperties='{
-        "title": { "visible": false },
+[odata] - GET /odata/v4/mfu/getPieData() 
+[cds] - Error: Invalid resource path "MFUService.getPieData"
+    at module.exports [as afterburner] (/home/user/projects/MFUAnalytics (3) (3)/node_modules/@sap/cds/libx/odata/parse/afterburner.js:794:9)
+    at enhanceCqn (/home/user/projects/MFUAnalytics (3) (3)/node_modules/@sap/cds/libx/odata/index.js:87:19)
+    at Object.parse (/home/user/projects/MFUAnalytics (3) (3)/node_modules/@sap/cds/libx/odata/index.js:146:13)
+    at odata_parse_url (/home/user/projects/MFUAnalytics (3) (3)/node_modules/@sap/cds/libx/odata/middleware/parse.js:12:28)
+    at Layer.handle [as handle_request] (/home/user/projects/MFUAnalytics (3) (3)/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/user/projects/MFUAnalytics (3) (3)/node_modules/express/lib/router/index.js:328:13)
+    at /home/user/projects/MFUAnalytics (3) (3)/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/user/projects/MFUAnalytics (3) (3)/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/user/projects/MFUAnalytics (3) (3)/node_modules/express/lib/router/index.js:280:10)
+    at odata_version (/home/user/projects/MFUAnalytics (3) (3)/node_modules/@sap/cds/libx/odata/ODataAdapter.js:60:11) {
+  code: '404',
+  statusCode: 404
+}
+[error] - 404 > {
+  code: '404',
+  message: 'Invalid resource path "MFUService.getPieData"'
+}
 
-        "legend": {
-            "visible": true,
-            "position": "right"
-        },
 
-        "plotArea": {
-            "innerRadius": "60%",
-            "dataLabel": {
-                "visible": true,
-                "type": "percentage"
-            }
-        },
 
-        "interaction": {
-            "selectability": {
-                "mode": "SINGLE"
-            }
-        }
-    }'
->
-
-    <viz:dataset>
-        <viz.data:FlattenedDataset data="{/pieModules}">
-
-            <!-- 🔥 USER -->
-            <viz.data:dimensions>
-                <viz.data:DimensionDefinition
-                    name="User"
-                    value="{user}" />
-            </viz.data:dimensions>
-
-            <!-- 🔥 COUNT -->
-            <viz.data:measures>
-                <viz.data:MeasureDefinition
-                    name="Templates"
-                    value="{count}" />
-            </viz.data:measures>
-
-        </viz.data:FlattenedDataset>
-    </viz:dataset>
-
-    <viz:feeds>
-        <!-- SIZE -->
-        <viz.feeds:FeedItem
-            uid="size"
-            type="Measure"
-            values="Templates"/>
-
-        <!-- COLOR -->
-        <viz.feeds:FeedItem
-            uid="color"
-            type="Dimension"
-            values="User"/>
-    </viz:feeds>
-
-</viz:VizFrame>
