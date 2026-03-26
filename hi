@@ -1,82 +1,56 @@
-<Column>
-    <VBox>
-        <Link text="Module" press="onHeaderClick"/>
-        <Input visible="false"
-               liveChange="onTableFilter"
-               placeholder="module"/>
-    </VBox>
-</Column>
+/* 🔥 Header container */
+.filterHeader {
+    padding: 2px 0;
+    gap: 4px;
+}
 
-<Column>
-    <VBox>
-        <Link text="Sub Module" press="onHeaderClick"/>
-        <Input visible="false"
-               liveChange="onTableFilter"
-               placeholder="subModule"/>
-    </VBox>
-</Column>
+/* 🔥 Make link look like normal header */
+.sapMLnk {
+    color: #32363a !important;
+    text-decoration: none !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
 
-<Column>
-    <VBox>
-        <Link text="Load Type" press="onHeaderClick"/>
-        <Input visible="false"
-               liveChange="onTableFilter"
-               placeholder="loadType"/>
-    </VBox>
-</Column>
+/* 🔥 Hover effect like SAP */
+.sapMLnk:hover {
+    color: #0a6ed1 !important;
+}
 
-<Column>
-    <VBox>
-        <Link text="Template" press="onHeaderClick"/>
-        <Input visible="false"
-               liveChange="onTableFilter"
-               placeholder="template"/>
-    </VBox>
-</Column>
+/* 🔥 Input styling */
+.sapMInputBase {
+    height: 1.8rem;
+    font-size: 0.75rem;
+}
 
-    <Column>
-        <Text text="Load Count"/>
-    </Column>
+/* 🔥 Smooth appearance */
+.sapMInputBase {
+    transition: all 0.2s ease-in-out;
+}
 
+/* 🔥 Focus effect */
+.sapMInputBase:focus-within {
+    border-color: #0a6ed1;
+    box-shadow: 0 0 0 1px #0a6ed1;
+}
 
+/* 🔥 Column alignment fix */
+.sapMListTblHeaderCell {
+    vertical-align: top !important;
+}
 
-onTableFilter: function () {
+/* 🔥 Reduce header height */
+.sapMColumnHeader {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+}
 
-    var oTable = this.byId("_IDGenTable");
-    var oBinding = oTable.getBinding("items");
+/* 🔥 Input spacing */
+.filterHeader .sapMInputBase {
+    margin-top: 2px;
+}
 
-    var aFilters = [];
-
-    oTable.getColumns().forEach(col => {
-
-        var header = col.getHeader();
-
-        if (header instanceof sap.m.VBox) {
-
-            var input = header.getItems()[1];
-            var value = input.getValue();
-
-            if (value) {
-
-                var field = input.getPlaceholder();
-
-                aFilters.push(new sap.ui.model.Filter(
-                    field,
-                    sap.ui.model.FilterOperator.Contains,
-                    value
-                ));
-            }
-        }
-    });
-
-    oBinding.filter(aFilters);
-},
-
-onHeaderClick: function (oEvent) {
-
-    var oVBox = oEvent.getSource().getParent();
-    var oInput = oVBox.getItems()[1];
-
-    // toggle input
-    oInput.setVisible(!oInput.getVisible());
-},
+/* 🔥 Optional: subtle animation when showing input */
+.sapMInputBase {
+    opacity: 1;
+}
