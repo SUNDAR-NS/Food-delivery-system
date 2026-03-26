@@ -1,8 +1,7 @@
 using com.scb.fileupload.master as db from '../db/schema';
 
 service MFUService {
-    
-    // 🔥 MAIN DASHBOARD
+
     action getDashboardData(module: array of String) returns {
         uploaded        : Integer;
         approved        : Integer;
@@ -21,27 +20,6 @@ service MFUService {
             status      : String;
             user        : String;
         };
-        uploadedmodules   : array of {
-            MODULE_NAME   : String;
-            SUB_MODULE_NAME : Integer;
-            LOAD_TEMPLATE : Integer;
-        };
-        approvedmodules   : array of {
-            MODULE_NAME   : String;
-            SUB_MODULE_NAME : Integer;
-            LOAD_TEMPLATE : Integer;
-            createdBy : String;
-            createdAt : Timestamp;
-            modifiedBy : Timestamp;
-        };
-        rejectedmodules   : array of {
-            MODULE_NAME   : String;
-            SUB_MODULE_NAME : Integer;
-            LOAD_TEMPLATE : Integer;
-            CREATED_BY: String;
-            CREATED_AT: Timestamp;
-            MODIFIED_BY: Timestamp;
-        };
     };
 
     function getModules() returns array of {
@@ -49,29 +27,44 @@ service MFUService {
     };
 
     function getSankeyData() returns many {
-
         period    : String;
-
         module    : String;
-
         value     : Integer;
-
         templates : many {
-
             name  : String;
-
             value : Integer;
-
         };
+    };
 
-        function getPieData() returns many {
-            user : String;
-            count : Integer;
-        };
-
+    // ✅ FIXED (OUTSIDE)
+    function getPieData() returns many {
+        user  : String;
+        count : Integer;
     };
 }
 
+
+
+
+this.on('getPieData', async () => {
+
+    const data = await cds.run(SELECT.from(ReportFileStorage));
+
+    const map = {};
+
+    data.forEach(r => {
+
+        const user = r.CREATEDBY || r.CREATED_BY || "Unknown";
+
+        map[user] = (map[user] || 0) + 1;
+
+    });
+
+    return Object.entries(map).map(([user, count]) => ({
+        user,
+        count
+    }));
+});
 
 
 
@@ -84,8 +77,11 @@ sap.ui.define([
     "use strict";
 
     return Controller.extend("mfuanalytics.controller.mfureport", {
+
         onInit: function () {
+
             this._showTreemap = false;
+
             var oModel = new JSONModel({
                 allModules: [],
                 modules: [],
@@ -95,54 +91,58 @@ sap.ui.define([
                 totalRejected: 0,
                 totalTemplates: 0
             });
+
             this.getView().setModel(oModel);
+
             setTimeout(() => {
                 document.activeElement.blur();
-            }, 100)
-            // LOAD MODULES
+            }, 100);
+
+            // 🔥 LOAD MODULES
             fetch("/odata/v4/mfu/getModules()")
                 .then(res => res.json())
                 .then(data => {
+
                     oModel.setProperty("/allModules", data.value);
+
                     const allKeys = data.value.map(m => m.module);
+
                     this.byId("_IDGenMultiComboBox1").setSelectedKeys(allKeys);
+
                     this.loadDashboard(allKeys);
-                    this.loadPieChart();
                 });
         },
 
-        loadPieChart: function () {
-
-    fetch("/odata/v4/mfu/getPieData()")
-        .then(res => res.json())
-        .then(data => {
-
-            console.log("🔥 PIE DATA:", data);
-
-            const oModel = this.getView().getModel();
-            oModel.setProperty("/pieModules", data.value || []);
-        })
-        .catch(err => {
-            console.error("PIE ERROR:", err);
-        });
-},
-
+        // =========================
+        // 🔁 TREEMAP TOGGLE
+        // =========================
         onToggleChart: function (oEvent) {
+
             this._showTreemap = !this._showTreemap;
+
             this.byId("vizContainer").setVisible(!this._showTreemap);
             this.byId("treemapContainer").setVisible(this._showTreemap);
+
             oEvent.getSource().setText(
                 this._showTreemap ? "Chart" : "Treemap"
             );
+
             if (this._showTreemap) {
                 setTimeout(this._renderTreemap.bind(this), 200);
             }
         },
 
+        // =========================
+        // 🌳 TREEMAP (STATIC)
+        // =========================
         _renderTreemap: function () {
+
             var treemapDom = document.getElementById("treemapChart");
+
             if (!treemapDom) return;
+
             var treemapChart = echarts.init(treemapDom);
+
             var option = {
                 tooltip: { formatter: '{b}' },
                 series: [{
@@ -158,173 +158,20 @@ sap.ui.define([
                                 {
                                     name: "Approved",
                                     children: [
-                                        {
-                                            name: "MFU_BUD_AIEA_AIBL",
-                                            value: 12,
-                                            meta: {
-                                                user: "test",
-                                                created: "2025-12-29",
-                                                approved: "2025-12-29",
-                                                module: "NFRP",
-                                                submodule: "CONFIG",
-                                                status: "Approved"
-                                            }
-                                        },
-                                        {
-                                            name: "MFU_FPNA_CIB_FY",
-                                            value: 8,
-                                            meta: {
-                                                user: "8227668",
-                                                created: "2025-12-29",
-                                                approved: "2025-12-29",
-                                                module: "NFRP",
-                                                submodule: "CONFIG",
-                                                status: "Approved"
-                                            }
-                                        }
+                                        { name: "MFU_BUD_AIEA_AIBL", value: 12 },
+                                        { name: "MFU_FPNA_CIB_FY", value: 8 }
                                     ]
                                 },
                                 {
                                     name: "Pending",
                                     children: [
-                                        {
-                                            name: "MFU_ENTITY_XLATE",
-                                            value: 5,
-                                            meta: {
-                                                user: "8227668",
-                                                created: "15-Feb-2026",
-                                                approved: "30-Feb-2026",
-                                                module: "NFRP",
-                                                submodule: "MAPPING_MASTER",
-                                                status: "Pending"
-                                            }
-                                        }
+                                        { name: "MFU_ENTITY_XLATE", value: 5 }
                                     ]
                                 },
                                 {
                                     name: "Rejected",
                                     children: [
-                                        {
-                                            name: "MFU_CONFIG_TARGET_SETTING",
-                                            value: 3,
-                                            meta: {
-                                                user: "test",
-                                                created: "2025-12-30",
-                                                approved: "2025-01-01",
-                                                module: "NFRP",
-                                                submodule: "MAPPING_MASTER",
-                                                status: "Rejected"
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-
-                        {
-                            name: "SCBI",
-                            children: [
-                                {
-                                    name: "Approved",
-                                    children: [
-                                        {
-                                            name: "MFU_TBL_COST_MAP_BRANCH_OFFICE",
-                                            value: 14,
-                                            meta: {
-                                                user: "test",
-                                                created: "01-Feb-2026",
-                                                approved: "02-Feb-2026",
-                                                module: "SCBI",
-                                                submodule: "MAPPING",
-                                                status: "Approved"
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    name: "Pending",
-                                    children: [
-                                        {
-                                            name: "MFU_COST_MAP_WFP_DRIVER",
-                                            value: 6,
-                                            meta: {
-                                                user: "test",
-                                                created: "14-Feb-2026",
-                                                approved: "27-Feb-2026",
-                                                module: "SCBI",
-                                                submodule: "MAPPING",
-                                                status: "Pending"
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-
-                        {
-                            name: "ICON",
-                            children: [
-                                {
-                                    name: "Approved",
-                                    children: [
-                                        {
-                                            name: "MFU_DOUBLE_LEVERAGE_RATIO_THRESHOLD",
-                                            value: 9,
-                                            meta: {
-                                                user: "test",
-                                                created: "05-Feb-2026",
-                                                approved: "06-Feb-2026",
-                                                module: "ICON",
-                                                submodule: "MAPPING",
-                                                status: "Approved"
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-
-                        {
-                            name: "Treasury",
-                            children: [
-                                {
-                                    name: "Approved",
-                                    children: [
-                                        {
-                                            name: "MFU_CASHFLOW_TEMPLATE",
-                                            value: 7,
-                                            meta: {
-                                                user: "test",
-                                                created: "03-Feb-2026",
-                                                approved: "04-Feb-2026",
-                                                module: "Treasury",
-                                                submodule: "MAPPING",
-                                                status: "Approved"
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-
-                        {
-                            name: "ESG",
-                            children: [
-                                {
-                                    name: "Pending",
-                                    children: [
-                                        {
-                                            name: "MFU_DOUBLE_LEVERAGE_RATIO",
-                                            value: 4,
-                                            meta: {
-                                                user: "test",
-                                                created: "2026-01-05",
-                                                approved: "2026-01-27",
-                                                module: "ESG",
-                                                submodule: "MAPPING",
-                                                status: "Pending"
-                                            }
-                                        }
+                                        { name: "MFU_CONFIG_TARGET_SETTING", value: 3 }
                                     ]
                                 }
                             ]
@@ -332,45 +179,21 @@ sap.ui.define([
                     ]
                 }]
             };
-            treemapChart.setOption(option);
 
-            var that = this;
-            treemapChart.on("click", function (params) {
-                if (params.data && params.data.meta) {
-                    var meta = params.data.meta;
-                    var statusState = "None";
-                    if (meta.status === "Approved") statusState = "Success";
-                    if (meta.status === "Pending") statusState = "Warning";
-                    if (meta.status === "Rejected") statusState = "Error";
-                    var oModel = new sap.ui.model.json.JSONModel({
-                        template: params.data.name,
-                        module: meta.module,
-                        submodule: meta.submodule,
-                        user: meta.user,
-                        status: meta.status,
-                        statusState: statusState,
-                        rows: [
-                            { key: "Created At", value: meta.created },
-                            { key: "Approved At", value: meta.approved },
-                            // { key: "Module", value: meta.module },
-                            // { key: "SubModule", value: meta.submodule },
-                            // { key: "User", value: meta.user }
-                        ]
-                    });
-                    that.getView().setModel(oModel, "detail");
-                    that.byId("templateDialog").open();
-                }
-            });
+            treemapChart.setOption(option);
         },
 
         onCloseDialog: function () {
             this.byId("templateDialog").close();
         },
 
+        // =========================
+        // 🔥 SANKEY
+        // =========================
         onAfterRendering: function () {
             this.loadSankey();
         },
- 
+
         loadSankey: function () {
 
             fetch("/odata/v4/mfu/getSankeyData()")
@@ -378,77 +201,69 @@ sap.ui.define([
                 .then(data => {
 
                     const result = data.value || [];
- 
-                    if (result.length === 0) {
-                        console.log("❌ No Sankey Data");
-                        return;
-                    }
- 
+
+                    if (result.length === 0) return;
+
                     const nodeSet = new Set();
                     const links = [];
- 
+
                     result.forEach(r => {
- 
+
                         nodeSet.add(r.period);
                         nodeSet.add(r.module);
- 
+
                         links.push({
                             source: r.period,
                             target: r.module,
                             value: r.value
                         });
- 
+
                         (r.templates || []).forEach(t => {
- 
+
                             nodeSet.add(t.name);
- 
+
                             links.push({
                                 source: r.module,
                                 target: t.name,
                                 value: t.value
                             });
- 
+
                         });
                     });
- 
+
                     const nodes = Array.from(nodeSet).map(n => ({ name: n }));
- 
+
                     var chartDom = document.getElementById("sankeyChart");
- 
-                    if (!chartDom) {
-                        return;
-                    }
- 
+
+                    if (!chartDom) return;
+
                     var chart = echarts.init(chartDom);
- 
+
                     chart.setOption({
-                        tooltip: {
-                            trigger: "item"
-                        },
-                        series: [
-                            {
-                                type: "sankey",
-                                nodeAlign: "left",
-                                data: nodes,
-                                links: links,
-                                lineStyle: {
-                                    curveness: 0.5
-                                },
-                                emphasis: {
-                                    focus: "adjacency"
-                                }
-                            }
-                        ]
+                        tooltip: { trigger: "item" },
+                        series: [{
+                            type: "sankey",
+                            nodeAlign: "left",
+                            data: nodes,
+                            links: links,
+                            lineStyle: { curveness: 0.5 },
+                            emphasis: { focus: "adjacency" }
+                        }]
                     });
- 
+
                 })
                 .catch(err => {
                     console.error("SANKEY ERROR:", err);
                 });
         },
 
+        // =========================
+        // 🔍 FILTER
+        // =========================
         onFilterChange: function (oEvent) {
+
             const keys = oEvent.getSource().getSelectedKeys();
+
             if (!keys || keys.length === 0) {
                 this.loadDashboard([]);
             } else {
@@ -456,106 +271,99 @@ sap.ui.define([
             }
         },
 
-        // LOAD DASHBOARD
+        // =========================
+        // 📊 DASHBOARD
+        // =========================
         loadDashboard: function (modules) {
+
             fetch("/odata/v4/mfu/getDashboardData", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    module: modules
-                })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ module: modules })
             })
-                .then(res => res.json())
-                .then(data => {
-                    console.log(data)
-                    var oModel = this.getView().getModel();
-                    oModel.setProperty("/modules", data.modules || []);
-                    oModel.setProperty("/tableData", data.table || []);
-                    oModel.setProperty("/totalUploaded", data.uploaded || 0);
-                    oModel.setProperty("/totalApproved", data.approved || 0);
-                    oModel.setProperty("/totalRejected", data.rejected || 0);
-                    oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
-                })
-                .catch(err => {
-                    console.error("API ERROR:", err);
-                });
+            .then(res => res.json())
+            .then(data => {
+
+                var oModel = this.getView().getModel();
+
+                oModel.setProperty("/modules", data.modules || []);
+                oModel.setProperty("/tableData", data.table || []);
+                oModel.setProperty("/totalUploaded", data.uploaded || 0);
+                oModel.setProperty("/totalApproved", data.approved || 0);
+                oModel.setProperty("/totalRejected", data.rejected || 0);
+                oModel.setProperty("/totalTemplates", data.totalTemplates || 0);
+            })
+            .catch(err => {
+                console.error("API ERROR:", err);
+            });
         },
 
-
+        // =========================
+        // 📦 DIALOGS
+        // =========================
         onCloseUploadDialog: function () {
             this._uploadedDialog.close();
         },
 
         onUploadedTilePress: async function () {
+
             var modules = this.byId("_IDGenMultiComboBox1").getSelectedKeys();
+
             if (!this._uploadedDialog) {
                 this._uploadedDialog = await this.loadFragment({
                     name: "mfuanalytics.view.fragments.uploaded"
                 });
                 this.getView().addDependent(this._uploadedDialog);
             }
+
             fetch("/odata/v4/mfu/getDashboardData", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    module: modules
-                })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ module: modules })
             })
-                .then(res => res.json())
-                .then(data => {
-                    //console.log(data.approvedmodules);
-                    var oJson = new sap.ui.model.json.JSONModel({
-                        items: data.uploadedmodules
-                    });
-                    this._uploadedDialog.setModel(oJson, "uploaded");
-                    this._uploadedDialog.open();
-                }
-                )
-                .catch(err => {
-                    console.error("API ERROR:", err);
-                });
-        },
+            .then(res => res.json())
+            .then(data => {
 
+                var oJson = new sap.ui.model.json.JSONModel({
+                    items: data.uploadedmodules
+                });
+
+                this._uploadedDialog.setModel(oJson, "uploaded");
+                this._uploadedDialog.open();
+            });
+        },
 
         onCloseTileDialog: function () {
             this._approvedDialog.close();
         },
 
         onApprovedPress: async function () {
+
             var modules = this.byId("_IDGenMultiComboBox1").getSelectedKeys();
+
             if (!this._approvedDialog) {
                 this._approvedDialog = await this.loadFragment({
                     name: "mfuanalytics.view.fragments.approved"
                 });
                 this.getView().addDependent(this._approvedDialog);
             }
+
             fetch("/odata/v4/mfu/getDashboardData", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    module: modules
-                })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ module: modules })
             })
-                .then(res => res.json())
-                .then(data => {
-                    console.log(data.approvedmodules);
-                    var oJson = new sap.ui.model.json.JSONModel({
-                        items: data.approvedmodules
-                    });
-                    this._approvedDialog.setModel(oJson, "approved");
-                    this._approvedDialog.open();
-                }
-                )
-                .catch(err => {
-                    console.error("API ERROR:", err);
+            .then(res => res.json())
+            .then(data => {
+
+                var oJson = new sap.ui.model.json.JSONModel({
+                    items: data.approvedmodules
                 });
-        },
+
+                this._approvedDialog.setModel(oJson, "approved");
+                this._approvedDialog.open();
+            });
+        }
 
     });
 });
