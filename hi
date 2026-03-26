@@ -1,23 +1,85 @@
-onHeaderClick: function (oEvent) {
-
-    var oVBox = oEvent.getSource().getParent();
-    var oInput = oVBox.getItems()[1];
-
-    var isVisible = oInput.getVisible();
-
-    // close all first
-    this.byId("_IDGenTable").getColumns().forEach(col => {
-        var header = col.getHeader();
-        if (header instanceof sap.m.VBox) {
-            header.getItems()[1].setVisible(false);
-        }
-    });
-
-    // toggle
-    oInput.setVisible(!isVisible);
-
-    // focus
-    if (!isVisible) {
-        setTimeout(() => oInput.focus(), 100);
-    }
-}
+<Column>  
+    <VBox>  
+        <Link text="Module" press="onHeaderClick"/>  
+        <Input visible="false"  
+               liveChange="onTableFilter"  
+               placeholder="module"/>  
+    </VBox>  
+</Column>  
+  
+<Column>  
+    <VBox>  
+        <Link text="Sub Module" press="onHeaderClick"/>  
+        <Input visible="false"  
+               liveChange="onTableFilter"  
+               placeholder="subModule"/>  
+    </VBox>  
+</Column>  
+  
+<Column>  
+    <VBox>  
+        <Link text="Load Type" press="onHeaderClick"/>  
+        <Input visible="false"  
+               liveChange="onTableFilter"  
+               placeholder="loadType"/>  
+    </VBox>  
+</Column>  
+  
+<Column>  
+    <VBox>  
+        <Link text="Template" press="onHeaderClick"/>  
+        <Input visible="false"  
+               liveChange="onTableFilter"  
+               placeholder="template"/>  
+    </VBox>  
+</Column>  
+  
+    <Column>  
+        <Text text="Load Count"/>  
+    </Column>  
+  
+  
+  
+onTableFilter: function () {  
+  
+    var oTable = this.byId("_IDGenTable");  
+    var oBinding = oTable.getBinding("items");  
+  
+    var aFilters = [];  
+  
+    oTable.getColumns().forEach(col => {  
+  
+        var header = col.getHeader();  
+  
+        if (header instanceof sap.m.VBox) {  
+  
+            var input = header.getItems()[1];  
+            var value = input.getValue();  
+  
+            if (value) {  
+  
+                var field = input.getPlaceholder();  
+  
+                aFilters.push(new sap.ui.model.Filter(  
+                    field,  
+                    sap.ui.model.FilterOperator.Contains,  
+                    value  
+                ));  
+            }  
+        }  
+    });  
+  
+    oBinding.filter(aFilters);  
+},  
+  
+onHeaderClick: function (oEvent) {  
+  
+    var oVBox = oEvent.getSource().getParent();  
+    var oInput = oVBox.getItems()[1];  
+  
+    // toggle input  
+    oInput.setVisible(!oInput.getVisible());  
+},  
+  
+  
+This is working fine just made a good ux and ui css
