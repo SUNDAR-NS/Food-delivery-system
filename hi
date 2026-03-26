@@ -1,56 +1,23 @@
-/* 🔥 Header container */
-.filterHeader {
-    padding: 2px 0;
-    gap: 4px;
-}
+onHeaderClick: function (oEvent) {
 
-/* 🔥 Make link look like normal header */
-.sapMLnk {
-    color: #32363a !important;
-    text-decoration: none !important;
-    font-weight: 600;
-    font-size: 0.85rem;
-}
+    var oVBox = oEvent.getSource().getParent();
+    var oInput = oVBox.getItems()[1];
 
-/* 🔥 Hover effect like SAP */
-.sapMLnk:hover {
-    color: #0a6ed1 !important;
-}
+    var isVisible = oInput.getVisible();
 
-/* 🔥 Input styling */
-.sapMInputBase {
-    height: 1.8rem;
-    font-size: 0.75rem;
-}
+    // close all first
+    this.byId("_IDGenTable").getColumns().forEach(col => {
+        var header = col.getHeader();
+        if (header instanceof sap.m.VBox) {
+            header.getItems()[1].setVisible(false);
+        }
+    });
 
-/* 🔥 Smooth appearance */
-.sapMInputBase {
-    transition: all 0.2s ease-in-out;
-}
+    // toggle
+    oInput.setVisible(!isVisible);
 
-/* 🔥 Focus effect */
-.sapMInputBase:focus-within {
-    border-color: #0a6ed1;
-    box-shadow: 0 0 0 1px #0a6ed1;
-}
-
-/* 🔥 Column alignment fix */
-.sapMListTblHeaderCell {
-    vertical-align: top !important;
-}
-
-/* 🔥 Reduce header height */
-.sapMColumnHeader {
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
-}
-
-/* 🔥 Input spacing */
-.filterHeader .sapMInputBase {
-    margin-top: 2px;
-}
-
-/* 🔥 Optional: subtle animation when showing input */
-.sapMInputBase {
-    opacity: 1;
+    // focus
+    if (!isVisible) {
+        setTimeout(() => oInput.focus(), 100);
+    }
 }
