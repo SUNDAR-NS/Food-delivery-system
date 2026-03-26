@@ -2,29 +2,37 @@
 
     <Column>
         <VBox>
-            <Text text="Module"/>
-            <Input liveChange="onTableFilter" placeholder="module"/>
+            <Text text="Module" press="onHeaderClick" />
+            <Input visible="false"
+                   liveChange="onTableFilter"
+                   placeholder="module"/>
         </VBox>
     </Column>
 
     <Column>
         <VBox>
-            <Text text="Sub Module"/>
-            <Input liveChange="onTableFilter" placeholder="subModule"/>
+            <Text text="Sub Module" press="onHeaderClick"/>
+            <Input visible="false"
+                   liveChange="onTableFilter"
+                   placeholder="subModule"/>
         </VBox>
     </Column>
 
     <Column>
         <VBox>
-            <Text text="Load Type"/>
-            <Input liveChange="onTableFilter" placeholder="loadType"/>
+            <Text text="Load Type" press="onHeaderClick"/>
+            <Input visible="false"
+                   liveChange="onTableFilter"
+                   placeholder="loadType"/>
         </VBox>
     </Column>
 
     <Column>
         <VBox>
-            <Text text="Template"/>
-            <Input liveChange="onTableFilter" placeholder="template"/>
+            <Text text="Template" press="onHeaderClick"/>
+            <Input visible="false"
+                   liveChange="onTableFilter"
+                   placeholder="template"/>
         </VBox>
     </Column>
 
@@ -34,6 +42,17 @@
 
 </columns>
 
+
+
+
+onHeaderClick: function (oEvent) {
+
+    var oVBox = oEvent.getSource().getParent();
+    var oInput = oVBox.getItems()[1];
+
+    // toggle input
+    oInput.setVisible(!oInput.getVisible());
+}
 
 
 
