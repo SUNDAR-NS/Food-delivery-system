@@ -1,35 +1,109 @@
-<Column>
-    <VBox>
-        <Link text="Module" press="onHeaderClick"/>
-        <Input visible="false"
-               liveChange="onTableFilter"
-               placeholder="module"/>
-    </VBox>
-</Column>
+<columns>
 
-<Column>
-    <VBox>
-        <Link text="Sub Module" press="onHeaderClick"/>
-        <Input visible="false"
-               liveChange="onTableFilter"
-               placeholder="subModule"/>
-    </VBox>
-</Column>
+    <!-- Module -->
+    <Column>
+        <VBox class="filterHeader">
+            <Link text="Module"
+                  press="onHeaderClick"
+                  class="filterTitle"/>
+            <Input visible="false"
+                   liveChange="onTableFilter"
+                   placeholder="Search module"
+                   class="filterInput"/>
+        </VBox>
+    </Column>
 
-<Column>
-    <VBox>
-        <Link text="Load Type" press="onHeaderClick"/>
-        <Input visible="false"
-               liveChange="onTableFilter"
-               placeholder="loadType"/>
-    </VBox>
-</Column>
+    <!-- Sub Module -->
+    <Column>
+        <VBox class="filterHeader">
+            <Link text="Sub Module"
+                  press="onHeaderClick"
+                  class="filterTitle"/>
+            <Input visible="false"
+                   liveChange="onTableFilter"
+                   placeholder="Search sub module"
+                   class="filterInput"/>
+        </VBox>
+    </Column>
 
-<Column>
-    <VBox>
-        <Link text="Template" press="onHeaderClick"/>
-        <Input visible="false"
-               liveChange="onTableFilter"
-               placeholder="template"/>
-    </VBox>
-</Column>
+    <!-- Load Type -->
+    <Column>
+        <VBox class="filterHeader">
+            <Link text="Load Type"
+                  press="onHeaderClick"
+                  class="filterTitle"/>
+            <Input visible="false"
+                   liveChange="onTableFilter"
+                   placeholder="Search load type"
+                   class="filterInput"/>
+        </VBox>
+    </Column>
+
+    <!-- Template -->
+    <Column>
+        <VBox class="filterHeader">
+            <Link text="Template"
+                  press="onHeaderClick"
+                  class="filterTitle"/>
+            <Input visible="false"
+                   liveChange="onTableFilter"
+                   placeholder="Search template"
+                   class="filterInput"/>
+        </VBox>
+    </Column>
+
+    <!-- Count -->
+    <Column>
+        <Text text="Load Count"/>
+    </Column>
+
+</columns>
+
+
+onHeaderClick: function (oEvent) {
+
+    var oTable = this.byId("_IDGenTable");
+
+    // 🔥 Close all filters first
+    oTable.getColumns().forEach(col => {
+        var header = col.getHeader();
+        if (header instanceof sap.m.VBox) {
+            header.getItems()[1].setVisible(false);
+        }
+    });
+
+    // 🔥 Open clicked one
+    var oVBox = oEvent.getSource().getParent();
+    var oInput = oVBox.getItems()[1];
+
+    oInput.setVisible(true);
+
+    // 🔥 Auto focus
+    setTimeout(() => {
+        oInput.focus();
+    }, 100);
+}
+
+
+
+/* Header container */
+.filterHeader {
+    gap: 4px;
+}
+
+/* Make link look like header */
+.filterTitle {
+    color: #32363a !important;
+    font-weight: 600;
+    text-decoration: none !important;
+}
+
+/* Hover effect */
+.filterTitle:hover {
+    color: #0a6ed1 !important;
+}
+
+/* Input styling */
+.filterInput {
+    margin-top: 2px;
+}
