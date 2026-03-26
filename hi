@@ -1,15 +1,95 @@
-loadPieChart: function () {
+var oViewModel = new sap.ui.model.json.JSONModel({
+    filterMode: false
+});
+this.getView().setModel(oViewModel, "view");
 
-    fetch("/odata/v4/mfu/getPieData()")
-        .then(res => res.json())
-        .then(data => {
 
-            console.log("PIE DATA:", data);
 
-            this.getView().getModel().setProperty("/pieModules", data.value || []);
 
-        })
-        .catch(err => {
-            console.error("PIE ERROR:", err);
-        });
+onEnableFilter: function () {
+    this.getView().getModel("view").setProperty("/filterMode", true);
 }
+
+
+onTableFilter: function () {
+
+    var oTable = this.byId("_IDGenTable");
+    var oBinding = oTable.getBinding("items");
+
+    var aFilters = [];
+
+    var columns = oTable.getColumns();
+    var fields = ["module", "subModule", "loadType", "template"];
+
+    columns.forEach((col, index) => {
+
+        var header = col.getHeader();
+
+        if (header instanceof sap.m.VBox) {
+
+            var input = header.getItems()[1];
+            var value = input.getValue();
+
+            if (value) {
+                aFilters.push(new sap.ui.model.Filter(
+                    fields[index],
+                    sap.ui.model.FilterOperator.Contains,
+                    value
+                ));
+            }
+        }
+    });
+
+    oBinding.filter(aFilters);
+}
+
+
+
+<Column>
+    <VBox>
+        <Text text="Module"
+              visible="{= !${view>/filterMode} }"
+              press="onEnableFilter"/>
+
+        <Input
+            visible="{view>/filterMode}"
+            liveChange="onTableFilter"
+            placeholder="Search Module"/>
+    </VBox>
+</Column>
+<Column>
+    <VBox>
+        <Text text="Sub Module"
+              visible="{= !${view>/filterMode} }"
+              press="onEnableFilter"/>
+
+        <Input
+            visible="{view>/filterMode}"
+            liveChange="onTableFilter"
+            placeholder="Search SubModule"/>
+    </VBox>
+</Column>
+<Column>
+    <VBox>
+        <Text text="Load Type"
+              visible="{= !${view>/filterMode} }"
+              press="onEnableFilter"/>
+
+        <Input
+            visible="{view>/filterMode}"
+            liveChange="onTableFilter"
+            placeholder="Search LoadType"/>
+    </VBox>
+</Column>
+<Column>
+    <VBox>
+        <Text text="Template"
+              visible="{= !${view>/filterMode} }"
+              press="onEnableFilter"/>
+
+        <Input
+            visible="{view>/filterMode}"
+            liveChange="onTableFilter"
+            placeholder="Search Template"/>
+    </VBox>
+</Column>
