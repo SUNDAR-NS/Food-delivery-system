@@ -1,4 +1,55 @@
-formatter: function (params) {
+loadSankey: function () {
+
+    fetch("/odata/v4/mfu/getSankeyData()")
+        .then(res => res.json())
+        .then(data => {
+
+            const result = data.value || [];
+
+            if (result.length === 0) return;
+
+            const nodeSet = new Set();
+            const links = [];
+
+            result.forEach(r => {
+
+                nodeSet.add(r.period);
+                nodeSet.add(r.module);
+
+                // 🔥 Period → Module
+                links.push({
+                    source: r.period,
+                    target: r.module,
+                    value: r.value,
+                    total: r.total
+                });
+
+                // 🔥 Module → Template
+                (r.templates || []).forEach(t => {
+
+                    nodeSet.add(t.name);
+
+                    links.push({
+                        source: r.module,
+                        target: t.name,
+                        value: t.value
+                    });
+
+                });
+            });
+
+            const nodes = Array.from(nodeSet).map(n => ({ name: n }));
+
+            var chartDom = document.getElementById("sankeyChart");
+
+            if (!chartDom) return;
+
+            var chart = echarts.init(chartDom);
+
+            chart.setOption({
+                tooltip: {
+                    trigger: "item",
+                    formatter: function (params) {
 
     const links = chart.getOption().series[0].links;
 
@@ -36,3 +87,18 @@ formatter: function (params) {
     // ✅ LINK
     return params.data.source + " → " + params.data.target + " : " + params.data.value;
 }
+                series: [{
+                    type: "sankey",
+                    nodeAlign: "left",
+                    data: nodes,
+                    links: links,
+                    lineStyle: { curveness: 0.5 },
+                    emphasis: { focus: "adjacency" }
+                }]
+            });
+
+        })
+        .catch(err => {
+            console.error("SANKEY ERROR:", err);
+        });
+},
