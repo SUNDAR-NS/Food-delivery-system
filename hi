@@ -10,18 +10,24 @@ loadSankey: function () {
 
             const nodeSet = new Set();
             const links = [];
+            const totalMap = {}; // 🔥 store totals
 
             result.forEach(r => {
 
                 nodeSet.add(r.period);
                 nodeSet.add(r.module);
 
+                // 🔥 store total for PERIOD
+                totalMap[r.period] = r.total;
+
+                // 🔥 store total for MODULE
+                totalMap[r.module] = r.value;
+
                 // 🔥 Period → Module
                 links.push({
                     source: r.period,
                     target: r.module,
-                    value: r.value,
-                    total: r.total
+                    value: r.value
                 });
 
                 // 🔥 Module → Template
@@ -51,42 +57,18 @@ loadSankey: function () {
                     trigger: "item",
                     formatter: function (params) {
 
-    const links = chart.getOption().series[0].links;
+                        // ✅ NODE HOVER (PERIOD + MODULE)
+                        if (params.dataType === "node") {
 
-    // ✅ PERIOD (Monthly / Quarterly / Yearly)
-    if (params.dataType === "node" &&
-        (params.data.name === "Monthly" ||
-         params.data.name === "Quarterly" ||
-         params.data.name === "Yearly")) {
+                            const total = totalMap[params.data.name] || 0;
 
-        let total = 0;
+                            return params.data.name + " TOTAL : " + total;
+                        }
 
-        links.forEach(l => {
-            if (l.source === params.data.name) {
-                total += l.value;
-            }
-        });
-
-        return params.data.name + " TOTAL : " + total;
-    }
-
-    // ✅ MODULE (NFRP, ESG, etc)
-    if (params.dataType === "node") {
-
-        let total = 0;
-
-        links.forEach(l => {
-            if (l.source === params.data.name) {
-                total += l.value;
-            }
-        });
-
-        return params.data.name + " TOTAL : " + total;
-    }
-
-    // ✅ LINK
-    return params.data.source + " → " + params.data.target + " : " + params.data.value;
-}
+                        // ✅ LINK HOVER
+                        return params.data.source + " → " + params.data.target + " : " + params.data.value;
+                    }
+                },
                 series: [{
                     type: "sankey",
                     nodeAlign: "left",
@@ -101,4 +83,4 @@ loadSankey: function () {
         .catch(err => {
             console.error("SANKEY ERROR:", err);
         });
-},
+}
