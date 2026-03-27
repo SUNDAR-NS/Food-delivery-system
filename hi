@@ -1,77 +1,80 @@
 this.on('getSankeyData', async () => {
 
-        const data = await cds.run(SELECT.from(ReportFileStorage));
+    const data = await cds.run(SELECT.from(ReportFileStorage));
 
-        function getDate(row) {
-            return row.createdAt || row.CREATEDAT || null;
+    function getDate(row) {
+        return row.createdAt || row.CREATEDAT || null;
+    }
+
+    function parseDate(d) {
+        if (!d) return null;
+        return new Date(d.toString().replace(" ", "T").split(".")[0]);
+    }
+
+    let latest = null;
+
+    data.forEach(r => {
+        const d = parseDate(getDate(r));
+        if (d && (!latest || d > latest)) {
+            latest = d;
         }
+    });
 
-        function parseDate(d) {
-            if (!d) return null;
-            return new Date(d.toString().replace(" ", "T").split(".")[0]);
-        }
+    if (!latest) return [];
 
-        let latest = null;
+    const startMonth = new Date(latest.getFullYear(), latest.getMonth(), 1);
 
-        data.forEach(r => {
+    const startQuarter = new Date(latest);
+    startQuarter.setMonth(latest.getMonth() - 2);
+    startQuarter.setDate(1);
+
+    const startYear = new Date(latest);
+    startYear.setFullYear(latest.getFullYear() - 1);
+
+    function filter(start) {
+        return data.filter(r => {
             const d = parseDate(getDate(r));
-            if (d && (!latest || d > latest)) {
-                latest = d;
+            return d && d >= start;
+        });
+    }
+
+    function process(rows, period) {
+
+        const total = rows.length; // 🔥 TOTAL COUNT
+
+        const map = {};
+
+        rows.forEach(r => {
+
+            const m = r.MODULE_NAME;
+            const t = r.LOAD_TEMPLATE;
+
+            if (!map[m]) {
+                map[m] = { count: 0, templates: {} };
             }
+
+            map[m].count++;
+            map[m].templates[t] = (map[m].templates[t] || 0) + 1;
         });
 
-        if (!latest) return [];
+        return Object.entries(map)
+            .sort((a, b) => b[1].count - a[1].count)
+            .slice(0, 3)
+            .map(([m, val]) => ({
+                period,
+                module: m,
+                value: val.count,
+                total: total, // 🔥 ADD THIS
+                templates: Object.entries(val.templates)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3)
+                    .map(([name, value]) => ({ name, value }))
+            }));
+    }
 
-        const startMonth = new Date(latest.getFullYear(), latest.getMonth(), 1);
-
-        const startQuarter = new Date(latest);
-        startQuarter.setMonth(latest.getMonth() - 2);
-        startQuarter.setDate(1);
-
-        const startYear = new Date(latest);
-        startYear.setFullYear(latest.getFullYear() - 1);
-
-        function filter(start) {
-            return data.filter(r => {
-                const d = parseDate(getDate(r));
-                return d && d >= start;
-            });
-        }
-
-        function process(rows, period) {
-
-    const map = {};
-
-    rows.forEach(r => {
-
-        const m = r.MODULE_NAME;
-        const t = r.LOAD_TEMPLATE;
-
-        if (!map[m]) {
-            map[m] = { count: 0, templates: {} };
-        }
-
-        map[m].count++;
-        map[m].templates[t] = (map[m].templates[t] || 0) + 1;
-    });
-
-    return Object.entries(map)
-        .sort((a, b) => b[1].count - a[1].count)
-        .slice(0, 3) // ✅ keep top 3
-        .map(([m, val]) => ({
-            period,
-            module: m,
-            value: val.count,
-            templates: Object.entries(val.templates)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 3)
-                .map(([name, value]) => ({ name, value }))
-        }));
-}
-
-        return [
-            ...process(filter(startMonth), "Monthly"),
-            ...process(filter(startQuarter), "Quarterly"),
-            ...process(filter(startYear), "Yearly")
-        ];
-    });
+    return [
+        ...process(filter(startMonth), "Monthly"),
+        ...process(filter(startQuarter), "Quarterly"),
+        ...process(filter(startYear), "Yearly")
+    ];
+});
