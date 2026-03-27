@@ -1,80 +1,86 @@
-this.on('getSankeyData', async () => {
+loadSankey: function () {
 
-    const data = await cds.run(SELECT.from(ReportFileStorage));
+    fetch("/odata/v4/mfu/getSankeyData()")
+        .then(res => res.json())
+        .then(data => {
 
-    function getDate(row) {
-        return row.createdAt || row.CREATEDAT || null;
-    }
+            const result = data.value || [];
 
-    function parseDate(d) {
-        if (!d) return null;
-        return new Date(d.toString().replace(" ", "T").split(".")[0]);
-    }
+            if (result.length === 0) return;
 
-    let latest = null;
+            const nodeSet = new Set();
+            const links = [];
 
-    data.forEach(r => {
-        const d = parseDate(getDate(r));
-        if (d && (!latest || d > latest)) {
-            latest = d;
-        }
-    });
+            result.forEach(r => {
 
-    if (!latest) return [];
+                nodeSet.add(r.period);
+                nodeSet.add(r.module);
 
-    const startMonth = new Date(latest.getFullYear(), latest.getMonth(), 1);
+                // 🔥 Period → Module
+                links.push({
+                    source: r.period,
+                    target: r.module,
+                    value: r.value
+                });
 
-    const startQuarter = new Date(latest);
-    startQuarter.setMonth(latest.getMonth() - 2);
-    startQuarter.setDate(1);
+                // 🔥 Module → Template
+                (r.templates || []).forEach(t => {
 
-    const startYear = new Date(latest);
-    startYear.setFullYear(latest.getFullYear() - 1);
+                    nodeSet.add(t.name);
 
-    function filter(start) {
-        return data.filter(r => {
-            const d = parseDate(getDate(r));
-            return d && d >= start;
+                    links.push({
+                        source: r.module,
+                        target: t.name,
+                        value: t.value
+                    });
+
+                });
+            });
+
+            const nodes = Array.from(nodeSet).map(n => ({ name: n }));
+
+            var chartDom = document.getElementById("sankeyChart");
+
+            if (!chartDom) return;
+
+            var chart = echarts.init(chartDom);
+
+            chart.setOption({
+                tooltip: {
+                    trigger: "item",
+                    formatter: function (params) {
+
+                        // 🔥 NODE HOVER (Monthly, Quarterly, Yearly)
+                        if (params.dataType === "node") {
+
+                            let total = 0;
+
+                            // 🔥 calculate total from links
+                            chart.getOption().series[0].links.forEach(l => {
+                                if (l.source === params.data.name) {
+                                    total += l.value;
+                                }
+                            });
+
+                            return params.data.name + " TOTAL : " + total;
+                        }
+
+                        // 🔥 LINK HOVER
+                        return params.data.source + " → " + params.data.target + " : " + params.data.value;
+                    }
+                },
+                series: [{
+                    type: "sankey",
+                    nodeAlign: "left",
+                    data: nodes,
+                    links: links,
+                    lineStyle: { curveness: 0.5 },
+                    emphasis: { focus: "adjacency" }
+                }]
+            });
+
+        })
+        .catch(err => {
+            console.error("SANKEY ERROR:", err);
         });
-    }
-
-    function process(rows, period) {
-
-        const total = rows.length; // 🔥 TOTAL COUNT
-
-        const map = {};
-
-        rows.forEach(r => {
-
-            const m = r.MODULE_NAME;
-            const t = r.LOAD_TEMPLATE;
-
-            if (!map[m]) {
-                map[m] = { count: 0, templates: {} };
-            }
-
-            map[m].count++;
-            map[m].templates[t] = (map[m].templates[t] || 0) + 1;
-        });
-
-        return Object.entries(map)
-            .sort((a, b) => b[1].count - a[1].count)
-            .slice(0, 3)
-            .map(([m, val]) => ({
-                period,
-                module: m,
-                value: val.count,
-                total: total, // 🔥 ADD THIS
-                templates: Object.entries(val.templates)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 3)
-                    .map(([name, value]) => ({ name, value }))
-            }));
-    }
-
-    return [
-        ...process(filter(startMonth), "Monthly"),
-        ...process(filter(startQuarter), "Quarterly"),
-        ...process(filter(startYear), "Yearly")
-    ];
-});
+},
