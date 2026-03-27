@@ -14,37 +14,52 @@ loadSankey: function () {
 
             result.forEach(r => {
 
-                nodeSet.add(r.period);
-                nodeSet.add(r.module);
+                const moduleNode = r.period + "_" + r.module; // unique node
 
-                // 🔥 store total for PERIOD
+                nodeSet.add(r.period);
+                nodeSet.add(moduleNode);
+
+                // ✅ PERIOD TOTAL
                 totalMap[r.period] = r.total;
 
-                // 🔥 store total for MODULE
-                totalMap[r.module] = r.value;
+                // ✅ MODULE TOTAL (ACCUMULATED)
+                if (!totalMap[r.module]) {
+                    totalMap[r.module] = 0;
+                }
+                totalMap[r.module] += r.value;
 
                 // 🔥 Period → Module
                 links.push({
                     source: r.period,
-                    target: r.module,
+                    target: moduleNode,
                     value: r.value
                 });
 
                 // 🔥 Module → Template
                 (r.templates || []).forEach(t => {
 
-                    nodeSet.add(t.name);
+                    const templateNode = moduleNode + "_" + t.name;
+
+                    nodeSet.add(templateNode);
 
                     links.push({
-                        source: r.module,
-                        target: t.name,
+                        source: moduleNode,
+                        target: templateNode,
                         value: t.value
                     });
 
                 });
             });
 
-            const nodes = Array.from(nodeSet).map(n => ({ name: n }));
+            // 🔥 CLEAN DISPLAY LABELS
+            const nodes = Array.from(nodeSet).map(n => ({
+                name: n,
+                label: {
+                    formatter: function () {
+                        return n.includes("_") ? n.split("_").slice(1).join("_") : n;
+                    }
+                }
+            }));
 
             var chartDom = document.getElementById("sankeyChart");
 
@@ -57,15 +72,18 @@ loadSankey: function () {
                     trigger: "item",
                     formatter: function (params) {
 
-                        // ✅ NODE HOVER (PERIOD + MODULE)
                         if (params.dataType === "node") {
 
-                            const total = totalMap[params.data.name] || 0;
+                            let name = params.data.name;
 
-                            return params.data.name + " TOTAL : " + total;
+                            // 🔥 get real module name
+                            let key = name.includes("_") ? name.split("_")[1] : name;
+
+                            const total = totalMap[key] || totalMap[name] || 0;
+
+                            return key + " TOTAL : " + total;
                         }
 
-                        // ✅ LINK HOVER
                         return params.data.source + " → " + params.data.target + " : " + params.data.value;
                     }
                 },
