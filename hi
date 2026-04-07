@@ -1,6 +1,1 @@
-user: customui $ pwd
-/home/user/projects/customui
-user: customui $ ls app/customui
-build  customui.zip  node_modules  package-lock.json  package.json  public  src  xs-app.json
-user: customui $ ls resources
-user: customui $ 
+"build": "react-scripts build && cd build && zip -r ../customui.zip . && cp ../customui.zip /home/user/projects/customui/resources/"
