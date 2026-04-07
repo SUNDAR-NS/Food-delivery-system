@@ -1,1 +1,1 @@
-"build": "react-scripts build && cd build && mkdir -p ../../resources && zip -r ../../resources/customui.zip ."
+"build": "react-scripts build && cd build && zip -r ../customui.zip . && mkdir -p ../../resources && cp ../customui.zip ../../resources/"
