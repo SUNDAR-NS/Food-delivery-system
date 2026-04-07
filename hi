@@ -1,81 +1,25 @@
-cf deploy /home/user/projects/customui/mta_archives/customui_1.0.4.mtar -f
-
-Deploying multi-target app archive /home/user/projects/customui/mta_archives/customui_1.0.4.mtar in org Standard Chartered Bank_core-foundational-12982zqn / space CAPM_FIORI as ns.sundar@sc.com...
-
-Executing action "abort" on operation e0c64528-3287-11f1-b872-eeee0a8e2c64...
-OK
-Uploading 1 files...
-  /home/user/projects/customui/mta_archives/customui_1.0.4.mtar
-
- 0s  0 B / 298.00 KiB    0.00%
- 0s  298.00 KiB / 298.00 KiB  100.00%
- 0s  298.00 KiB / 298.00 KiB  100.00% 0s
-OK
-Operation ID: dfffab05-3290-11f1-aafc-eeee0a9b1301
-Deploying in org "Standard Chartered Bank_core-foundational-12982zqn" and space "CAPM_FIORI"
-Detected MTA schema version: "3"
-Detected deployed MTA with ID "customui" and version "1.0.4"
-Detected new MTA version: "1.0.4"
-Deployed MTA version: "1.0.4"
-Processing service "customui-html5-service"...
-Processing service "customui-html5-runtime"...
-Processing service "customui-destination-service"...
-Processing service "customui-auth"...
-Setting service "customui-auth" parameters from "xs-security.json"
-Updating service "customui-auth"...
-1 of 1 done
-Service key "customui-app-content-customui-repo-host-credentials" for service "customui-html5-service" already exists
-Uploading content module "customui-app-content" in target service "customui-repo-host"...
-Deploying content module "customui-app-content" in target service "customui-repo-host"...
-[customui-app-content] [ERROR] Upload application content failed { CODE: '1001' } validation error: Missing sap.app object in manifest.json
-Error checking status of content deployment from module "customui-app-content" in content service "customui-repo-host": Content deployment for module "customui-app-content" failed due to invalid content. Download the logs "customui-app-content_customui-repo-host" via the dmol command and check them for more information. 
-Process failed.
-Use "cf deploy -i dfffab05-3290-11f1-aafc-eeee0a9b1301 -a abort" to abort the process.
-Use "cf deploy -i dfffab05-3290-11f1-aafc-eeee0a9b1301 -a retry" to retry the process.
-Use "cf dmol -i dfffab05-3290-11f1-aafc-eeee0a9b1301" to download the logs of the process.
-Exit error code: 1
-
- *  Terminal will be reused by tasks, press any key to close it.
-
-
-
-
-cf oauth-token
-bearer eyJqa3UiOiJodHRwczovL3VhYS5jZi5hcDExLmhhbmEub25kZW1hbmQuY29tL3Rva2VuX2tleXMiLCJraWQiOiJrZXktMSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjOWI3YzI2Zi1kZDkwLTQ3NTMtYjhlYi1lMzRhMzRhZmM3YTYiLCJ1c2VyX25hbWUiOiJucy5zdW5kYXJAc2MuY29tIiwib3JpZ2luIjoic2FwLmRldmN1c3RvbS1wbGF0Zm9ybSIsImlzcyI6Imh0dHBzOi8vdWFhLmNmLmFwMTEuaGFuYS5vbmRlbWFuZC5jb20vb2F1dGgvdG9rZW4iLCJyZXZvY2FibGUiOnRydWUsImNsaWVudF9pZCI6ImNmIiwiYXVkIjpbImNsb3VkX2NvbnRyb2xsZXIiLCJwYXNzd29yZCIsIm9wZW5pZCIsInVhYSIsImNmIl0sInppZCI6InVhYSIsImdyYW50X3R5cGUiOiJwYXNzd29yZCIsInVzZXJfaWQiOiJjOWI3YzI2Zi1kZDkwLTQ3NTMtYjhlYi1lMzRhMzRhZmM3YTYiLCJhenAiOiJjZiIsInNjb3BlIjpbImNsb3VkX2NvbnRyb2xsZXIucmVhZCIsInBhc3N3b3JkLndyaXRlIiwiY2xvdWRfY29udHJvbGxlci53cml0ZSIsIm9wZW5pZCIsInVhYS51c2VyIl0sImV4cCI6MTc3NTU3NDMwNywiaWF0IjoxNzc1NTczMTA3LCJqdGkiOiJkMGQ3YzEyZWYyODg0Nzk4YjllOWZmMDcwZWVmZjlmNiIsImVtYWlsIjoibnMuc3VuZGFyQHNjLmNvbSIsInJldl9zaWciOiJjYTQ2MTgwNSIsImNsaWVudF9hdXRoX21ldGhvZCI6Im5vbmUiLCJjaWQiOiJjZiJ9.Zo71nX7hpSR_PctEqWc0O582GUwpxQy0ISu-vbwDrMyVJjKYaSCUy0d52vtafbvK8E2ZahVX6tHUfofG8l7oHUtpCVRdqEZJBKVyYl_rakNJbCuuhwLvYJnRdnNT9KsYAL0FMop-oSqm2ftvojGB_adlGp4WSwmf1kMBLAtuqlYlDFrvuaZCu8drJo0bZl0QkAjm0q-Y7I-lbZI-4hDa5A3ydDN2GJjnS8zxHcLUU9QWQEAiSDZz4gDcknnCjr0rseFI07SF0OWz4LQSO2CRAdoYxlBC5Gc2E5nM-LQBE8G6QgqE2zF2z3ckUNpNliyBS8W6FCbQ4--DPvQBzbIYuA
-cf deploy /home/user/projects/customui/mta_archives/customui_1.0.4.mtar -f
-Deploying multi-target app archive /home/user/projects/customui/mta_archives/customui_1.0.4.mtar in org Standard Chartered Bank_core-foundational-12982zqn / space CAPM_FIORI as ns.sundar@sc.com...
-
-Executing action "abort" on operation e0c64528-3287-11f1-b872-eeee0a8e2c64...
-OK
-Uploading 1 files...
-  /home/user/projects/customui/mta_archives/customui_1.0.4.mtar
-
- 0s  0 B / 298.00 KiB    0.00%
- 0s  298.00 KiB / 298.00 KiB  100.00%
- 0s  298.00 KiB / 298.00 KiB  100.00% 0s
-OK
-Operation ID: dfffab05-3290-11f1-aafc-eeee0a9b1301
-Deploying in org "Standard Chartered Bank_core-foundational-12982zqn" and space "CAPM_FIORI"
-Detected MTA schema version: "3"
-Detected deployed MTA with ID "customui" and version "1.0.4"
-Detected new MTA version: "1.0.4"
-Deployed MTA version: "1.0.4"
-Processing service "customui-html5-service"...
-Processing service "customui-html5-runtime"...
-Processing service "customui-destination-service"...
-Processing service "customui-auth"...
-Setting service "customui-auth" parameters from "xs-security.json"
-Updating service "customui-auth"...
-1 of 1 done
-Service key "customui-app-content-customui-repo-host-credentials" for service "customui-html5-service" already exists
-Uploading content module "customui-app-content" in target service "customui-repo-host"...
-Deploying content module "customui-app-content" in target service "customui-repo-host"...
-[customui-app-content] [ERROR] Upload application content failed { CODE: '1001' } validation error: Missing sap.app object in manifest.json
-Error checking status of content deployment from module "customui-app-content" in content service "customui-repo-host": Content deployment for module "customui-app-content" failed due to invalid content. Download the logs "customui-app-content_customui-repo-host" via the dmol command and check them for more information. 
-Process failed.
-Use "cf deploy -i dfffab05-3290-11f1-aafc-eeee0a9b1301 -a abort" to abort the process.
-Use "cf deploy -i dfffab05-3290-11f1-aafc-eeee0a9b1301 -a retry" to retry the process.
-Use "cf dmol -i dfffab05-3290-11f1-aafc-eeee0a9b1301" to download the logs of the process.
-Exit error code: 1
-
-
+{
+  "short_name": "React App",
+  "name": "Create React App Sample",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
