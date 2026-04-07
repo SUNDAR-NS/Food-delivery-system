@@ -1,4 +1,12 @@
 {
+  "sap.app": {
+    "id": "customui",
+    "type": "application",
+    "title": "React App",
+    "applicationVersion": {
+      "version": "1.0.0"
+    }
+  },
   "short_name": "React App",
   "name": "Create React App Sample",
   "icons": [
