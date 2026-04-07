@@ -1,75 +1,223 @@
- Executing task: mbt build -s '/home/user/projects/customui'; sleep 2; 
+_schema-version: 3.3.0
+ID: fileuploader
+description: A simple CAP project.
+version: 1.0.1
+modules:
+- name: SCBFileHub
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: T1GDTL_PHY
+  - name: fileuploader-auth
+  - name: fileuploader-destination-service
+  - name: applogs_fileuploader
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    instances: 1
+  build-parameters:
+    builder: npm-ci
+- name: fileuploader-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: T1GDTL_PHY
+    properties:
+      TARGET_CONTAINER: T1GDTL_PHY
+    parameters:
+      buildpack: nodejs_buildpack
+- name: fileuploader-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: fileuploader-destination-service
+    parameters:
+      content-target: true
+  - name: fileuploader-repo-host
+    parameters:
+      service-key:
+        name: fileuploader-repo-host-key
+  - name: fileuploader-auth
+    parameters:
+      service-key:
+        name: fileuploader-auth-auth-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: fileuploader-fileuploader-repo-host
+          ServiceInstanceName: fileuploader-html5-service
+          ServiceKeyName: fileuploaderrepo-host-key
+          sap.cloud.service: fileuploader 
+        - Authentication: OAuth2UserTokenExchange
+          Name: fileuploader-fileuploader-auth
+          ServiceInstanceName: fileuploader-auth
+          ServiceKeyName: fileuploader-auth-key
+          sap.cloud.service: fileuploader
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+- name: fileuploader-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: fileuploader-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - fileuploader.zip
+      name: fileuploader
+      target-path: resources/
+- name: fileuploader
+  type: html5
+  path: app/fileuploader
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: applogs_fileuploader
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: application-logs
+    service-plan: lite
+- name: T1GDTL_PHY
+  type: com.sap.xs.hdi-container
+  parameters:
+    config:
+      schema: T1GDTL_PHY
+  properties:
+    hdi-container-name: ${service-name}
+    existing: true
+- name: fileuploader-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      tenant-mode: dedicated
+      xsappname: fileuploader
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+- name: fileuploader-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: fileuploader-html5-service
+    service-plan: app-host
+- name: fileuploader-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: fileuploader-srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: fileuploader-destination-service
+    service-plan: lite
+  requires:
+  - name: srv-api
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production
 
-[2026-04-07 14:02:43]  INFO Cloud MTA Build Tool version 1.2.34
-[2026-04-07 14:02:43]  INFO generating the "Makefile_20260407140243.mta" file...
-[2026-04-07 14:02:43]  INFO done
-[2026-04-07 14:02:43]  INFO executing the "make -f Makefile_20260407140243.mta p=cf mtar= strict=true mode=" command...
-[2026-04-07 14:02:43]  INFO validating the MTA project
-[2026-04-07 14:02:43]  INFO validating the MTA project
-[2026-04-07 14:02:43]  INFO building the "customui" module...
-[2026-04-07 14:02:43]  INFO executing the "npm install" command...
-..
-up to date, audited 1314 packages in 2s
 
-268 packages are looking for funding
-  run `npm fund` for details
 
-26 vulnerabilities (9 low, 3 moderate, 14 high)
-
-To address issues that do not require attention, run:
-  npm audit fix
-
-To address all issues (including breaking changes), run:
-  npm audit fix --force
-
-Run `npm audit` for details.
-[2026-04-07 14:02:45]  INFO executing the "npm run build" command...
-
-> customui@0.1.0 build
-> react-scripts build && cd build && zip -r ../customui.zip . && cp ../customui.zip ..
-
-Creating an optimized production build...
-....Compiled successfully.
-
-File sizes after gzip:
-
-  60.83 kB  build/static/js/main.1b9d36e6.js
-  1.76 kB   build/static/js/453.56c0e146.chunk.js
-  263 B     build/static/css/main.e6c13ad2.css
-
-The project was built assuming it is hosted at /.
-You can control this with the homepage field in your package.json.
-
-The build folder is ready to be deployed.
-You may serve it with a static server:
-
-  npm install -g serve
-  serve -s build
-
-Find out more about deployment here:
-
-  https://cra.link/deployment
-
-updating: favicon.ico (deflated 11%)
-updating: logo192.png (deflated 1%)
-updating: static/ (stored 0%)
-updating: static/css/ (stored 0%)
-updating: static/css/main.e6c13ad2.css.map (deflated 35%)
-updating: static/css/main.e6c13ad2.css (deflated 27%)
-updating: static/js/ (stored 0%)
-updating: static/js/453.56c0e146.chunk.js.map (deflated 65%)
-updating: static/js/main.1b9d36e6.js (deflated 69%)
-updating: static/js/main.1b9d36e6.js.map (deflated 76%)
-updating: static/js/main.1b9d36e6.js.LICENSE.txt (deflated 83%)
-updating: static/js/453.56c0e146.chunk.js (deflated 61%)
-updating: robots.txt (deflated 10%)
-updating: index.html (deflated 45%)
-updating: manifest.json (deflated 53%)
-updating: asset-manifest.json (deflated 67%)
-updating: logo512.png (deflated 0%)
-cp: '../customui.zip' and '../customui.zip' are the same file
-[2026-04-07 14:02:49] ERROR could not build the "customui" module: could not execute the "npm run build" command: exit status 1
-make: *** [Makefile_20260407140243.mta:37: customui] Error 1
-[2026-04-07 14:02:49] ERROR could not build the MTA project: could not execute the "make -f Makefile_20260407140243.mta p=cf mtar= strict=true mode=" command: exit status 2
-Error: could not build the MTA project: could not execute the "make -f Makefile_20260407140243.mta p=cf mtar= strict=true mode=" command: exit status 2
- *  Terminal will be reused by tasks, press any key to close it. 
+{
+  "name": "scbfilehub",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^8.9.4",
+    "express": "^4",
+    "exceljs": "4.4.0",
+    "xlsx": "0.18.5",
+    "@sap/cds-hana": "^2.1.0",
+    "@sap/hana-client": "^2.25.29",
+    "@sap/xssec": "4.9.0",
+    "body-parser": "2.2.0",
+    "get-stream": "9.0.1",
+    "base64-stream": "1.0.0"
+  },
+  "devDependencies": {
+    "@cap-js/cds-types": "^0.8.0",
+    "@cap-js/sqlite": "^1"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "deploy": "cds deploy --to hana",
+    "build":"cds build",
+    "watch-scb": "cds watch --open scb/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch-fileuploader": "cds watch --open fileuploader/webapp/index.html?sap-ui-xx-viewCache=false"
+  },
+  "cds": {
+    "requires": {
+      "auth": {
+        "[development]": {
+          "kind": "basic",
+          "users": {
+            "alice": {
+              "roles": [
+                "NFRP_File_Uploader_Maker",
+                "NFRP_File_Uploader_Checker"
+              ],
+              "attr": {
+                "givenName": "Alice",
+                "familyName": "Doe",
+                "email": "alice@sap.com"
+              }
+            }
+          }
+        },
+        "[production]": {
+          "kind": "xsuaa"
+        }
+      },
+      "db": {
+        "kind": "hana"
+      },
+      "server": {
+        "body_parser": {
+          "limit": "50mb"
+        }
+      },
+      "sql": {
+        "native_hana_associations": false
+      }
+    }
+  },
+  "sapux": [
+    "app/fileuploader"
+  ]
+}
