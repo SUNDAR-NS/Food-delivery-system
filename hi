@@ -1,104 +1,87 @@
-loadSankey: function () {
+_schema-version: "3.2"
+ID: customui
+description: React UI deployment
+version: 1.0.4
 
-    fetch("/odata/v4/mfu/getSankeyData()")
-        .then(res => res.json())
-        .then(data => {
+modules:
 
-            const result = data.value || [];
+  # React HTML5 module
+  - name: customui
+    type: html5
+    path: app/customui
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - npm run build
+      build-result: build
+      supported-platforms: []
 
-            if (result.length === 0) return;
+  # Content deployer module
+  - name: customui-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: customui-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: customui
+          artifacts:
+            - customui.zip
+          target-path: resources/
 
-            const nodeSet = new Set();
-            const links = [];
-            const totalMap = {}; // 🔥 store totals
+  # Destination configuration module
+  - name: customui-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: customui-destination-service
+        parameters:
+          content-target: true
+      - name: customui-auth
+      - name: customui-repo-host
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Name: customui_html5_repo_runtime
+              ServiceInstanceName: customui-html5-runtime
+              ServiceKeyName: customui-repo-host-key
+              sap.cloud.service: customui
+          existing_destinations_policy: update
+    build-parameters:
+      no-source: true
 
-            result.forEach(r => {
+resources:
 
-                const moduleNode = r.period + "_" + r.module; // unique node
+  # HTML5 Repo Host
+  - name: customui-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+      service-name: customui-html5-service
 
-                nodeSet.add(r.period);
-                nodeSet.add(moduleNode);
+  # HTML5 Repo Runtime
+  - name: customui-html5-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
 
-                // ✅ PERIOD TOTAL
-                totalMap[r.period] = r.total;
+  # Destination Service
+  - name: customui-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
 
-                // ✅ MODULE TOTAL (ACCUMULATED)
-                if (!totalMap[r.module]) {
-                    totalMap[r.module] = 0;
-                }
-                totalMap[r.module] += r.value;
-
-                // 🔥 Period → Module
-                links.push({
-                    source: r.period,
-                    target: moduleNode,
-                    value: r.value
-                });
-
-                // 🔥 Module → Template
-                (r.templates || []).forEach(t => {
-
-                    const templateNode = moduleNode + "_" + t.name;
-
-                    nodeSet.add(templateNode);
-
-                    links.push({
-                        source: moduleNode,
-                        target: templateNode,
-                        value: t.value
-                    });
-
-                });
-            });
-
-            // 🔥 CLEAN DISPLAY LABELS
-            const nodes = Array.from(nodeSet).map(n => ({
-                name: n,
-                label: {
-                    formatter: function () {
-                        return n.includes("_") ? n.split("_").slice(1).join("_") : n;
-                    }
-                }
-            }));
-
-            var chartDom = document.getElementById("sankeyChart");
-
-            if (!chartDom) return;
-
-            var chart = echarts.init(chartDom);
-
-            chart.setOption({
-                tooltip: {
-                    trigger: "item",
-                    formatter: function (params) {
-
-                        if (params.dataType === "node") {
-
-                            let name = params.data.name;
-
-                            // 🔥 get real module name
-                            let key = name.includes("_") ? name.split("_")[1] : name;
-
-                            const total = totalMap[key] || totalMap[name] || 0;
-
-                            return key + " TOTAL : " + total;
-                        }
-
-                        return params.data.source + " → " + params.data.target + " : " + params.data.value;
-                    }
-                },
-                series: [{
-                    type: "sankey",
-                    nodeAlign: "left",
-                    data: nodes,
-                    links: links,
-                    lineStyle: { curveness: 0.5 },
-                    emphasis: { focus: "adjacency" }
-                }]
-            });
-
-        })
-        .catch(err => {
-            console.error("SANKEY ERROR:", err);
-        });
-}
+  # Authentication Service
+  - name: customui-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: xs-security.json
