@@ -1,87 +1,40 @@
-_schema-version: "3.2"
-ID: customui
-description: React UI deployment
-version: 1.0.4
-
-modules:
-
-  # React HTML5 module
-  - name: customui
-    type: html5
-    path: app/customui
-    build-parameters:
-      builder: custom
-      commands:
-        - npm install
-        - npm run build
-      build-result: build
-      supported-platforms: []
-
-  # Content deployer module
-  - name: customui-app-content
-    type: com.sap.application.content
-    path: .
-    requires:
-      - name: customui-repo-host
-        parameters:
-          content-target: true
-    build-parameters:
-      build-result: resources
-      requires:
-        - name: customui
-          artifacts:
-            - customui.zip
-          target-path: resources/
-
-  # Destination configuration module
-  - name: customui-destination-content
-    type: com.sap.application.content
-    requires:
-      - name: customui-destination-service
-        parameters:
-          content-target: true
-      - name: customui-auth
-      - name: customui-repo-host
-    parameters:
-      content:
-        instance:
-          destinations:
-            - Name: customui_html5_repo_runtime
-              ServiceInstanceName: customui-html5-runtime
-              ServiceKeyName: customui-repo-host-key
-              sap.cloud.service: customui
-          existing_destinations_policy: update
-    build-parameters:
-      no-source: true
-
-resources:
-
-  # HTML5 Repo Host
-  - name: customui-repo-host
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: html5-apps-repo
-      service-plan: app-host
-      service-name: customui-html5-service
-
-  # HTML5 Repo Runtime
-  - name: customui-html5-runtime
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: html5-apps-repo
-      service-plan: app-runtime
-
-  # Destination Service
-  - name: customui-destination-service
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: destination
-      service-plan: lite
-
-  # Authentication Service
-  - name: customui-auth
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      path: xs-security.json
+{
+  "name": "customui",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^13.5.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "build:cf": "npm run build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
