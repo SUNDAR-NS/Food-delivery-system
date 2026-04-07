@@ -1,130 +1,81 @@
-_schema-version: "3.2"
-ID: customui
-description: React UI deployment
-version: 1.0.4
+cf deploy /home/user/projects/customui/mta_archives/customui_1.0.4.mtar -f
 
-modules:
+Deploying multi-target app archive /home/user/projects/customui/mta_archives/customui_1.0.4.mtar in org Standard Chartered Bank_core-foundational-12982zqn / space CAPM_FIORI as ns.sundar@sc.com...
 
-  # React HTML5 module
-  - name: customui
-    type: html5
-    path: app/customui
-    build-parameters:
-      builder: custom
-      commands:
-        - npm install
-        - npm run build
-      build-result: build
-      supported-platforms: []
+Executing action "abort" on operation e0c64528-3287-11f1-b872-eeee0a8e2c64...
+OK
+Uploading 1 files...
+  /home/user/projects/customui/mta_archives/customui_1.0.4.mtar
 
-  # Content deployer module
-  - name: customui-app-content
-    type: com.sap.application.content
-    path: .
-    requires:
-      - name: customui-repo-host
-        parameters:
-          content-target: true
-    build-parameters:
-      build-result: build
-      requires:
-        - name: customui
-          artifacts:
-            - customui.zip
-          target-path: resources/
+ 0s  0 B / 298.00 KiB    0.00%
+ 0s  298.00 KiB / 298.00 KiB  100.00%
+ 0s  298.00 KiB / 298.00 KiB  100.00% 0s
+OK
+Operation ID: dfffab05-3290-11f1-aafc-eeee0a9b1301
+Deploying in org "Standard Chartered Bank_core-foundational-12982zqn" and space "CAPM_FIORI"
+Detected MTA schema version: "3"
+Detected deployed MTA with ID "customui" and version "1.0.4"
+Detected new MTA version: "1.0.4"
+Deployed MTA version: "1.0.4"
+Processing service "customui-html5-service"...
+Processing service "customui-html5-runtime"...
+Processing service "customui-destination-service"...
+Processing service "customui-auth"...
+Setting service "customui-auth" parameters from "xs-security.json"
+Updating service "customui-auth"...
+1 of 1 done
+Service key "customui-app-content-customui-repo-host-credentials" for service "customui-html5-service" already exists
+Uploading content module "customui-app-content" in target service "customui-repo-host"...
+Deploying content module "customui-app-content" in target service "customui-repo-host"...
+[customui-app-content] [ERROR] Upload application content failed { CODE: '1001' } validation error: Missing sap.app object in manifest.json
+Error checking status of content deployment from module "customui-app-content" in content service "customui-repo-host": Content deployment for module "customui-app-content" failed due to invalid content. Download the logs "customui-app-content_customui-repo-host" via the dmol command and check them for more information. 
+Process failed.
+Use "cf deploy -i dfffab05-3290-11f1-aafc-eeee0a9b1301 -a abort" to abort the process.
+Use "cf deploy -i dfffab05-3290-11f1-aafc-eeee0a9b1301 -a retry" to retry the process.
+Use "cf dmol -i dfffab05-3290-11f1-aafc-eeee0a9b1301" to download the logs of the process.
+Exit error code: 1
 
-  # Destination configuration module
-  - name: customui-destination-content
-    type: com.sap.application.content
-    requires:
-      - name: customui-destination-service
-        parameters:
-          content-target: true
-      - name: customui-auth
-      - name: customui-repo-host
-    parameters:
-      content:
-        instance:
-          destinations:
-            - Name: customui_html5_repo_runtime
-              ServiceInstanceName: customui-html5-runtime
-              ServiceKeyName: customui-repo-host-key
-              sap.cloud.service: customui
-          existing_destinations_policy: update
-    build-parameters:
-      no-source: true
-
-resources:
-
-  # HTML5 Repo Host
-  - name: customui-repo-host
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: html5-apps-repo
-      service-plan: app-host
-      service-name: customui-html5-service
-
-  # HTML5 Repo Runtime
-  - name: customui-html5-runtime
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: html5-apps-repo
-      service-plan: app-runtime
-
-  # Destination Service
-  - name: customui-destination-service
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: destination
-      service-plan: lite
-
-  # Authentication Service
-  - name: customui-auth
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      path: xs-security.json
+ *  Terminal will be reused by tasks, press any key to close it.
 
 
 
-{
-  "name": "customui",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^13.5.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build && cd build && zip -r ../customui.zip . && cp -f ../customui.zip /home/user/projects/customui/resources/ || true",
-    "build:cf": "npm run build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
-}
+
+cf oauth-token
+bearer eyJqa3UiOiJodHRwczovL3VhYS5jZi5hcDExLmhhbmEub25kZW1hbmQuY29tL3Rva2VuX2tleXMiLCJraWQiOiJrZXktMSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjOWI3YzI2Zi1kZDkwLTQ3NTMtYjhlYi1lMzRhMzRhZmM3YTYiLCJ1c2VyX25hbWUiOiJucy5zdW5kYXJAc2MuY29tIiwib3JpZ2luIjoic2FwLmRldmN1c3RvbS1wbGF0Zm9ybSIsImlzcyI6Imh0dHBzOi8vdWFhLmNmLmFwMTEuaGFuYS5vbmRlbWFuZC5jb20vb2F1dGgvdG9rZW4iLCJyZXZvY2FibGUiOnRydWUsImNsaWVudF9pZCI6ImNmIiwiYXVkIjpbImNsb3VkX2NvbnRyb2xsZXIiLCJwYXNzd29yZCIsIm9wZW5pZCIsInVhYSIsImNmIl0sInppZCI6InVhYSIsImdyYW50X3R5cGUiOiJwYXNzd29yZCIsInVzZXJfaWQiOiJjOWI3YzI2Zi1kZDkwLTQ3NTMtYjhlYi1lMzRhMzRhZmM3YTYiLCJhenAiOiJjZiIsInNjb3BlIjpbImNsb3VkX2NvbnRyb2xsZXIucmVhZCIsInBhc3N3b3JkLndyaXRlIiwiY2xvdWRfY29udHJvbGxlci53cml0ZSIsIm9wZW5pZCIsInVhYS51c2VyIl0sImV4cCI6MTc3NTU3NDMwNywiaWF0IjoxNzc1NTczMTA3LCJqdGkiOiJkMGQ3YzEyZWYyODg0Nzk4YjllOWZmMDcwZWVmZjlmNiIsImVtYWlsIjoibnMuc3VuZGFyQHNjLmNvbSIsInJldl9zaWciOiJjYTQ2MTgwNSIsImNsaWVudF9hdXRoX21ldGhvZCI6Im5vbmUiLCJjaWQiOiJjZiJ9.Zo71nX7hpSR_PctEqWc0O582GUwpxQy0ISu-vbwDrMyVJjKYaSCUy0d52vtafbvK8E2ZahVX6tHUfofG8l7oHUtpCVRdqEZJBKVyYl_rakNJbCuuhwLvYJnRdnNT9KsYAL0FMop-oSqm2ftvojGB_adlGp4WSwmf1kMBLAtuqlYlDFrvuaZCu8drJo0bZl0QkAjm0q-Y7I-lbZI-4hDa5A3ydDN2GJjnS8zxHcLUU9QWQEAiSDZz4gDcknnCjr0rseFI07SF0OWz4LQSO2CRAdoYxlBC5Gc2E5nM-LQBE8G6QgqE2zF2z3ckUNpNliyBS8W6FCbQ4--DPvQBzbIYuA
+cf deploy /home/user/projects/customui/mta_archives/customui_1.0.4.mtar -f
+Deploying multi-target app archive /home/user/projects/customui/mta_archives/customui_1.0.4.mtar in org Standard Chartered Bank_core-foundational-12982zqn / space CAPM_FIORI as ns.sundar@sc.com...
+
+Executing action "abort" on operation e0c64528-3287-11f1-b872-eeee0a8e2c64...
+OK
+Uploading 1 files...
+  /home/user/projects/customui/mta_archives/customui_1.0.4.mtar
+
+ 0s  0 B / 298.00 KiB    0.00%
+ 0s  298.00 KiB / 298.00 KiB  100.00%
+ 0s  298.00 KiB / 298.00 KiB  100.00% 0s
+OK
+Operation ID: dfffab05-3290-11f1-aafc-eeee0a9b1301
+Deploying in org "Standard Chartered Bank_core-foundational-12982zqn" and space "CAPM_FIORI"
+Detected MTA schema version: "3"
+Detected deployed MTA with ID "customui" and version "1.0.4"
+Detected new MTA version: "1.0.4"
+Deployed MTA version: "1.0.4"
+Processing service "customui-html5-service"...
+Processing service "customui-html5-runtime"...
+Processing service "customui-destination-service"...
+Processing service "customui-auth"...
+Setting service "customui-auth" parameters from "xs-security.json"
+Updating service "customui-auth"...
+1 of 1 done
+Service key "customui-app-content-customui-repo-host-credentials" for service "customui-html5-service" already exists
+Uploading content module "customui-app-content" in target service "customui-repo-host"...
+Deploying content module "customui-app-content" in target service "customui-repo-host"...
+[customui-app-content] [ERROR] Upload application content failed { CODE: '1001' } validation error: Missing sap.app object in manifest.json
+Error checking status of content deployment from module "customui-app-content" in content service "customui-repo-host": Content deployment for module "customui-app-content" failed due to invalid content. Download the logs "customui-app-content_customui-repo-host" via the dmol command and check them for more information. 
+Process failed.
+Use "cf deploy -i dfffab05-3290-11f1-aafc-eeee0a9b1301 -a abort" to abort the process.
+Use "cf deploy -i dfffab05-3290-11f1-aafc-eeee0a9b1301 -a retry" to retry the process.
+Use "cf dmol -i dfffab05-3290-11f1-aafc-eeee0a9b1301" to download the logs of the process.
+Exit error code: 1
+
+
