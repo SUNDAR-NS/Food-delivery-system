@@ -1,8 +1,52 @@
-TC 1 : in Valid from column the values with millisecond should be considered & the same should be reflected in Hana table
+function convertTimestamp(value) {
+  if (!value) return "";
 
-TC 2 : Capture values with milliseconds (more than 3 decimals) .
-Sample  : 2025-10-16 17:30:00.4612345
- 
-TC3: Capture values without/0 milliseconds
-Sample  2025-07-22 17:30:00.0000000
- 
+  // ✅ STRING → PRESERVE EXACT VALUE
+  if (typeof value === "string") {
+    const str = value.trim();
+
+    // Match: yyyy-MM-dd HH:mm:ss(. or :)fraction
+    const match = str.match(
+      /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})[.:](\d+)$/
+    );
+
+    if (match) {
+      const base = match[1];
+      const fraction = match[2]; // keep EXACT (any length)
+
+      return `${base}:${fraction}`; // ✅ no loss
+    }
+
+    // No milliseconds
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(str)) {
+      return `${str}:0000000`; // ✅ TC3
+    }
+
+    return "";
+  }
+
+  // ✅ NUMBER (Excel fallback)
+  if (typeof value === "number") {
+    const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+    const date = new Date(excelEpoch.getTime() + value * 86400000);
+
+    if (isNaN(date.getTime())) return "";
+
+    const yyyy = date.getUTCFullYear();
+    const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(date.getUTCDate()).padStart(2, "0");
+
+    const hh = String(date.getUTCHours()).padStart(2, "0");
+    const mi = String(date.getUTCMinutes()).padStart(2, "0");
+    const ss = String(date.getUTCSeconds()).padStart(2, "0");
+
+    const ms = date.getUTCMilliseconds();
+
+    // convert to 7 digits (client expects)
+    const fraction = String(ms * 10000).padStart(7, "0");
+
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}:${fraction}`;
+  }
+
+  return "";
+}
