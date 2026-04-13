@@ -1,106 +1,81 @@
-_schema-version: "3.3.0"
-ID: reactui
-version: 1.0.0
-description: A simple React project
+const cds = require('@sap/cds');
+module.exports = cds.service.impl(async function () {
 
-modules:
+  this.on('READ', 'DummyUsers', async () => {
+    return [
+      { id: 1, name: 'User1' },
+      { id: 2, name: 'User2' }
+    ];
+  });
+});
 
-  # HTML5 Module
-  - name: reactui
-    type: html5
-    path: app/reactui
-    build-parameters:
-      builder: custom
-      commands:
-        - npm install
-        - npm run build
-      build-result: build
-      supported-platforms: []
 
-  # App Router Module
-  - name: react-approuter
-    type: approuter.nodejs
-    path: app/router
-    requires:
-      - name: reactui-uaa
-      - name: reactui-destination-service
+using {dummy.backend as dummy} from '../db/schema.cds';
 
-  # HTML5 App Content Deployer
-  - name: reactui-app-content
-    type: com.sap.application.content
-    path: .
-    requires:
-      - name: reactui-repo-host
-        parameters:
-          content-target: true
-    build-parameters:
-      build-result: resources
-      requires:
-        - name: reactui
-          artifacts:
-            - reactui.zip
-          target-path: resources/
+@protocol: 'rest'
+service UserService {
 
-  # Destination Content Deployer
-  - name: reactui-destination-content
-    type: com.sap.application.content
-    requires:
-      - name: reactui-destination-service
-        parameters:
-          content-target: true
+  @requires: 'authenticated-user'
+  entity DummyUsers as projection on dummy.DummyUsers;
+}
 
-      - name: reactui-uaa
-        parameters:
-          service-key:
-            name: reactui-uaa-key
 
-      - name: reactexperienceapp-auth
+// /rest/user/DummyUsers
 
-    parameters:
-      content:
-        subaccount:
-          existing_destinations_policy: update
-          destinations:
-            - Name: reactexperienceapp-destination-service
-              URL: https://standard-chartered-bank-core-foundational-12982zqn-capm75926b0b.cfapps.ap11.hana.ondemand.com
-              Authentication: OAuth2UserTokenExchange
-              forwardAuthToken: true
-              ServiceInstanceName: reactexperienceapp-auth
 
-    build-parameters:
-      no-source: true
+namespace dummy.backend;
 
-resources:
+entity DummyUsers {
+    key ID : Integer;
+        name : String;
+        email: String;
+}
 
-  # HTML5 Repo Host
-  - name: reactui-repo-host
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: html5-apps-repo
-      service-name: reactui-html5-service
-      service-plan: app-host
 
-  # Destination Service
-  - name: reactui-destination-service
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: destination
-      service-name: reactui-destination-service
-      service-plan: lite
-      config:
-        HTML5Runtime_enabled: true
-        deploy_mode: html5-repo
-        enable-parallel-deployments: true
+import React, { useState } from "react";
+import axios from "axios";
 
-  # React UI XSUAA
-  - name: reactui-uaa
-    type: org.cloudfoundry.managed-service
-    parameters:
-      path: ./xs-security.json
-      service: xsuaa
-      service-name: reactui-xsuaa-service
-      service-plan: application
+function App() {
 
-  # Existing CAP Backend Auth Service
-  - name: reactexperienceapp-auth
-    type: org.cloudfoundry.existing-service
+  const [users, setUsers] = useState([]);
+
+  const loadUsers = async () => {
+    const res = await axios.get("/rest/UserService/DummyUsers");
+    setUsers(res.data);
+  };
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h2>CAP React App</h2>
+
+      <button onClick={loadUsers}>
+        Load Users
+      </button>
+
+      <br/><br/>
+
+      {users.map(u => (
+        <div key={u.id}>
+          {u.id} - {u.name}
+        </div>
+      ))}
+
+    </div>
+  );
+}
+
+export default App;
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/rest/(.*)$",
+      "target": "/$1",
+      "destination": "reactexperienceapp-destination-service",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}
