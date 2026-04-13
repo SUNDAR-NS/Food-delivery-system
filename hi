@@ -1,1 +1,17 @@
-https://standard-chartered-bank-core-foundational-12982zqn-capm3524e849.cfapps.ap11.hana.ondemand.com
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/rest/(.*)$",
+      "target": "/$1",
+      "destination": "reactexperienceapp-destination-service",
+      "authenticationType": "xsuaa"
+    },
+    {
+      "source": "^(.*)$",
+      "localDir": "../reactui/build",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}
