@@ -92,3 +92,123 @@ resources:
 
 
 
+
+
+
+
+
+user: reactui_1 $ cf env react-approuter
+Getting env variables for app react-approuter in org Standard Chartered Bank_core-foundational-12982zqn / space CAPM_FIORI as ns.sundar@sc.com...
+System-Provided:
+VCAP_SERVICES: {
+  "destination": [
+    {
+      "binding_guid": "641a1292-7b8d-4e41-9f5d-b0f331410498",
+      "binding_name": null,
+      "credentials": {
+        "clientid": "sb-clone2df434b008af4917a34a69e4a5db9286!b5156|destination-xsappname!b5",
+        "clientsecret": "641a1292-7b8d-4e41-9f5d-b0f331410498$aJLwQUZ4bHVBB0irbSbhr5H8bk0uQLHB7ehEAqsu24k=",
+        "credential-type": "binding-secret",
+        "identityzone": "core-foundational-12982zqn",
+        "instanceid": "2df434b0-08af-4917-a34a-69e4a5db9286",
+        "tenantid": "a4858a1d-5361-433e-953b-3b1af8d72b3c",
+        "tenantmode": "dedicated",
+        "token-type": [
+          "xsuaa",
+          "ias"
+        ],
+        "uaadomain": "authentication.ap11.hana.ondemand.com",
+        "uri": "https://destination-configuration.cfapps.ap11.hana.ondemand.com",
+        "url": "https://core-foundational-12982zqn.authentication.ap11.hana.ondemand.com",
+        "verificationkey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsAk3ulGEWVTRpSNNhvsX\nysPE82Xn7ZQIyWE0NX8+QHPD4jlLRXIRcgvsEN2jtZJk0v10iFvw3ul+slK9lKkG\ni8t1BZvXgrbeeY3mjRmc7R0GQk/7EV2Kw2ydAKlCgBNMQFGL1lOy1jOaynpihMI9\nftL3vSBekWXFYXuqnIw9xlevKREgvw2iAqyWjDe33jxidsrjNP7ywxnMBa9YcoDf\n0vdkEJD3qEkyAB9gbpDQvLu+Wuq7Sn669ByjTFaKblBx0qfgN3e+dZ8tOvgcPJqO\nUXye/cj6CX4QXiOwusAcDNUXFhM+T8qghf6yHknGc6xX3kW1nQ2VK/HK73aS6JPf\nXwIDAQAB\n-----END PUBLIC KEY-----",
+        "xsappname": "clone2df434b008af4917a34a69e4a5db9286!b5156|destination-xsappname!b5"
+      },
+      "instance_guid": "2df434b0-08af-4917-a34a-69e4a5db9286",
+      "instance_name": "reactui-destination-service",
+      "label": "destination",
+      "name": "reactui-destination-service",
+      "plan": "lite",
+      "provider": null,
+      "syslog_drain_url": null,
+      "tags": [
+        "destination",
+        "conn",
+        "connsvc"
+      ],
+      "volume_mounts": []
+    }
+  ],
+  "xsuaa": [
+    {
+      "binding_guid": "03584c86-be04-4418-9afe-0c37edb9469d",
+      "binding_name": null,
+      "credentials": {
+        "apiurl": "https://api.authentication.ap11.hana.ondemand.com",
+        "clientid": "sb-reactui!t5156",
+        "clientsecret": "03584c86-be04-4418-9afe-0c37edb9469d$U_u4jNVlntWfvCgGd93-k7NfSSyEpSPmGqKf31ZfVaI=",
+        "credential-type": "binding-secret",
+        "identityzone": "core-foundational-12982zqn",
+        "identityzoneid": "a4858a1d-5361-433e-953b-3b1af8d72b3c",
+        "sburl": "https://internal-xsuaa.authentication.ap11.hana.ondemand.com",
+        "serviceInstanceId": "aa1af9be-e2da-47fe-a235-7eee0676db9a",
+        "subaccountid": "a4858a1d-5361-433e-953b-3b1af8d72b3c",
+        "tenantid": "a4858a1d-5361-433e-953b-3b1af8d72b3c",
+        "tenantmode": "dedicated",
+        "uaadomain": "authentication.ap11.hana.ondemand.com",
+        "url": "https://core-foundational-12982zqn.authentication.ap11.hana.ondemand.com",
+        "verificationkey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsAk3ulGEWVTRpSNNhvsX\nysPE82Xn7ZQIyWE0NX8+QHPD4jlLRXIRcgvsEN2jtZJk0v10iFvw3ul+slK9lKkG\ni8t1BZvXgrbeeY3mjRmc7R0GQk/7EV2Kw2ydAKlCgBNMQFGL1lOy1jOaynpihMI9\nftL3vSBekWXFYXuqnIw9xlevKREgvw2iAqyWjDe33jxidsrjNP7ywxnMBa9YcoDf\n0vdkEJD3qEkyAB9gbpDQvLu+Wuq7Sn669ByjTFaKblBx0qfgN3e+dZ8tOvgcPJqO\nUXye/cj6CX4QXiOwusAcDNUXFhM+T8qghf6yHknGc6xX3kW1nQ2VK/HK73aS6JPf\nXwIDAQAB\n-----END PUBLIC KEY-----",
+        "xsappname": "reactui!t5156",
+        "zoneid": "a4858a1d-5361-433e-953b-3b1af8d72b3c"
+      },
+      "instance_guid": "aa1af9be-e2da-47fe-a235-7eee0676db9a",
+      "instance_name": "reactui-xsuaa-service",
+      "label": "xsuaa",
+      "name": "reactui-xsuaa-service",
+      "plan": "application",
+      "provider": null,
+      "syslog_drain_url": null,
+      "tags": [
+        "xsuaa"
+      ],
+      "volume_mounts": []
+    }
+  ]
+}
+
+
+VCAP_APPLICATION: {
+  "application_id": "b6596981-db8d-4b81-a0c5-57342625d2b7",
+  "application_name": "react-approuter",
+  "application_uris": [
+    "standard-chartered-bank-core-foundational-12982zqn-capm3524e849.cfapps.ap11.hana.ondemand.com"
+  ],
+  "cf_api": "https://api.cf.ap11.hana.ondemand.com",
+  "limits": {
+    "fds": 32768
+  },
+  "name": "react-approuter",
+  "organization_id": "26c32e52-821c-44fe-90a6-8fd81e52940d",
+  "organization_name": "Standard Chartered Bank_core-foundational-12982zqn",
+  "space_id": "d6431333-7338-4365-a0f9-ec6be8ad78c8",
+  "space_name": "CAPM_FIORI",
+  "uris": [
+    "standard-chartered-bank-core-foundational-12982zqn-capm3524e849.cfapps.ap11.hana.ondemand.com"
+  ],
+  "users": null
+}
+
+
+User-Provided:
+DEPLOY_ATTRIBUTES: {
+  "app-content-digest" : "AAE20025FD9460A2C4934F53C4708E5D"
+}
+destinations: [ {
+  "name" : "reactui-destination-service"
+} ]
+
+Running Environment Variable Groups:
+LOG4J_FORMAT_MSG_NO_LOOKUPS: true
+
+Staging Environment Variable Groups:
+LOG4J_FORMAT_MSG_NO_LOOKUPS: true
+
