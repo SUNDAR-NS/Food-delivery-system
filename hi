@@ -1,505 +1,141 @@
-user: reactui $ cf logs react-approuter --recent | grep ERR
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:28:37.00+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:28:37.01+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:28:37.01+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:28:37.01+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:28:37.01+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:28:37.01+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:28:49.29+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:28:49.31+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:28:49.31+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:28:49.31+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:28:49.31+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:28:49.31+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:29:00.91+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:29:00.93+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:29:00.93+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:29:00.93+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:29:00.93+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:29:00.93+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:29:52.64+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:29:52.65+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:29:52.65+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:29:52.65+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:29:52.65+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:29:52.65+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:30:24.57+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:30:24.58+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:30:24.58+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:30:24.58+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:30:24.58+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:30:24.58+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:30:35.94+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:30:35.95+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:30:35.95+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:30:35.95+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:30:35.95+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:30:35.95+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:30:45.62+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:30:45.64+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:30:45.64+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:30:45.64+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:30:45.64+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:30:45.64+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:31:07.15+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:31:07.17+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:31:07.17+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:31:07.17+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:31:07.17+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:31:07.17+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:31:19.52+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:31:19.54+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:31:19.54+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:31:19.54+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:31:19.54+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:31:19.54+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:31:30.89+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:31:30.91+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:31:30.91+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:31:30.91+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:31:30.91+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:31:30.91+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:31:46.68+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:31:46.69+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:31:46.69+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:31:46.69+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:31:46.69+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:31:46.69+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:31:58.41+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:31:58.42+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:31:58.42+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:31:58.42+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:31:58.42+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:31:58.42+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:32:08.40+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:32:08.41+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:32:08.41+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:32:08.41+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:32:08.41+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:32:08.41+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:32:25.96+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:32:25.97+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:32:25.97+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:32:25.97+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:32:25.97+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:32:25.97+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:32:37.06+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:32:37.07+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:32:37.07+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:32:37.07+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:32:37.07+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:32:37.07+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:32:49.01+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:32:49.02+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:32:49.02+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:32:49.02+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:32:49.02+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:32:49.02+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:33:56.20+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:33:56.20+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:33:56.20+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:33:56.21+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:33:56.22+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:33:56.22+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:33:56.22+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:33:56.22+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:33:56.22+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/0: Format validation failed (A route requires access to CAP_BACKEND_API service but the service is not bound.)
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/0: Format validation failed (A route requires access to CAP_BACKEND_API service but the service is not bound.)',
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:35:03.84+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:35:03.86+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:35:03.86+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:35:03.86+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:35:03.86+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:35:03.86+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/0: Format validation failed (A route requires access to CAP_BACKEND_API service but the service is not bound.)
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/0: Format validation failed (A route requires access to CAP_BACKEND_API service but the service is not bound.)',
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:35:15.94+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:35:15.96+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:35:15.96+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:35:15.96+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:35:15.96+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:35:15.96+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/0: Format validation failed (A route requires access to CAP_BACKEND_API service but the service is not bound.)
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/0: Format validation failed (A route requires access to CAP_BACKEND_API service but the service is not bound.)',
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:35:27.83+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:35:27.84+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:35:27.84+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:35:27.84+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:35:27.84+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:35:27.84+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/0: Format validation failed (A route requires access to CAP_BACKEND_API service but the service is not bound.)
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/0: Format validation failed (A route requires access to CAP_BACKEND_API service but the service is not bound.)',
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T07:36:28.55+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T07:36:28.57+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T07:36:28.57+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T07:36:28.57+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T07:36:28.57+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T07:36:28.57+0000 [APP/PROC/WEB/0] ERR npm notice
+_schema-version: "3.3.0"
+ID: reactui
+version: 1.0.0
+description: A simple React project
+
+modules:
+# HTML5 module
+- name: reactui
+  type: html5
+  path: app/reactui
+  build-parameters:
+    builder: custom
+    commands:
+      - npm install
+      - npm run build
+    build-result: build
+    supported-platforms: []
+
+- name: react-approuter
+  type: approuter.nodejs
+  path: app/router
+  requires:
+    - name: reactui-uaa
+    - name: reactui-destination-service
+
+# Content deployer module
+- name: reactui-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+    - name: reactui-repo-host
+      parameters:
+        content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+      - name: reactui
+        artifacts:
+          - reactui.zip
+        target-path: resources/
+
+- name: reactui-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: reactui-destination-service
+    parameters:
+      content-target: true
+  - name: reactui-uaa
+    parameters:
+      service-key:
+        name: reactui-uaa-key
+  parameters:
+    content:
+      subaccount:
+        destinations:
+        - Name: reactexperienceapp-destination-service
+          Type: HTTP
+          URL: https://standard-chartered-bank-core-foundational-12982zqn-capm75926b0b.cfapps.ap11.hana.ondemand.com
+          Authentication: OAuth2UserTokenExchange
+          ProxyType: Internet
+          forwardAuthToken: true
+  build-parameters:
+    no-source: true
+
+resources:
+  - name: reactui-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: reactui-html5-service
+      service-plan: app-host
+
+  - name: reactui-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-name: reactui-destination-service
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: true
+        deploy_mode: html5-repo
+        enable-parallel-deployments: true
+
+  - name: reactui-uaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      path: ./xs-security.json
+      service: xsuaa
+      service-name: reactui-xsuaa-service
+      service-plan: application
+
+
+
+
+
+
+
+
+
+_schema-version: 3.3.0
+ID: reactexperienceapp
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+modules:
+  - name: reactexperienceapp-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm-ci
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: reactexperienceapp-auth
+
+resources:
+  - name: reactexperienceapp-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: reactexperienceapp
+        tenant-mode: dedicated
+        oauth2-configuration:
+          credential-types:
+            - "binding-secret"
+            - "x509"
