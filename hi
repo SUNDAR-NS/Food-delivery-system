@@ -1,313 +1,53 @@
-user: reactui $ cf logs react-approuter --recent | grep ERR
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/0: Format validation failed (A route requires access to CAP_BACKEND_API service but the service is not bound.)
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/0: Format validation failed (A route requires access to CAP_BACKEND_API service but the service is not bound.)',
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:09:58.77+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:09:58.78+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:09:58.78+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:09:58.78+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:09:58.78+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:09:58.78+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:22:10.02+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:22:10.03+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:22:10.03+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:22:10.03+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:22:10.03+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:22:10.03+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:22:21.51+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:22:21.53+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:22:21.53+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:22:21.53+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:22:21.53+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:22:21.53+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:22:33.80+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:22:33.82+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:22:33.82+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:22:33.82+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:22:33.82+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:22:33.82+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:22:53.26+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:22:53.27+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:22:53.27+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:22:53.27+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:22:53.27+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:22:53.27+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:23:04.75+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:23:04.77+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:23:04.77+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:23:04.77+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:23:04.77+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:23:04.77+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:23:16.54+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:23:16.55+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:23:16.55+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:23:16.55+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:23:16.55+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:23:16.55+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:23:32.46+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:23:32.47+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:23:32.47+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:23:32.47+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:23:32.47+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:23:32.47+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:23:44.98+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:23:45.00+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:23:45.00+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:23:45.00+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:23:45.00+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:23:45.00+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:23:54.75+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:23:54.76+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:23:54.76+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:23:54.76+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:23:54.76+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:23:54.76+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:24:11.88+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:24:11.90+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:24:11.90+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:24:11.90+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:24:11.90+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:24:11.90+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:24:24.05+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:24:24.06+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:24:24.06+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:24:24.06+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:24:24.06+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:24:24.06+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR ^
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR VError: xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR at Object.validateXsApp (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:162:15)
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR at exports.loadConfiguration (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/app-config.js:21:14)
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:24:34)
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6)
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR at Module._compile (node:internal/modules/cjs/loader:1706:14)
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR at Object..js (node:internal/modules/cjs/loader:1839:10)
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR at Module.load (node:internal/modules/cjs/loader:1441:32) {
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'xs-app.json/routes/1: Format validation failed (/home/vcap/reactui/build is not a directory)',
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR jse_info: {},
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR }
-   2026-04-13T08:24:36.19+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
-   2026-04-13T08:24:36.20+0000 [APP/PROC/WEB/0] ERR npm notice
-   2026-04-13T08:24:36.20+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
-   2026-04-13T08:24:36.20+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
-   2026-04-13T08:24:36.20+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
-   2026-04-13T08:24:36.20+0000 [APP/PROC/WEB/0] ERR npm notice
+cf deploy /home/user/projects/reactui_1/mta_archives/reactui_1.0.0.mtar -f
+
+Deploying multi-target app archive /home/user/projects/reactui_1/mta_archives/reactui_1.0.0.mtar in org Standard Chartered Bank_core-foundational-12982zqn / space CAPM_FIORI as ns.sundar@sc.com...
+
+Executing action "abort" on operation a4c261b6-3711-11f1-aced-eeee0a8701c0...
+OK
+Uploading 1 files...
+  /home/user/projects/reactui_1/mta_archives/reactui_1.0.0.mtar
+
+ 0s  0 B / 6.69 MiB    0.00%
+ 0s  6.69 MiB / 6.69 MiB  100.00%
+ 0s  6.69 MiB / 6.69 MiB  100.00%
+ 0s  6.69 MiB / 6.69 MiB  100.00% 0s
+OK
+Operation ID: 09b72688-3713-11f1-9679-eeee0a816643
+Deploying in org "Standard Chartered Bank_core-foundational-12982zqn" and space "CAPM_FIORI"
+Detected MTA schema version: "3"
+Detected deployed MTA with ID "reactui" and version "1.0.0"
+Detected new MTA version: "1.0.0"
+Deployed MTA version: "1.0.0"
+Processing service "reactui-xsuaa-service"...
+Setting service "reactui-xsuaa-service" parameters from "xs-security.json"
+Updating service "reactui-xsuaa-service"...
+Processing service "reactui-html5-service"...
+Processing service "reactui-destination-service"...
+Updating service "reactui-destination-service"...
+1 of 1 done
+1 of 1 done
+Updating application "react-approuter"...
+Unbinding service instance "reactui-xsuaa-service" from application "react-approuter"...
+Unbinding service instance "reactui-destination-service" from application "react-approuter"...
+Binding service instance "reactui-xsuaa-service" to application "react-approuter"...
+Binding service instance "reactui-destination-service" to application "react-approuter"...
+Uploading application "react-approuter"...
+Started async upload of application "react-approuter"
+Stopping application "react-approuter"...
+Staging application "react-approuter"...
+Application "react-approuter" staged
+Starting application "react-approuter"...
+Application "react-approuter" started and available at "standard-chartered-bank-core-foundational-12982zqn-capm3524e849.cfapps.ap11.hana.ondemand.com"
+Creating service key "reactui-app-content-reactui-repo-host-credentials" for service instance "reactui-html5-service"...
+Uploading content module "reactui-app-content" in target service "reactui-repo-host"...
+Deploying content module "reactui-app-content" in target service "reactui-repo-host"...
+Creating service key "reactui-destination-content-reactui-destination-service-credentials" for service instance "reactui-destination-service"...
+Creating service key "reactui-uaa-key" for service instance "reactui-xsuaa-service"...
+Deploying content module "reactui-destination-content" in target service "reactui-destination-service"...
+[reactui-destination-content] [ERROR] Missing destination property [ServiceInstanceName] in destination reactexperienceapp-destination-service
+Content deployment for module "reactui-destination-content" to resource "reactui-destination-service" failed: Content deployment for module "reactui-destination-content" failed due to invalid content. Download the logs "reactui-destination-content_reactui-destination-service" via the dmol command and check them for more information. 
+Process failed.
+Use "cf deploy -i 09b72688-3713-11f1-9679-eeee0a816643 -a abort" to abort the process.
+Use "cf deploy -i 09b72688-3713-11f1-9679-eeee0a816643 -a retry" to retry the process.
+Use "cf dmol -i 09b72688-3713-11f1-9679-eeee0a816643" to download the logs of the process.
+Exit error code: 1
