@@ -61,10 +61,8 @@ modules:
         subaccount:
           destinations:
             - Name: reactexperienceapp-destination-service
-              Type: HTTP
               URL: https://standard-chartered-bank-core-foundational-12982zqn-capm75926b0b.cfapps.ap11.hana.ondemand.com
               Authentication: OAuth2UserTokenExchange
-              ProxyType: Internet
               forwardAuthToken: true
               ServiceInstanceName: reactexperienceapp-auth
 
