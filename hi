@@ -4,66 +4,76 @@ version: 1.0.0
 description: A simple React project
 
 modules:
-# HTML5 module
-- name: reactui
-  type: html5
-  path: app/reactui
-  build-parameters:
-    builder: custom
-    commands:
-      - npm install
-      - npm run build
-    build-result: build
-    supported-platforms: []
 
-- name: react-approuter
-  type: approuter.nodejs
-  path: app/router
-  requires:
-    - name: reactui-uaa
-    - name: reactui-destination-service
+  # HTML5 Module
+  - name: reactui
+    type: html5
+    path: app/reactui
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - npm run build
+      build-result: build
+      supported-platforms: []
 
-# Content deployer module
-- name: reactui-app-content
-  type: com.sap.application.content
-  path: .
-  requires:
-    - name: reactui-repo-host
-      parameters:
-        content-target: true
-  build-parameters:
-    build-result: resources
+  # App Router Module
+  - name: react-approuter
+    type: approuter.nodejs
+    path: app/router
     requires:
-      - name: reactui
-        artifacts:
-          - reactui.zip
-        target-path: resources/
+      - name: reactui-uaa
+      - name: reactui-destination-service
 
-- name: reactui-destination-content
-  type: com.sap.application.content
-  requires:
-  - name: reactui-destination-service
+  # HTML5 App Content Deployer
+  - name: reactui-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: reactui-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: reactui
+          artifacts:
+            - reactui.zip
+          target-path: resources/
+
+  # Destination Content Deployer
+  - name: reactui-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: reactui-destination-service
+        parameters:
+          content-target: true
+
+      - name: reactui-uaa
+        parameters:
+          service-key:
+            name: reactui-uaa-key
+
+      - name: reactexperienceapp-auth
+
     parameters:
-      content-target: true
-  - name: reactui-uaa
-    parameters:
-      service-key:
-        name: reactui-uaa-key
-  parameters:
-    content:
-      subaccount:
-        destinations:
-        - Name: reactexperienceapp-destination-service
-          Type: HTTP
-          URL: https://standard-chartered-bank-core-foundational-12982zqn-capm75926b0b.cfapps.ap11.hana.ondemand.com
-          Authentication: OAuth2UserTokenExchange
-          ProxyType: Internet
-          forwardAuthToken: true
-          ServiceInstanceName: reactexperienceapp-auth
-  build-parameters:
-    no-source: true
+      content:
+        subaccount:
+          destinations:
+            - Name: reactexperienceapp-destination-service
+              Type: HTTP
+              URL: https://standard-chartered-bank-core-foundational-12982zqn-capm75926b0b.cfapps.ap11.hana.ondemand.com
+              Authentication: OAuth2UserTokenExchange
+              ProxyType: Internet
+              forwardAuthToken: true
+              ServiceInstanceName: reactexperienceapp-auth
+
+    build-parameters:
+      no-source: true
 
 resources:
+
+  # HTML5 Repo Host
   - name: reactui-repo-host
     type: org.cloudfoundry.managed-service
     parameters:
@@ -71,6 +81,7 @@ resources:
       service-name: reactui-html5-service
       service-plan: app-host
 
+  # Destination Service
   - name: reactui-destination-service
     type: org.cloudfoundry.managed-service
     parameters:
@@ -82,6 +93,7 @@ resources:
         deploy_mode: html5-repo
         enable-parallel-deployments: true
 
+  # React UI XSUAA
   - name: reactui-uaa
     type: org.cloudfoundry.managed-service
     parameters:
@@ -89,3 +101,7 @@ resources:
       service: xsuaa
       service-name: reactui-xsuaa-service
       service-plan: application
+
+  # Existing CAP Backend Auth Service
+  - name: reactexperienceapp-auth
+    type: org.cloudfoundry.existing-service
