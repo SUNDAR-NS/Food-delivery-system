@@ -1,46 +1,91 @@
-user: reactui $ cf services
-Getting service instances in org Standard Chartered Bank_core-foundational-12982zqn / space CAPM_FIORI as ns.sundar@sc.com...
+_schema-version: "3.3.0"
+ID: reactui
+version: 1.0.0
+description: A simple React project
 
-name                                         offering           plan          bound apps                                                                                                                                  last operation     broker                                                               upgrade available
-applogs_fileuploader                         application-logs   lite          SCBFileHub                                                                                                                                  create succeeded   sm-sleeve-broker-736761c5-6981-4b60-a0e3-3156443ef375                no
-applogs_nfrpdashboard                        application-logs   lite          nfrpdashboard                                                                                                                               create succeeded   sm-sleeve-broker-736761c5-6981-4b60-a0e3-3156443ef375                no
-app-runtime-1755157781                       html5-apps-repo    app-runtime                                                                                                                                               create succeeded   sm-html5-apps-repo-sb-71ec0667-b217-4bc8-9d17-276f9d87a071           no
-CLIENTMI_OVERLAY                             user-provided                    T1GDTL_PHY-db                                                                                                                               create succeeded                                                                        
-CloudLogging-Non-prod                        cloud-logging      standard                                                                                                                                                  create succeeded   sm-cloud-logging-8c4f5318-d77c-4b87-91ac-3e3f28fe29d6                no
-customui-destination-service                 destination        lite                                                                                                                                                      update succeeded   sm-destination-service-broker-a222a2f4-6cda-4db1-a7a9-19fae66fa720   no
-customui-html5-service                       html5-apps-repo    app-host                                                                                                                                                  create succeeded   sm-html5-apps-repo-sb-71ec0667-b217-4bc8-9d17-276f9d87a071           no
-customui-xsuaa-service                       xsuaa              application                                                                                                                                               update succeeded   sm-xsuaa-28eb2426-5280-43db-be10-2a623a2521f6                        no
-fileuploader-auth                            xsuaa              application   SCBFileHub                                                                                                                                  update succeeded   sm-xsuaa-28eb2426-5280-43db-be10-2a623a2521f6                        no
-fileuploader-destination-service             destination        lite          SCBFileHub                                                                                                                                  update succeeded   sm-destination-service-broker-a222a2f4-6cda-4db1-a7a9-19fae66fa720   no
-fileuploader-html5-service                   html5-apps-repo    app-host                                                                                                                                                  create succeeded   sm-html5-apps-repo-sb-71ec0667-b217-4bc8-9d17-276f9d87a071           no
-FINSIGHTCOST_OVERLAY                         user-provided                    T1GDTL_PHY-db                                                                                                                               create succeeded                                                                        
-FINSIGHT_TEST                                user-provided                                                                                                                                                                create succeeded                                                                        
-hdi_T1GDTL_PHY-db                            hana               hdi-shared                                                                                                                                                create succeeded   sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-ICON_OVERLAY                                 user-provided                    T1GDTL_PHY-db                                                                                                                               create succeeded                                                                        
-mfu-dashboard-db                             hana               hdi-shared                                                                                                                                                create succeeded   sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-MFU-Dashboard-hdiMFU-Dashboard_db-ws-b7k6x   hana               hdi-shared                                                                                                                                                create succeeded   sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-MFU_Frontend-db                              hana               hdi-shared                                                                                                                                                update succeeded   sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-MFU_Frontend-destination                     destination        lite          MFU_Frontend                                                                                                                                update succeeded   sm-destination-service-broker-a222a2f4-6cda-4db1-a7a9-19fae66fa720   no
-MFU_Frontend-html5-service                   html5-apps-repo    app-host                                                                                                                                                  create succeeded   sm-html5-apps-repo-sb-71ec0667-b217-4bc8-9d17-276f9d87a071           no
-myreactapp-destination-service               destination        lite                                                                                                                                                      update succeeded   sm-destination-service-broker-a222a2f4-6cda-4db1-a7a9-19fae66fa720   no
-myreactapp-html5-service                     html5-apps-repo    app-host                                                                                                                                                  create succeeded   sm-html5-apps-repo-sb-71ec0667-b217-4bc8-9d17-276f9d87a071           no
-myreactapp-xsuaa-service                     xsuaa              application                                                                                                                                               update succeeded   sm-xsuaa-28eb2426-5280-43db-be10-2a623a2521f6                        no
-NFRA_OVERLAY                                 user-provided                    T1GDTL_PHY-db                                                                                                                               create succeeded                                                                        
-nfrpdashboard-auth                           xsuaa              application   nfrpdashboard                                                                                                                               update succeeded   sm-xsuaa-28eb2426-5280-43db-be10-2a623a2521f6                        no
-NfrpDashboard-db                             hana               hdi-shared                                                                                                                                                create succeeded   sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-nfrpdashboard-destination-service            destination        lite          nfrpdashboard                                                                                                                               update succeeded   sm-destination-service-broker-a222a2f4-6cda-4db1-a7a9-19fae66fa720   no
-nfrpdashboard-html5-service                  html5-apps-repo    app-host                                                                                                                                                  create succeeded   sm-html5-apps-repo-sb-71ec0667-b217-4bc8-9d17-276f9d87a071           no
-reactexperienceapp-auth                      xsuaa              application   reactexperienceapp-srv                                                                                                                      update succeeded   sm-xsuaa-28eb2426-5280-43db-be10-2a623a2521f6                        no
-reactui-destination-service                  destination        lite          react-approuter                                                                                                                             update succeeded   sm-destination-service-broker-a222a2f4-6cda-4db1-a7a9-19fae66fa720   no
-reactui-html5-service                        html5-apps-repo    app-host                                                                                                                                                  create succeeded   sm-html5-apps-repo-sb-71ec0667-b217-4bc8-9d17-276f9d87a071           no
-reactui-xsuaa-service                        xsuaa              application   react-approuter                                                                                                                             update succeeded   sm-xsuaa-28eb2426-5280-43db-be10-2a623a2521f6                        no
-SCBI_OVERLAY                                 user-provided                    T1GDTL_PHY-db                                                                                                                               create succeeded                                                                        
-STG_UPS                                      user-provided                                                                                                                                                                create succeeded                                                                        
-T1GDTL_LOG                                   hana               hdi-shared                                                                                                                                                create succeeded   sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-T1GDTL_PHY                                   hana               hdi-shared    SCBFileHub, fileuploader-db-deployer, T1GDTL_PHY-db, MFU_Frontend-db-deployer, MFU_Frontend-srv, nfrpdashboard-db-deployer, nfrpdashboard   update succeeded   sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-T1GDTL_PHY-hdiT1GDTL_PHY-db-ws-cjyzt         hana               hdi-shared                                                                                                                                                create succeeded   sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-T1GDTL_PHY-hdiT1GDTL_PHY-db-ws-gr6w5         hana               hdi-shared                                                                                                                                                create succeeded   sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-T1GDTL_PHY-hdiT1GDTL_PHY_db-ws-k6td0         hana               hdi-shared                                                                                                                                                create succeeded   sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-T1NFRP_PHY                                   hana               hdi-shared                                                                                                                                                create failed      sm-hana-broker-f62c0ba2-fcf0-4b49-9ab8-cbeeae1d08b2                  no
-TREASURY_OVERLAY                             user-provided                    T1GDTL_PHY-db                                                                                                                               create succeeded                                                                        
-user: reactui $ 
+modules:
+# HTML5 module
+- name: reactui
+  type: html5
+  path: app/reactui
+  build-parameters:
+    builder: custom
+    commands:
+      - npm install
+      - npm run build
+    build-result: build
+    supported-platforms: []
+
+- name: react-approuter
+  type: approuter.nodejs
+  path: app/router
+  requires:
+    - name: reactui-uaa
+    - name: reactui-destination-service
+
+# Content deployer module
+- name: reactui-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+    - name: reactui-repo-host
+      parameters:
+        content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+      - name: reactui
+        artifacts:
+          - reactui.zip
+        target-path: resources/
+
+- name: reactui-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: reactui-destination-service
+    parameters:
+      content-target: true
+  - name: reactui-uaa
+    parameters:
+      service-key:
+        name: reactui-uaa-key
+  parameters:
+    content:
+      subaccount:
+        destinations:
+        - Name: reactexperienceapp-destination-service
+          Type: HTTP
+          URL: https://standard-chartered-bank-core-foundational-12982zqn-capm75926b0b.cfapps.ap11.hana.ondemand.com
+          Authentication: OAuth2UserTokenExchange
+          ProxyType: Internet
+          forwardAuthToken: true
+          ServiceInstanceName: reactexperienceapp-auth
+  build-parameters:
+    no-source: true
+
+resources:
+  - name: reactui-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: reactui-html5-service
+      service-plan: app-host
+
+  - name: reactui-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-name: reactui-destination-service
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: true
+        deploy_mode: html5-repo
+        enable-parallel-deployments: true
+
+  - name: reactui-uaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      path: ./xs-security.json
+      service: xsuaa
+      service-name: reactui-xsuaa-service
+      service-plan: application
