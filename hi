@@ -1,96 +1,565 @@
-_schema-version: "3.3.0"
-ID: reactui
-version: 1.0.0
-description: A simple React project
-
-modules:
-# HTML5 module
-- name: reactui
-  type: html5
-  path: app/reactui
-  build-parameters:
-    builder: custom
-    commands:
-      - npm install
-      - npm run build
-    build-result: build
-    supported-platforms: []
-
-- name: react-approuter
-  type: approuter.nodejs
-  path: app/router
-  requires:
-    - name: reactui-uaa
-    - name: reactui-destination-service
-
-# Content deployer module
-- name: reactui-app-content
-  type: com.sap.application.content
-  path: .
-  requires:
-    - name: reactui-repo-host
-      parameters:
-        content-target: true
-  build-parameters:
-    build-result: resources
-    requires:
-      - name: reactui
-        artifacts:
-          - reactui.zip
-        target-path: resources/
-
-- name: reactui-destination-content
-  type: com.sap.application.content
-  requires:
-  - name: reactui-destination-service
-    parameters:
-      content-target: true
-  - name: reactui-uaa
-    parameters:
-      service-key:
-        name: reactui-uaa-key
-  parameters:
-    content:
-      instance:
-        destinations:
-        - Name: reactexperienceapp-destination-service
-          Type: HTTP
-          URL: https://standard-chartered-bank-core-foundational-12982zqn-capm75926b0b.cfapps.ap11.hana.ondemand.com/
-          Authentication: OAuth2UserTokenExchange
-          ProxyType: Internet
-          forwardAuthToken: true
-  build-parameters:
-    no-source: true
-
-resources:
-  - name: reactui-repo-host
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: html5-apps-repo
-      service-name: reactui-html5-service
-      service-plan: app-host
-
-  - name: reactui-destination-service
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: destination
-      service-name: reactui-destination-service
-      service-plan: lite
-      config:
-        HTML5Runtime_enabled: true
-        deploy_mode: html5-repo
-        enable-parallel-deployments: true
-
-  - name: reactui-uaa
-    type: org.cloudfoundry.managed-service
-    parameters:
-      path: ./xs-security.json
-      service: xsuaa
-      service-name: reactui-xsuaa-service
-      service-plan: application
-
-
-
-
-Error starting application "react-approuter": Some instances have crashed. Check the logs of your application for more information.
-Download the application logs via the dmol command and check them for more information.
+  2026-04-13T06:48:28.80+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:48:28.87+0000 [CELL/0] OUT Cell 0b70386d-26e6-4207-ab0f-718ae228c2a5 successfully created container for instance 9dc96f29-b16b-47c2-51be-4fd7
+   2026-04-13T06:48:29.70+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:48:29.99+0000 [CELL/0] OUT Cell 28a4e4c8-d7f3-438d-83bf-64c91a666fba successfully destroyed container for instance e8d35f5d-681a-4db3-5558-f779
+   2026-04-13T06:48:32.95+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:48:32.95+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:48:33.01+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:48:33.17+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:48:33.48+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:48:33.48+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:48:33.62+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:48:33.624Z","written_ts":1776062913624000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.201.10","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:48:34.000Z","written_ts":1776062914000000000,"csn_component":"-","correlation_id":"mnwu034g","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.201.10","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu034g","msg":"Application router version 20.10.0"}
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:48:34.00+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:48:34.01+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:48:34.01+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:48:34.01+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:48:34.01+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:48:34.01+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:48:34.07+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:48:40.54+0000 [CELL/0] OUT Cell 0b70386d-26e6-4207-ab0f-718ae228c2a5 stopping instance 9dc96f29-b16b-47c2-51be-4fd7
+   2026-04-13T06:48:40.54+0000 [CELL/0] OUT Cell 0b70386d-26e6-4207-ab0f-718ae228c2a5 destroying container for instance 9dc96f29-b16b-47c2-51be-4fd7
+   2026-04-13T06:48:40.54+0000 [API/4] OUT Process has crashed with type: "web"
+   2026-04-13T06:48:40.56+0000 [API/4] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"9dc96f29-b16b-47c2-51be-4fd7", "index"=>0, "cell_id"=>"0b70386d-26e6-4207-ab0f-718ae228c2a5", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>2, "crash_timestamp"=>1776062920523684326, "version"=>"474d6369-088e-4fdd-b955-711ecc639ffe"}
+   2026-04-13T06:48:40.60+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d creating container for instance bb64cdfe-c375-4210-65a1-d3dc
+   2026-04-13T06:48:40.64+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:48:41.08+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:48:41.14+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d successfully created container for instance bb64cdfe-c375-4210-65a1-d3dc
+   2026-04-13T06:48:41.71+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:48:42.30+0000 [CELL/0] OUT Cell 0b70386d-26e6-4207-ab0f-718ae228c2a5 successfully destroyed container for instance 9dc96f29-b16b-47c2-51be-4fd7
+   2026-04-13T06:48:44.98+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:48:44.98+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:48:45.04+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:48:45.21+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:48:45.54+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:48:45.54+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:48:45.67+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:48:45.677Z","written_ts":1776062925677000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.137.7","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:48:46.04+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:48:46.047Z","written_ts":1776062926047000000,"csn_component":"-","correlation_id":"mnwu0cf3","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.137.7","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu0cf3","msg":"Application router version 20.10.0"}
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:48:46.05+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:48:46.06+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:48:46.06+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:48:46.06+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:48:46.06+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:48:46.06+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:48:46.12+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:48:52.35+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d stopping instance bb64cdfe-c375-4210-65a1-d3dc
+   2026-04-13T06:48:52.35+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d destroying container for instance bb64cdfe-c375-4210-65a1-d3dc
+   2026-04-13T06:48:52.37+0000 [API/10] OUT Process has crashed with type: "web"
+   2026-04-13T06:48:52.39+0000 [API/10] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"bb64cdfe-c375-4210-65a1-d3dc", "index"=>0, "cell_id"=>"66cecda0-270d-49fa-9a28-b86aaa13627d", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>3, "crash_timestamp"=>1776062932355158478, "version"=>"474d6369-088e-4fdd-b955-711ecc639ffe"}
+   2026-04-13T06:48:52.48+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:48:54.19+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d successfully destroyed container for instance bb64cdfe-c375-4210-65a1-d3dc
+   2026-04-13T06:48:58.19+0000 [API/3] OUT Stopping app with guid b6596981-db8d-4b81-a0c5-57342625d2b7
+   2026-04-13T06:48:58.37+0000 [API/5] OUT Starting app with guid b6596981-db8d-4b81-a0c5-57342625d2b7
+   2026-04-13T06:48:58.53+0000 [CELL/0] OUT Cell fba12dde-8f54-4449-bfb8-26a9d51ae213 creating container for instance fdb0da9b-4e60-4761-40cd-8e10
+   2026-04-13T06:48:59.01+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:48:59.08+0000 [CELL/0] OUT Cell fba12dde-8f54-4449-bfb8-26a9d51ae213 successfully created container for instance fdb0da9b-4e60-4761-40cd-8e10
+   2026-04-13T06:48:59.52+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:49:02.78+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:49:02.78+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:49:02.85+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:49:03.00+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:49:03.33+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:49:03.33+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:49:03.47+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:49:03.471Z","written_ts":1776062943471000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.201.20","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:49:03.850Z","written_ts":1776062943850000000,"csn_component":"-","correlation_id":"mnwu0q5m","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.201.20","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu0q5m","msg":"Application router version 20.10.0"}
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:49:03.85+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:49:03.86+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:49:03.86+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:49:03.86+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:49:03.86+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:49:03.86+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:49:03.93+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:49:10.05+0000 [CELL/0] OUT Cell fba12dde-8f54-4449-bfb8-26a9d51ae213 stopping instance fdb0da9b-4e60-4761-40cd-8e10
+   2026-04-13T06:49:10.05+0000 [CELL/0] OUT Cell fba12dde-8f54-4449-bfb8-26a9d51ae213 destroying container for instance fdb0da9b-4e60-4761-40cd-8e10
+   2026-04-13T06:49:10.05+0000 [API/4] OUT Process has crashed with type: "web"
+   2026-04-13T06:49:10.07+0000 [API/4] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"fdb0da9b-4e60-4761-40cd-8e10", "index"=>0, "cell_id"=>"fba12dde-8f54-4449-bfb8-26a9d51ae213", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>1, "crash_timestamp"=>1776062950034031051, "version"=>"9fbf7a03-0748-4b35-b8ab-8447051da1ab"}
+   2026-04-13T06:49:10.11+0000 [CELL/0] OUT Cell 628197f7-ff00-4d5e-b77a-4eafdea69d59 creating container for instance 19cfd8a6-327b-427e-7701-e78f
+   2026-04-13T06:49:10.20+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:49:10.62+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:49:10.69+0000 [CELL/0] OUT Cell 628197f7-ff00-4d5e-b77a-4eafdea69d59 successfully created container for instance 19cfd8a6-327b-427e-7701-e78f
+   2026-04-13T06:49:11.04+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:49:11.73+0000 [CELL/0] OUT Cell fba12dde-8f54-4449-bfb8-26a9d51ae213 successfully destroyed container for instance fdb0da9b-4e60-4761-40cd-8e10
+   2026-04-13T06:49:14.26+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:49:14.26+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:49:14.34+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:49:14.48+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:49:14.80+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:49:14.80+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:49:14.95+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:49:14.950Z","written_ts":1776062954950000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.137.12","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:49:15.329Z","written_ts":1776062955329000000,"csn_component":"-","correlation_id":"mnwu0z0h","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.137.12","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu0z0h","msg":"Application router version 20.10.0"}
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:49:15.33+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:49:15.34+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:49:15.34+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:49:15.34+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:49:15.34+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:49:15.34+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:49:15.40+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:49:21.52+0000 [CELL/0] OUT Cell 628197f7-ff00-4d5e-b77a-4eafdea69d59 stopping instance 19cfd8a6-327b-427e-7701-e78f
+   2026-04-13T06:49:21.52+0000 [CELL/0] OUT Cell 628197f7-ff00-4d5e-b77a-4eafdea69d59 destroying container for instance 19cfd8a6-327b-427e-7701-e78f
+   2026-04-13T06:49:21.53+0000 [API/14] OUT Process has crashed with type: "web"
+   2026-04-13T06:49:21.54+0000 [API/14] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"19cfd8a6-327b-427e-7701-e78f", "index"=>0, "cell_id"=>"628197f7-ff00-4d5e-b77a-4eafdea69d59", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>2, "crash_timestamp"=>1776062961509506108, "version"=>"9fbf7a03-0748-4b35-b8ab-8447051da1ab"}
+   2026-04-13T06:49:21.57+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 creating container for instance 10fe2fca-826d-4702-4079-c5b9
+   2026-04-13T06:49:21.65+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:49:22.10+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:49:22.19+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 successfully created container for instance 10fe2fca-826d-4702-4079-c5b9
+   2026-04-13T06:49:22.63+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:49:23.21+0000 [CELL/0] OUT Cell 628197f7-ff00-4d5e-b77a-4eafdea69d59 successfully destroyed container for instance 19cfd8a6-327b-427e-7701-e78f
+   2026-04-13T06:49:25.94+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:49:25.94+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:49:26.01+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:49:26.18+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:49:26.51+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:49:26.51+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:49:26.66+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:49:26.662Z","written_ts":1776062966662000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.201.28","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:49:27.062Z","written_ts":1776062967062000000,"csn_component":"-","correlation_id":"mnwu182e","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.201.28","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu182e","msg":"Application router version 20.10.0"}
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:49:27.06+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:49:27.07+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:49:27.07+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:49:27.07+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:49:27.07+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:49:27.07+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:49:27.14+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:49:33.73+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 stopping instance 10fe2fca-826d-4702-4079-c5b9
+   2026-04-13T06:49:33.73+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 destroying container for instance 10fe2fca-826d-4702-4079-c5b9
+   2026-04-13T06:49:33.75+0000 [API/9] OUT Process has crashed with type: "web"
+   2026-04-13T06:49:33.76+0000 [API/9] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"10fe2fca-826d-4702-4079-c5b9", "index"=>0, "cell_id"=>"ee4f2cd0-cf98-4a38-bb73-fcc222cfa679", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>3, "crash_timestamp"=>1776062973729060723, "version"=>"9fbf7a03-0748-4b35-b8ab-8447051da1ab"}
+   2026-04-13T06:49:33.85+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:49:35.48+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 successfully destroyed container for instance 10fe2fca-826d-4702-4079-c5b9
+   2026-04-13T06:49:37.53+0000 [API/10] OUT Stopping app with guid b6596981-db8d-4b81-a0c5-57342625d2b7
+   2026-04-13T06:49:37.72+0000 [API/12] OUT Starting app with guid b6596981-db8d-4b81-a0c5-57342625d2b7
+   2026-04-13T06:49:37.87+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 creating container for instance 1211199d-c753-4cd4-522d-700c
+   2026-04-13T06:49:38.40+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:49:38.47+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 successfully created container for instance 1211199d-c753-4cd4-522d-700c
+   2026-04-13T06:49:38.73+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:49:42.05+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:49:42.05+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:49:42.12+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:49:42.28+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:49:42.61+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:49:42.61+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:49:42.76+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:49:42.759Z","written_ts":1776062982759000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.201.28","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:49:43.180Z","written_ts":1776062983180000000,"csn_component":"-","correlation_id":"mnwu1ki5","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.201.28","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu1ki5","msg":"Application router version 20.10.0"}
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:49:43.18+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:49:43.19+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:49:43.19+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:49:43.19+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:49:43.19+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:49:43.19+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:49:43.25+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:49:49.57+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 stopping instance 1211199d-c753-4cd4-522d-700c
+   2026-04-13T06:49:49.57+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 destroying container for instance 1211199d-c753-4cd4-522d-700c
+   2026-04-13T06:49:49.57+0000 [API/2] OUT Process has crashed with type: "web"
+   2026-04-13T06:49:49.59+0000 [API/2] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"1211199d-c753-4cd4-522d-700c", "index"=>0, "cell_id"=>"ee4f2cd0-cf98-4a38-bb73-fcc222cfa679", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>1, "crash_timestamp"=>1776062989555785758, "version"=>"6249e9b8-f8db-49f6-ba2c-bf9f9de09fd3"}
+   2026-04-13T06:49:49.62+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d creating container for instance 6860c3a4-d139-454a-6810-2be1
+   2026-04-13T06:49:49.70+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:49:50.14+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:49:50.20+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d successfully created container for instance 6860c3a4-d139-454a-6810-2be1
+   2026-04-13T06:49:50.74+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:49:51.33+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 successfully destroyed container for instance 1211199d-c753-4cd4-522d-700c
+   2026-04-13T06:49:54.07+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:49:54.07+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:49:54.13+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:49:54.29+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:49:54.63+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:49:54.63+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:49:54.76+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:49:54.766Z","written_ts":1776062994766000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.137.7","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:49:55.135Z","written_ts":1776062995135000000,"csn_component":"-","correlation_id":"mnwu1tq7","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.137.7","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu1tq7","msg":"Application router version 20.10.0"}
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:49:55.13+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:49:55.15+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:49:55.15+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:49:55.15+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:49:55.15+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:49:55.15+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:49:55.21+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:50:01.92+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d stopping instance 6860c3a4-d139-454a-6810-2be1
+   2026-04-13T06:50:01.92+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d destroying container for instance 6860c3a4-d139-454a-6810-2be1
+   2026-04-13T06:50:01.92+0000 [API/8] OUT Process has crashed with type: "web"
+   2026-04-13T06:50:01.93+0000 [API/8] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"6860c3a4-d139-454a-6810-2be1", "index"=>0, "cell_id"=>"66cecda0-270d-49fa-9a28-b86aaa13627d", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>2, "crash_timestamp"=>1776063001903951458, "version"=>"6249e9b8-f8db-49f6-ba2c-bf9f9de09fd3"}
+   2026-04-13T06:50:01.98+0000 [CELL/0] OUT Cell 57811516-1095-4889-98b0-666e6b8cab65 creating container for instance 29ae0afd-e0ae-494f-70e5-15bc
+   2026-04-13T06:50:02.04+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:50:02.47+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:50:02.56+0000 [CELL/0] OUT Cell 57811516-1095-4889-98b0-666e6b8cab65 successfully created container for instance 29ae0afd-e0ae-494f-70e5-15bc
+   2026-04-13T06:50:03.30+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:50:03.65+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d successfully destroyed container for instance 6860c3a4-d139-454a-6810-2be1
+   2026-04-13T06:50:06.52+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:50:06.52+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:50:06.59+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:50:06.75+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:50:07.09+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:50:07.09+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:50:07.23+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:50:07.236Z","written_ts":1776063007236000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.73.25","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:50:07.640Z","written_ts":1776063007640000000,"csn_component":"-","correlation_id":"mnwu23dk","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.73.25","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu23dk","msg":"Application router version 20.10.0"}
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:50:07.64+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:50:07.65+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:50:07.65+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:50:07.65+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:50:07.65+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:50:07.65+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:50:07.72+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:50:13.72+0000 [CELL/0] OUT Cell 57811516-1095-4889-98b0-666e6b8cab65 stopping instance 29ae0afd-e0ae-494f-70e5-15bc
+   2026-04-13T06:50:13.72+0000 [CELL/0] OUT Cell 57811516-1095-4889-98b0-666e6b8cab65 destroying container for instance 29ae0afd-e0ae-494f-70e5-15bc
+   2026-04-13T06:50:13.74+0000 [API/11] OUT Process has crashed with type: "web"
+   2026-04-13T06:50:13.75+0000 [API/11] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"29ae0afd-e0ae-494f-70e5-15bc", "index"=>0, "cell_id"=>"57811516-1095-4889-98b0-666e6b8cab65", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>3, "crash_timestamp"=>1776063013718264464, "version"=>"6249e9b8-f8db-49f6-ba2c-bf9f9de09fd3"}
+   2026-04-13T06:50:13.83+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:50:15.58+0000 [CELL/0] OUT Cell 57811516-1095-4889-98b0-666e6b8cab65 successfully destroyed container for instance 29ae0afd-e0ae-494f-70e5-15bc
+   2026-04-13T06:50:16.83+0000 [API/4] OUT Stopping app with guid b6596981-db8d-4b81-a0c5-57342625d2b7
+   2026-04-13T06:50:17.01+0000 [API/15] OUT Starting app with guid b6596981-db8d-4b81-a0c5-57342625d2b7
+   2026-04-13T06:50:17.14+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 creating container for instance f25ff5e2-b158-40be-7e25-dd22
+   2026-04-13T06:50:17.65+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:50:17.74+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 successfully created container for instance f25ff5e2-b158-40be-7e25-dd22
+   2026-04-13T06:50:18.62+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:50:21.80+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:50:21.80+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:50:21.87+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:50:22.03+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:50:22.37+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:50:22.37+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:50:22.50+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:50:22.508Z","written_ts":1776063022508000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.201.28","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:50:22.881Z","written_ts":1776063022881000000,"csn_component":"-","correlation_id":"mnwu2f4x","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.201.28","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu2f4x","msg":"Application router version 20.10.0"}
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:50:22.88+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:50:22.89+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:50:22.89+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:50:22.89+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:50:22.89+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:50:22.89+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:50:22.95+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:50:29.48+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 stopping instance f25ff5e2-b158-40be-7e25-dd22
+   2026-04-13T06:50:29.48+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 destroying container for instance f25ff5e2-b158-40be-7e25-dd22
+   2026-04-13T06:50:29.48+0000 [API/8] OUT Process has crashed with type: "web"
+   2026-04-13T06:50:29.49+0000 [API/8] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"f25ff5e2-b158-40be-7e25-dd22", "index"=>0, "cell_id"=>"ee4f2cd0-cf98-4a38-bb73-fcc222cfa679", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>1, "crash_timestamp"=>1776063029461749389, "version"=>"564368d1-c6da-4357-a241-6deb8f326349"}
+   2026-04-13T06:50:29.53+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d creating container for instance 6ae24dd8-af50-4849-5451-2307
+   2026-04-13T06:50:29.61+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:50:30.02+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:50:30.09+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d successfully created container for instance 6ae24dd8-af50-4849-5451-2307
+   2026-04-13T06:50:30.41+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:50:31.22+0000 [CELL/0] OUT Cell ee4f2cd0-cf98-4a38-bb73-fcc222cfa679 successfully destroyed container for instance f25ff5e2-b158-40be-7e25-dd22
+   2026-04-13T06:50:33.68+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:50:33.68+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:50:33.74+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:50:33.90+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:50:34.24+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:50:34.24+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:50:34.38+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:50:34.383Z","written_ts":1776063034383000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.137.7","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:50:34.756Z","written_ts":1776063034756000000,"csn_component":"-","correlation_id":"mnwu2oas","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.137.7","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu2oas","msg":"Application router version 20.10.0"}
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:50:34.75+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:50:34.77+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:50:34.77+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:50:34.77+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:50:34.77+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:50:34.77+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:50:34.83+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:50:41.19+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d stopping instance 6ae24dd8-af50-4849-5451-2307
+   2026-04-13T06:50:41.19+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d destroying container for instance 6ae24dd8-af50-4849-5451-2307
+   2026-04-13T06:50:41.19+0000 [API/3] OUT Process has crashed with type: "web"
+   2026-04-13T06:50:41.20+0000 [API/3] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"6ae24dd8-af50-4849-5451-2307", "index"=>0, "cell_id"=>"66cecda0-270d-49fa-9a28-b86aaa13627d", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>2, "crash_timestamp"=>1776063041170864602, "version"=>"564368d1-c6da-4357-a241-6deb8f326349"}
+   2026-04-13T06:50:41.25+0000 [CELL/0] OUT Cell 57811516-1095-4889-98b0-666e6b8cab65 creating container for instance 02c0274e-cc61-4382-6a4b-88f8
+   2026-04-13T06:50:41.29+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:50:41.74+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:50:41.80+0000 [CELL/0] OUT Cell 57811516-1095-4889-98b0-666e6b8cab65 successfully created container for instance 02c0274e-cc61-4382-6a4b-88f8
+   2026-04-13T06:50:42.54+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:50:42.92+0000 [CELL/0] OUT Cell 66cecda0-270d-49fa-9a28-b86aaa13627d successfully destroyed container for instance 6ae24dd8-af50-4849-5451-2307
+   2026-04-13T06:50:45.78+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:50:45.78+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:50:45.86+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:50:46.02+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:50:46.36+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:50:46.36+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:50:46.50+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:50:46.501Z","written_ts":1776063046501000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.73.25","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:50:46.882Z","written_ts":1776063046882000000,"csn_component":"-","correlation_id":"mnwu2xnm","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.73.25","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu2xnm","msg":"Application router version 20.10.0"}
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:50:46.88+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:50:46.89+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:50:46.89+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:50:46.89+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:50:46.89+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:50:46.89+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:50:46.95+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:50:53.33+0000 [CELL/0] OUT Cell 57811516-1095-4889-98b0-666e6b8cab65 stopping instance 02c0274e-cc61-4382-6a4b-88f8
+   2026-04-13T06:50:53.33+0000 [CELL/0] OUT Cell 57811516-1095-4889-98b0-666e6b8cab65 destroying container for instance 02c0274e-cc61-4382-6a4b-88f8
+   2026-04-13T06:50:53.35+0000 [API/4] OUT Process has crashed with type: "web"
+   2026-04-13T06:50:53.37+0000 [API/4] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"02c0274e-cc61-4382-6a4b-88f8", "index"=>0, "cell_id"=>"57811516-1095-4889-98b0-666e6b8cab65", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>3, "crash_timestamp"=>1776063053334034067, "version"=>"564368d1-c6da-4357-a241-6deb8f326349"}
+   2026-04-13T06:50:53.46+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:50:55.03+0000 [CELL/0] OUT Cell 57811516-1095-4889-98b0-666e6b8cab65 successfully destroyed container for instance 02c0274e-cc61-4382-6a4b-88f8
+   2026-04-13T06:51:40.44+0000 [CELL/0] OUT Cell 723fd821-7861-4253-a334-76c431301d18 creating container for instance aa475370-d432-42b7-408d-734e
+   2026-04-13T06:51:40.96+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:51:41.02+0000 [CELL/0] OUT Cell 723fd821-7861-4253-a334-76c431301d18 successfully created container for instance aa475370-d432-42b7-408d-734e
+   2026-04-13T06:51:41.23+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:51:44.49+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:51:44.49+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:51:44.57+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:51:44.72+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:51:45.05+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:51:45.05+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:51:45.19+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:51:45.192Z","written_ts":1776063105192000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.73.3","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:51:45.580Z","written_ts":1776063105580000000,"csn_component":"-","correlation_id":"mnwu46y4","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.73.3","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu46y4","msg":"Application router version 20.10.0"}
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:51:45.58+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:51:45.59+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:51:45.59+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:51:45.59+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:51:45.59+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:51:45.59+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:51:45.65+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:51:52.03+0000 [CELL/0] OUT Cell 723fd821-7861-4253-a334-76c431301d18 stopping instance aa475370-d432-42b7-408d-734e
+   2026-04-13T06:51:52.03+0000 [CELL/0] OUT Cell 723fd821-7861-4253-a334-76c431301d18 destroying container for instance aa475370-d432-42b7-408d-734e
+   2026-04-13T06:51:52.05+0000 [API/5] OUT Process has crashed with type: "web"
+   2026-04-13T06:51:52.06+0000 [API/5] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"aa475370-d432-42b7-408d-734e", "index"=>0, "cell_id"=>"723fd821-7861-4253-a334-76c431301d18", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>4, "crash_timestamp"=>1776063112032363333, "version"=>"564368d1-c6da-4357-a241-6deb8f326349"}
+   2026-04-13T06:51:52.16+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:51:53.75+0000 [CELL/0] OUT Cell 723fd821-7861-4253-a334-76c431301d18 successfully destroyed container for instance aa475370-d432-42b7-408d-734e
+   2026-04-13T06:53:11.77+0000 [CELL/0] OUT Cell 22a9644b-9a98-4cb7-a1de-ae8751bab6b3 creating container for instance 80223e4a-314f-4d48-4cf3-5d09
+   2026-04-13T06:53:12.23+0000 [CELL/0] OUT Security group rules were updated
+   2026-04-13T06:53:12.31+0000 [CELL/0] OUT Cell 22a9644b-9a98-4cb7-a1de-ae8751bab6b3 successfully created container for instance 80223e4a-314f-4d48-4cf3-5d09
+   2026-04-13T06:53:12.51+0000 [CELL/0] OUT Downloading droplet...
+   2026-04-13T06:53:15.74+0000 [CELL/0] OUT Downloaded droplet (62.1M)
+   2026-04-13T06:53:15.74+0000 [CELL/0] OUT Starting health monitoring of container
+   2026-04-13T06:53:15.80+0000 [APP/PROC/WEB/0] OUT Invoking pre-start scripts.
+   2026-04-13T06:53:15.95+0000 [APP/PROC/WEB/0] OUT Invoking start command.
+   2026-04-13T06:53:16.27+0000 [APP/PROC/WEB/0] OUT > start
+   2026-04-13T06:53:16.27+0000 [APP/PROC/WEB/0] OUT > node node_modules/@sap/approuter/approuter.js
+   2026-04-13T06:53:16.40+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:53:16.407Z","written_ts":1776063196407000000,"csn_component":"-","correlation_id":"-","type":"log","logger":"nodejs-logger","layer":"/LoggingLibrary","level":"warning","container_id":"10.0.201.4","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"","msg":"Dynamic log level switching not available"}
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] OUT {"written_at":"2026-04-13T06:53:16.782Z","written_ts":1776063196782000000,"csn_component":"-","correlation_id":"mnwu65bi","type":"log","logger":"nodejs-logger","layer":"/approuter","level":"info","container_id":"10.0.201.4","component_type":"application","component_id":"b6596981-db8d-4b81-a0c5-57342625d2b7","component_name":"react-approuter","component_instance":-1,"source_instance":-1,"organization_id":"26c32e52-821c-44fe-90a6-8fd81e52940d","organization_name":"Standard Chartered Bank_core-foundational-12982zqn","space_id":"d6431333-7338-4365-a0f9-ec6be8ad78c8","space_name":"CAPM_FIORI","context_id":"mnwu65bi","msg":"Application router version 20.10.0"}
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR /home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR throw new VError('%s%s: %s',
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR ^
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR VError: environment-destinations: Missing required property: url
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR at JsonValidator.validate (/home/vcap/app/node_modules/@sap/approuter/lib/utils/JsonValidator.js:30:11)
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR at /home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:210:19
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR at Array.forEach (<anonymous>)
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR at Object.validateDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/validators.js:206:18)
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR at loadDestinations (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:108:14)
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR at Object.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration/env-config.js:23:28)
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR at module.exports.load (/home/vcap/app/node_modules/@sap/approuter/lib/configuration.js:16:37)
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR at bootstrap (/home/vcap/app/node_modules/@sap/approuter/lib/bootstrap.js:67:38)
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR at Approuter.start (/home/vcap/app/node_modules/@sap/approuter/approuter.js:70:13)
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR at Object.<anonymous> (/home/vcap/app/node_modules/@sap/approuter/approuter.js:151:6) {
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR jse_shortmsg: 'environment-destinations: Missing required property: url',
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR jse_info: {},
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR cause: [Function: ve_cause]
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR }
+   2026-04-13T06:53:16.78+0000 [APP/PROC/WEB/0] ERR Node.js v22.22.0
+   2026-04-13T06:53:16.79+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:53:16.79+0000 [APP/PROC/WEB/0] ERR npm notice New major version of npm available! 10.9.4 -> 11.12.1
+   2026-04-13T06:53:16.79+0000 [APP/PROC/WEB/0] ERR npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+   2026-04-13T06:53:16.79+0000 [APP/PROC/WEB/0] ERR npm notice To update run: npm install -g npm@11.12.1
+   2026-04-13T06:53:16.79+0000 [APP/PROC/WEB/0] ERR npm notice
+   2026-04-13T06:53:16.85+0000 [APP/PROC/WEB/0] OUT Exit status 1
+   2026-04-13T06:53:23.59+0000 [CELL/0] OUT Cell 22a9644b-9a98-4cb7-a1de-ae8751bab6b3 stopping instance 80223e4a-314f-4d48-4cf3-5d09
+   2026-04-13T06:53:23.59+0000 [CELL/0] OUT Cell 22a9644b-9a98-4cb7-a1de-ae8751bab6b3 destroying container for instance 80223e4a-314f-4d48-4cf3-5d09
+   2026-04-13T06:53:23.60+0000 [API/12] OUT Process has crashed with type: "web"
+   2026-04-13T06:53:23.62+0000 [API/12] OUT App instance exited with guid b6596981-db8d-4b81-a0c5-57342625d2b7 payload: {"instance"=>"80223e4a-314f-4d48-4cf3-5d09", "index"=>0, "cell_id"=>"22a9644b-9a98-4cb7-a1de-ae8751bab6b3", "reason"=>"CRASHED", "exit_description"=>"APP/PROC/WEB: Exited with status 1", "crash_count"=>5, "crash_timestamp"=>1776063203587010147, "version"=>"564368d1-c6da-4357-a241-6deb8f326349"}
+   2026-04-13T06:53:23.69+0000 [PROXY/0] OUT Exit status 137
+   2026-04-13T06:53:25.36+0000 [CELL/0] OUT Cell 22a9644b-9a98-4cb7-a1de-ae8751bab6b3 successfully destroyed container for instance 80223e4a-314f-4d48-4cf3-5d09
