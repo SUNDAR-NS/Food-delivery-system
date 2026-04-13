@@ -1,15 +1,96 @@
-TRIGGER "AUTO_ID_TRIGGER"
-BEFORE INSERT ON "T1CLIENTMI_PHY.db::3TL_CLNTMI_ESG_DICX_LOCATION"
-REFERENCING NEW ROW AS NEW
-FOR EACH ROW
-BEGIN
+_schema-version: "3.3.0"
+ID: reactui
+version: 1.0.0
+description: A simple React project
 
-    DECLARE lv_id NVARCHAR(50);
+modules:
+# HTML5 module
+- name: reactui
+  type: html5
+  path: app/reactui
+  build-parameters:
+    builder: custom
+    commands:
+      - npm install
+      - npm run build
+    build-result: build
+    supported-platforms: []
 
-    SELECT TO_NVARCHAR("MFU_DICX_LOCATION_SEQ".NEXTVAL)
-    INTO lv_id
-    FROM DUMMY;
+- name: react-approuter
+  type: approuter.nodejs
+  path: app/router
+  requires:
+    - name: reactui-uaa
+    - name: reactui-destination-service
 
-    NEW."ID" = lv_id;
+# Content deployer module
+- name: reactui-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+    - name: reactui-repo-host
+      parameters:
+        content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+      - name: reactui
+        artifacts:
+          - reactui.zip
+        target-path: resources/
 
-END;
+- name: reactui-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: reactui-destination-service
+    parameters:
+      content-target: true
+  - name: reactui-uaa
+    parameters:
+      service-key:
+        name: reactui-uaa-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: reactexperienceapp-destination-service
+          Type: HTTP
+          URL: https://standard-chartered-bank-core-foundational-12982zqn-capm75926b0b.cfapps.ap11.hana.ondemand.com/
+          Authentication: OAuth2UserTokenExchange
+          ProxyType: Internet
+          forwardAuthToken: true
+  build-parameters:
+    no-source: true
+
+resources:
+  - name: reactui-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: reactui-html5-service
+      service-plan: app-host
+
+  - name: reactui-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-name: reactui-destination-service
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: true
+        deploy_mode: html5-repo
+        enable-parallel-deployments: true
+
+  - name: reactui-uaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      path: ./xs-security.json
+      service: xsuaa
+      service-name: reactui-xsuaa-service
+      service-plan: application
+
+
+
+
+Error starting application "react-approuter": Some instances have crashed. Check the logs of your application for more information.
+Download the application logs via the dmol command and check them for more information.
