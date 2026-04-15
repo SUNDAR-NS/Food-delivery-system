@@ -17,7 +17,7 @@ BEGIN
         "EXPIRY_DATE"
     )
     SELECT
-        SUBSTRING(TO_NVARCHAR(SYSUUID),1,18),
+        "MFU_ID",
         "NAME",
         "LOCATION_HIERARCHY",
         "LOCATION_CTRY_DAC_KEY",
