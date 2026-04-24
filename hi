@@ -1,15 +1,13 @@
-MFU_BUSINESS_INPUT
-MFU_CREDITMATE_LIMIT
-MFU_DEAL_PIPELINE
-MFU_INTEGRATED_SF
-MFU_LIMITS
-MFU_LOCATION_HIERARCHY
-MFU_LOG_TABLE
-MFU_MARKET_LINKAGE
-MFU_PRODUCT_MANAGEMENT_HIERARCHY
-MFU_PRODUCT_MAPPING
-MFU_PUREPLAY_CLIENTS
-MFU_SEGMENT_ANALYTICS
-MFU_SEGMENT_HIERARCHY
-MFU_STATIC_CLIENT
-MFU_SUSTAINABLE_FIN_MAPPING
+_schema-version: "3.1"
+ID: my-node-app
+version: 1.0.0
+
+modules:
+  - name: my-node-app
+    type: nodejs
+    path: .
+    parameters:
+      memory: 256M
+      disk-quota: 256M
+    build-parameters:
+      builder: npm
